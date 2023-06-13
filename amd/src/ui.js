@@ -146,7 +146,8 @@ const TEMPLATE = {
     {fraction: -25},
     {fraction: -33.333},
     {fraction: -50},
-    {fraction: -100}];
+    {fraction: -100},
+  ];
 
   /**
    * A reference to the currently open form.
@@ -195,7 +196,7 @@ const TEMPLATE = {
    */
   let _marks = null;
 
-  let modal;
+  let modal = null;
 
   /**
    * The selection object returned by the browser.
@@ -271,9 +272,7 @@ const TEMPLATE = {
       modal.setBody(_getDialogueContent());
     }
     modal.show();
-
-    _dialogue = modal;
-  },
+  };
 
   /**
    * Return the dialogue content for the tool, attaching any required
@@ -325,7 +324,7 @@ const TEMPLATE = {
     content.delegate('click', _raiseAnswer, '.' + CSS.RAISE);
 
     return content;
-  },
+  };
 
   /**
    * Find the correct answer default for the current question type
@@ -346,7 +345,7 @@ const TEMPLATE = {
         _answerDefault = '';
     }
     return _answerDefault;
-  },
+  };
 
   /**
    * Handle question choice
@@ -355,9 +354,9 @@ const TEMPLATE = {
    * @private
    * @param {Event} e Event from button click in chooser
    */
-  _choiceHandler: function(e) {
+  const _choiceHandler = function(e) {
     e.preventDefault();
-    var qtype = _form.querySelector('input[name=qtype]:checked');
+    let qtype = _form.querySelector('input[name=qtype]:checked');
     if (qtype) {
       _qtype = qtype.get('value');
       _getAnswerDefault();
@@ -384,7 +383,7 @@ const TEMPLATE = {
    * @private
    * @param {String} question The question string
    */
-  _parseSubquestion: function(question) {
+  const _parseSubquestion = function(question) {
     const re = /\{([0-9]*):([_A-Z]+):(.*?)\}$/g;
     const parts = re.exec(question);
     if (!parts) {
@@ -428,7 +427,7 @@ const TEMPLATE = {
    * @param {Event} e Event from button click or return
    * @private
    */
-  _addAnswer: function(e) {
+  const _addAnswer = function(e) {
     e.preventDefault();
     var index = this._form.all('.' + CSS.ADD).indexOf(e.target);
     if (index === -1) {
@@ -445,12 +444,17 @@ const TEMPLATE = {
     if (e.target.ancestor('li') && e.target.ancestor('li').one('.' + CSS.TOLERANCE)) {
       tolerance = e.target.ancestor('li').one('.' + CSS.TOLERANCE).getDOMNode().value;
     }
-    this._getFormData()
-      ._answerdata.splice(index, 0, {answer: '', id: Y.guid(), feedback: '',
-      fraction: this._answerDefault, tolerance: tolerance});
-    this._dialogue.set('bodyContent', this._getDialogueContent(e, this._qtype));
-    this._form.all('.' + CSS.ANSWER).item(index).focus();
-  },
+    _getFormData();
+    _answerdata.splice(index, 0, {
+      id: crypto.randomUUID(),
+      answer: '',
+      feedback: '',
+      fraction: _answerDefault,
+      tolerance: tolerance
+    });
+    modal.setBody(_getDialogueContent(e, _qtype));
+    _form.querySelectorAll('.' + CSS.ANSWER).item(index).focus();
+  };
 
   /**
    * Delete set of answer blanks before the button.
@@ -465,13 +469,13 @@ const TEMPLATE = {
     if (index === -1) {
       index = this._form.all('li').indexOf(e.target.ancestor('li'));
     }
-    _getFormData()
-      ._answerdata.splice(index, 1);
-    this._dialogue.set('bodyContent', this._getDialogueContent(e, this._qtype));
-    var answers = this._form.all('.' + CSS.ANSWER);
+    _getFormData();
+    _answerdata.splice(index, 1);
+    modal.setBody(_getDialogueContent(e, _qtype));
+    const answers = _form.all('.' + CSS.ANSWER);
     index = Math.min(index, answers.size() - 1);
     answers.item(index).focus();
-  },
+  };
 
   /**
    * Lower answer option
@@ -520,7 +524,7 @@ const TEMPLATE = {
    * @param {Event} e Event from button click
    * @private
    */
-  _setSubquestion: function(e, editor) {
+  const _setSubquestion = function(e, editor) {
     e.preventDefault();
     _getFormData();
 
@@ -541,9 +545,9 @@ const TEMPLATE = {
     editor.setSelection(_currentSelection);
 
     // Save the selection before inserting the new question.
-    var selection = window.rangy.saveSelection();
+    let selection = window.rangy.saveSelection();
     editor.insertContent(question);
-    host.insertContentAtFocusPoint(question);
+    //host.insertContentAtFocusPoint(question);
 
     // Select the inserted text.
     window.rangy.restoreSelection(selection);
@@ -638,7 +642,7 @@ const TEMPLATE = {
    */
   const _encode = function(text) {
     return String(text).replace(/(#|\}|~)/g, '\\$1');
-  },
+  };
 
   /**
    * Decode answer or feedback text.
@@ -650,7 +654,7 @@ const TEMPLATE = {
    */
   const _decode = function(text) {
     return String(text).replace(/\\(#|\}|~)/g, '$1');
-  },
+  };
 
   /**
    * Check whether cursor is in a subquestion and return subquestion text if
@@ -729,5 +733,4 @@ const TEMPLATE = {
     }
     return index;
   };
-});
 
