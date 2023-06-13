@@ -17,7 +17,7 @@
 /**
  * Plugin strings are defined here.
  *
- * @package     tiny_cloze2
+ * @package     tiny_cloze
  * @category    string
  * @copyright   2023 MoodleDACH
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later

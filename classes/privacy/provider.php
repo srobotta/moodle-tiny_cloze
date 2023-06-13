@@ -14,12 +14,12 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
-namespace tiny_cloze2\privacy;
+namespace tiny_cloze\privacy;
 
 /**
  * Privacy API implementation for the Cloze Editor plugin.
  *
- * @package     tiny_cloze2
+ * @package     tiny_cloze
  * @category    privacy
  * @copyright   2023 MoodleDACH
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
