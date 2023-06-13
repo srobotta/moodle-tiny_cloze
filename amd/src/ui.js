@@ -190,7 +190,7 @@ const TEMPLATE = {
    * @type Array
    * @private
    */
-  let _answerdata = null;
+  let _answerdata = [];
 
   let _answerDefault = '';
   /**
@@ -219,9 +219,13 @@ const TEMPLATE = {
    * @type Integer
    * @private
    */
-  let _marks = null;
+  let _marks = 1;
 
-  let modal = null;
+/**
+ * The modal dialogue to be displayed when designing the cloze question types.
+ * @type {null}
+ */
+let modal = null;
 
   /**
    * The selection object returned by the browser.
@@ -233,7 +237,7 @@ const TEMPLATE = {
    */
   let _currentSelection = null;
 
-  const onInit =  function() {
+  const onInit = function() {
     this._groupFocus = {};
     // Check whether we are editing a question.
     var form = this.get('host').editor.ancestor('body#page-question-type-multianswer form, ' +
@@ -245,17 +249,9 @@ const TEMPLATE = {
       return;
     }
 
-    this.addButton({
-      icon: 'icon',
-      iconComponent: 'qtype_multianswer',
-      callback: this._displayDialogue
-    });
-    _marks = 1;
-    _answerDefault = '';
-
     // We need custom highlight logic for this button.
     this.get('host').on('atto:selectionchanged', function() {
-      if (this._resolveSubquestion()) {
+      if (_resolveSubquestion()) {
         this.highlightButtons();
       } else {
         this.unHighlightButtons();
@@ -267,11 +263,11 @@ const TEMPLATE = {
   /**
    * Display form to edit subquestions.
    *
-   * @method _displayDialogue
+   * @method displayDialogue
    * @param {tinymce.Editor} editor
    * @private
    */
-  const _displayDialogue = async function(editor) {
+  const displayDialogue = async function(editor) {
 
     // Store the current selection.
     _currentSelection = editor.selection.getContent();
@@ -397,7 +393,7 @@ const TEMPLATE = {
         }
       ];
     }
-    _dialogue.set('bodyContent', _getDialogueContent(e, _qtype));
+    modal.setBody(_getDialogueContent(e, _qtype));
     _form.querySelector('.' + CSS.ANSWER).focus();
   };
 
@@ -498,7 +494,7 @@ const TEMPLATE = {
     _getFormData();
     _answerdata.splice(index, 1);
     modal.setBody(_getDialogueContent(e, _qtype));
-    const answers = _form.all('.' + CSS.ANSWER);
+    const answers = _form.querySelectorAll('.' + CSS.ANSWER);
     index = Math.min(index, answers.size() - 1);
     answers.item(index).focus();
   };
@@ -548,6 +544,7 @@ const TEMPLATE = {
    *
    * @method _setSubquestion
    * @param {Event} e Event from button click
+   * @param {tinymce.Editor} editor
    * @private
    */
   const _setSubquestion = function(e, editor) {
@@ -566,7 +563,7 @@ const TEMPLATE = {
           marks: _marks
         });
 
-    _dialogue.hide();
+    modal.hide();
     editor.focus();
     editor.setSelection(_currentSelection);
 
@@ -715,7 +712,7 @@ const TEMPLATE = {
   };
 
   /**
-   * Calculate the postition in text of parent node an selection end point
+   * Calculate the position in text of parent node an selection end point.
    *
    * @method _getIndex
    * @param {Node} selectedNode parent node
@@ -736,3 +733,6 @@ const TEMPLATE = {
     return index;
   };
 
+export {
+  displayDialogue
+};

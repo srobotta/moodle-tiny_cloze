@@ -29,15 +29,7 @@ import {
     examplemenuMenuItemName,
     icon,
 } from './common';
-
-/**
- * Handle the action for your plugin.
- * @param {TinyMCE.editor} editor The tinyMCE editor instance.
- */
-const handleAction = (editor) => {
-    // TODO Handle the action.
-    window.console.log(editor);
-};
+import {displayDialogue} from './ui';
 
 /**
  * Get the setup function for the buttons.
@@ -63,10 +55,10 @@ export const getSetup = async() => {
         editor.ui.registry.addIcon(icon, buttonImage.html);
 
         // Register the clozeedit Toolbar Button.
-        editor.ui.registry.addButton(clozeeditButtonName, {
+        editor.ui.registry.addToggleButton(clozeeditButtonName, {
             icon,
             tooltip: clozeeditButtonNameTitle,
-            onAction: () => handleAction(editor),
+            onAction: () => displayDialogue(editor),
         });
 
         // Add the examplemenu Menu Item.
@@ -74,7 +66,7 @@ export const getSetup = async() => {
         editor.ui.registry.addMenuItem(examplemenuMenuItemName, {
             icon,
             text: examplemenuMenuItemNameTitle,
-            onAction: () => handleAction(editor),
+            onAction: () => displayDialogue(editor),
         });
     };
 };
