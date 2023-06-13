@@ -16,8 +16,8 @@
 /**
  * Cloze Question Management Modal for Tiny.
  *
- * @module      tiny_cloze
- * @copyright   2022 Andrew Lyons <andrew@nicols.co.uk>
+ * @module      tiny_cloze/modal
+ * @copyright   2023 MoodleDACH
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 

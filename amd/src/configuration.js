@@ -14,9 +14,9 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Tiny tiny_cloze2 for Moodle.
+ * Plugin tiny_cloze for TinyMCE v6 in Moodle.
  *
- * @module      plugintype_pluginname/plugin
+ * @module      tiny_cloze/configuration
  * @copyright   2023 MoodleDACH
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */

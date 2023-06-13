@@ -16,7 +16,7 @@
 /**
  * Tiny tiny_cloze2 for Moodle.
  *
- * @module      plugintype_pluginname/plugin
+ * @module      tiny_cloze/plugin
  * @copyright   2023 MoodleDACH
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */

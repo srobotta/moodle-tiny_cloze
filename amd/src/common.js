@@ -16,12 +16,12 @@
 /**
  * Common values helper for the Moodle tiny_cloze2 plugin.
  *
- * @module      plugintype_pluginname/common
+ * @module      tiny_cloze/common
  * @copyright   2023 MoodleDACH
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-const component = 'tiny_cloze2';
+const component = 'tiny_cloze';
 
 export default {
     component,

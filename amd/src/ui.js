@@ -1,3 +1,26 @@
+// This file is part of Moodle - https://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+
+/**
+ * Plugin tiny_cloze for TinyMCE v6 in Moodle.
+ *
+ * @module      tiny_cloze/ui
+ * @copyright   2023 MoodleDACH
+ * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 import ModalEvents from 'core/modal_events';
 import ModalFactory from 'core/modal_factory';
 import Modal from "./modal";
@@ -6,6 +29,8 @@ import Mustache from 'core/mustache';
 
 const trim = v => v.toString().replace(/^\s+/, '').replace(/\s+$/, '');
 const isNull = a => a === null || a === undefined;
+const strdecode = t => String(t).replace(/\\(#|\}|~)/g, '$1');
+const strencode = t => String(t).replace(/(#|\}|~)/g, '\\$1');
 
 const CSS = {
   ANSWER: 'tiny_cloze_answer',
@@ -403,17 +428,18 @@ const TEMPLATE = {
         if (_qtype === 'NUMERICAL' ||_qtype === 'NM') {
           const tolerance = /^([^:]*):?(.*)/.exec(options[4])[2] || 0;
           _answerdata.push({
-            answer: _decode(options[4].replace(/:.*/, '')),
             id: crypto.randomUUID(),
-            feedback: _decode(options[6]),
+            answer: strdecode(options[4].replace(/:.*/, '')),
+            feedback: strdecode(options[6]),
             tolerance: tolerance,
             fraction: options[3] ? 100 : options[2] || 0
           });
           return;
         }
-        _answerdata.push({answer: this._decode(options[4]),
-          id: Y.guid(),
-          feedback: this._decode(options[6]),
+        _answerdata.push({
+          answer: strdecode(options[4]),
+          id: crypto.randomUUID(),
+          feedback: strdecode(options[6]),
           fraction: options[3] ? 100 : options[2] || 0
         });
       }
@@ -429,20 +455,20 @@ const TEMPLATE = {
    */
   const _addAnswer = function(e) {
     e.preventDefault();
-    var index = this._form.all('.' + CSS.ADD).indexOf(e.target);
+    let index = _form.querySelectorAll('.' + CSS.ADD).indexOf(e.target);
     if (index === -1) {
-      index = this._form.all('.' + CSS.ANSWER + ', .' + CSS.FEEDBACK).indexOf(e.target);
+      index = _form.querySelectorAll('.' + CSS.ANSWER + ', .' + CSS.FEEDBACK).indexOf(e.target);
       if (index !== -1) {
         index = Math.floor(index / 2) + 1;
       }
     }
     if (e.target.ancestor('li')) {
-      this._answerDefault = e.target.ancestor('li').one('.' + CSS.FRACTION).getDOMNode().value;
-      index = this._form.all('li').indexOf(e.target.ancestor('li')) + 1;
+      _answerDefault = e.target.ancestor('li').querySelector('.' + CSS.FRACTION).getDOMNode().value;
+      index = _form.querySelectorAll('li').indexOf(e.target.ancestor('li')) + 1;
     }
-    var tolerance = 0;
+    let tolerance = 0;
     if (e.target.ancestor('li') && e.target.ancestor('li').one('.' + CSS.TOLERANCE)) {
-      tolerance = e.target.ancestor('li').one('.' + CSS.TOLERANCE).getDOMNode().value;
+      tolerance = e.target.ancestor('li').querySelector('.' + CSS.TOLERANCE).getDOMNode().value;
     }
     _getFormData();
     _answerdata.splice(index, 0, {
@@ -465,9 +491,9 @@ const TEMPLATE = {
    */
   const _deleteAnswer = function(e) {
     e.preventDefault();
-    let index = this._form.all('.' + CSS.DELETE).indexOf(e.target);
+    let index = _form.querySelectorAll('.' + CSS.DELETE).indexOf(e.target);
     if (index === -1) {
-      index = this._form.all('li').indexOf(e.target.ancestor('li'));
+      index = _form.querySelectorAll('li').indexOf(e.target.ancestor('li'));
     }
     _getFormData();
     _answerdata.splice(index, 1);
@@ -514,7 +540,7 @@ const TEMPLATE = {
    */
   const _cancel = function(e) {
     e.preventDefault();
-    this._dialogue.hide();
+    modal.hide();
   };
 
   /**
@@ -529,8 +555,8 @@ const TEMPLATE = {
     _getFormData();
 
     _answerdata.forEach(function(option) {
-      option.answer = _encode(option.answer);
-      option.feedback = _encode(option.feedback);
+      option.answer = strencode(option.answer);
+      option.feedback = strencode(option.feedback);
     });
 
     const question = mustache.render(TEMPLATE.OUTPUT,
@@ -630,30 +656,6 @@ const TEMPLATE = {
       child = child.nextSibling;
     }
     return offset + _getOffset(child, node);
-  };
-
-  /**
-   * Encode answer or feedback text.
-   *
-   * @method _encode
-   * @param {String} text Text to encode
-   * @return {String} The encoded text
-   * @private
-   */
-  const _encode = function(text) {
-    return String(text).replace(/(#|\}|~)/g, '\\$1');
-  };
-
-  /**
-   * Decode answer or feedback text.
-   *
-   * @method _decode
-   * @param {String} text Text to decoded
-   * @return {String} The decoded text
-   * @private
-   */
-  const _decode = function(text) {
-    return String(text).replace(/\\(#|\}|~)/g, '$1');
   };
 
   /**

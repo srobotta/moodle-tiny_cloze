@@ -16,7 +16,7 @@
 /**
  * Commands helper for the Moodle tiny_cloze2 plugin.
  *
- * @module      plugintype_pluginname/commands
+ * @module      tiny_cloze/commands
  * @copyright   2023 MoodleDACH
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
