@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Multi-language integration settings.
+ * Cloze settings.
  *
- * @package   tiny_multilang2
+ * @package   tiny_cloze
  * @copyright 2023 MoodleDACH
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
