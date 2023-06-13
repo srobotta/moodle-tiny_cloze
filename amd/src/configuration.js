@@ -14,29 +14,44 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Configuration of tiny_cloze for Moodle.
+ * Tiny tiny_cloze2 for Moodle.
  *
- * @module      tiny_cloze
+ * @module      plugintype_pluginname/plugin
  * @copyright   2023 MoodleDACH
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-import {addMenubarItem, addToolbarButton} from 'editor_tiny/utils';
-import {component} from './common';
+import {
+    clozeeditButtonName,
+    examplemenuMenuItemName,
+} from './common';
 
-const configureToolbar = (toolbar) => {
-    toolbar = addToolbarButton(toolbar, 'formatting', component);
+import {
+    addMenubarItem,
+    addToolbarButtons,
+} from 'editor_tiny/utils';
+
+const getToolbarConfiguration = (instanceConfig) => {
+    let toolbar = instanceConfig.toolbar;
+    toolbar = addToolbarButtons(toolbar, 'content', [
+        clozeeditButtonName,
+    ]);
+
     return toolbar;
 };
 
-const configureMenu = (menu) => {
-    menu = addMenubarItem(menu, 'inser', component);
+const getMenuConfiguration = (instanceConfig) => {
+    let menu = instanceConfig.menu;
+    menu = addMenubarItem(menu, 'file', [
+        examplemenuMenuItemName,
+    ].join(' '));
+
     return menu;
 };
 
 export const configure = (instanceConfig) => {
     return {
-        toolbar: configureToolbar(instanceConfig.toolbar),
-        menu: configureMenu(instanceConfig.menu),
+        toolbar: getToolbarConfiguration(instanceConfig),
+        menu: getMenuConfiguration(instanceConfig),
     };
 };

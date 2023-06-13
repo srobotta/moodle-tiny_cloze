@@ -14,14 +14,19 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Common values helper for the Moodle tiny_cloze plugin.
+ * Common values helper for the Moodle tiny_cloze2 plugin.
  *
- * @module      tiny_cloze
+ * @module      plugintype_pluginname/common
  * @copyright   2023 MoodleDACH
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+const component = 'tiny_cloze2';
+
 export default {
-  pluginName: 'tiny_cloze/plugin',
-  component: 'tiny_cloze',
+    component,
+    pluginName: `${component}/plugin`,
+    icon: component,
+    clozeeditButtonName: `${component}_clozeedit`,
+    examplemenuMenuItemName: `${component}_examplemenu`,
 };

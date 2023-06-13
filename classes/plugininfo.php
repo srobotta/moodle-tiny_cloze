@@ -15,41 +15,31 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Cloze plugin for Moodle tinymce.
+ * Tiny Cloze Editor plugin for Moodle.
  *
- * @package     tiny_cloze
+ * @package     tiny_cloze2
  * @copyright   2023 MoodleDACH
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace tiny_cloze;
+namespace tiny_cloze2;
 
 use context;
 use editor_tiny\plugin;
 use editor_tiny\plugin_with_buttons;
 use editor_tiny\plugin_with_menuitems;
-use editor_tiny\plugin_with_configuration;
 
-class plugininfo extends plugin implements plugin_with_configuration, plugin_with_buttons, plugin_with_menuitems {
+class plugininfo extends plugin implements plugin_with_buttons, plugin_with_menuitems {
 
     public static function get_available_buttons(): array {
         return [
-            'tiny_cloze/plugin',
+            'tiny_cloze2/plugin',
         ];
     }
 
     public static function get_available_menuitems(): array {
         return [
-            'tiny_cloze/plugin',
+            'tiny_cloze2/plugin',
         ];
-    }
-
-    public static function get_plugin_configuration_for_context(
-        context $context,
-        array $options,
-        array $fpoptions,
-        ?\editor_tiny\editor $editor = null
-    ): array {
-        return [];
     }
 }

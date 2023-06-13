@@ -14,39 +14,36 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Plugin entry point of tiny_cloze for Moodle.
+ * Tiny tiny_cloze2 for Moodle.
  *
- * @module      tiny_cloze
+ * @module      plugintype_pluginname/plugin
  * @copyright   2023 MoodleDACH
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 import {getTinyMCE} from 'editor_tiny/loader';
 import {getPluginMetadata} from 'editor_tiny/utils';
+
 import {component, pluginName} from './common';
 import {getSetup as getCommandSetup} from './commands';
 import * as Configuration from './configuration';
-import {register as registerOptions} from './options';
 
-// Setup the tiny_cloze plugin.
+// Setup the tiny_cloze2 Plugin.
 export default new Promise(async(resolve) => {
     // Note: The PluginManager.add function does not support asynchronous configuration.
     // Perform any asynchronous configuration here, and then call the PluginManager.add function.
     const [
         tinyMCE,
-        setupCommands,
         pluginMetadata,
+        setupCommands,
     ] = await Promise.all([
         getTinyMCE(),
-        getCommandSetup(),
         getPluginMetadata(component, pluginName),
+        getCommandSetup(),
     ]);
 
     // Reminder: Any asynchronous code must be run before this point.
     tinyMCE.PluginManager.add(pluginName, (editor) => {
-        // Register options.
-        registerOptions(editor);
-
         // Setup any commands such as buttons, menu items, and so on.
         setupCommands(editor);
 

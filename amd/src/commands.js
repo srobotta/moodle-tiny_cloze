@@ -14,19 +14,33 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Commands helper for the Moodle tiny_cloze plugin.
+ * Commands helper for the Moodle tiny_cloze2 plugin.
  *
- * @module      tiny_cloze
+ * @module      plugintype_pluginname/commands
  * @copyright   2023 MoodleDACH
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-import {getLanguageList, showAllLanguages} from './options';
-import {component} from './common';
-import {get_strings as getStrings} from 'core/str';
+import {getButtonImage} from 'editor_tiny/utils';
+import {get_string as getString} from 'core/str';
+import {
+    component,
+    clozeeditButtonName,
+    examplemenuMenuItemName,
+    icon,
+} from './common';
 
 /**
- * Get the setup function for the button and the menu entry.
+ * Handle the action for your plugin.
+ * @param {TinyMCE.editor} editor The tinyMCE editor instance.
+ */
+const handleAction = (editor) => {
+    // TODO Handle the action.
+    window.console.log(editor);
+};
+
+/**
+ * Get the setup function for the buttons.
  *
  * This is performed in an async function which ultimately returns the registration function as the
  * Tiny.AddOnManager.Add() function does not support async functions.
@@ -35,25 +49,32 @@ import {get_strings as getStrings} from 'core/str';
  */
 export const getSetup = async() => {
     const [
-        buttonText,
-        tooltip,
-    ] = await getStrings(['multilang2:language', 'multilang2:desc'].map((key) => ({key, component})));
+        clozeeditButtonNameTitle,
+        examplemenuMenuItemNameTitle,
+        buttonImage,
+    ] = await Promise.all([
+        getString('button_clozeedit', component),
+        getString('menuitem_examplemenu', component),
+        getButtonImage('icon', component),
+    ]);
 
     return (editor) => {
+        // Register the Moodle SVG as an icon suitable for use as a TinyMCE toolbar button.
+        editor.ui.registry.addIcon(icon, buttonImage.html);
 
-        const languageList = getLanguageList(editor);
-        // If there is just one language, we don't need the plugin.
-        if (languageList.length < 2) {
-            return;
-        }
-
-        editor.ui.registry.addToggleButton(component, {
-            icon: 'language',
-            tooltip: tooltip,
+        // Register the clozeedit Toolbar Button.
+        editor.ui.registry.addButton(clozeeditButtonName, {
+            icon,
+            tooltip: clozeeditButtonNameTitle,
+            onAction: () => handleAction(editor),
         });
 
-        editor.on('init', () => {
-            onInit(editor);
+        // Add the examplemenu Menu Item.
+        // This allows it to be added to a standard menu, or a context menu.
+        editor.ui.registry.addMenuItem(examplemenuMenuItemName, {
+            icon,
+            text: examplemenuMenuItemNameTitle,
+            onAction: () => handleAction(editor),
         });
     };
 };
