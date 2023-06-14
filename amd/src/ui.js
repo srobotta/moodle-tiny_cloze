@@ -21,14 +21,12 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-import ModalEvents from 'core/modal_events';
 import ModalFactory from 'core/modal_factory';
 import Modal from "./modal";
-import Pending from 'core/pending';
 import Mustache from 'core/mustache';
+import {get_string as getString} from 'core/str';
 
 const trim = v => v.toString().replace(/^\s+/, '').replace(/\s+$/, '');
-const isNull = a => a === null || a === undefined;
 const strdecode = t => String(t).replace(/\\(#|\}|~)/g, '$1');
 const strencode = t => String(t).replace(/(#|\}|~)/g, '\\$1');
 
@@ -230,70 +228,61 @@ let modal = null;
   /**
    * The selection object returned by the browser.
    *
-   * @property _currentSelection
-   * @type Range
+   * @type Range|null
    * @default null
-   * @private
    */
   let _currentSelection = null;
 
-  const onInit = function() {
-    this._groupFocus = {};
+
+  const onInit = function(editor) {
     // Check whether we are editing a question.
-    var form = this.get('host').editor.ancestor('body#page-question-type-multianswer form, ' +
+    var form = editor.dom.ancestor('body#page-question-type-multianswer form, ' +
       'body#page-question-type-multianswerwiris form');
     // Only add plugin if this is the first editor on a multianswer question form.
     if (!form ||
-      !this.get('host').editor.compareTo(form.one('.editor_tiny_content')) ||
       !form.test('[action="question.php"]')) {
       return;
     }
-
-    // We need custom highlight logic for this button.
-    this.get('host').on('atto:selectionchanged', function() {
-      if (_resolveSubquestion()) {
-        this.highlightButtons();
-      } else {
-        this.unHighlightButtons();
-      }
-    }, this);
-
   };
 
-  /**
-   * Display form to edit subquestions.
-   *
-   * @method displayDialogue
-   * @param {tinymce.Editor} editor
-   * @private
-   */
-  const displayDialogue = async function(editor) {
+/**
+ * Display form to edit subquestions.
+ *
+ * @method displayDialogue
+ * @param {tinymce.Editor} editor
+ * @private
+ */
+const displayDialogue = async function(editor) {
+  // Store the current selection.
+  _currentSelection = editor.selection.getContent();
+  if (trim(_currentSelection) === '') {
+    return;
+  }
 
-    // Store the current selection.
-    _currentSelection = editor.selection.getContent();
-    if (trim(_currentSelection) === '') {
-      return;
-    }
+  // Save selected string to set answer default answer.
+  _selectedText = _currentSelection.toString();
 
-    // Save selected string to set answer default answer.
-    _selectedText = _currentSelection.toString();
+  modal = await ModalFactory.create({
+    type: Modal.TYPE,
+    title: getString('imageproperties', 'tiny_media'),
+    templateContext: {
+      elementid: editor.getId()
+    },
+    removeOnClose: true,
+    large: true,
+  });
 
-    const modal = await ModalFactory.create({
-      type: Modal.TYPE,
-      templateContext: getTemplateContext(editor, data),
-      large: true,
-    });
+  // Resolve whether cursor is in a subquestion.
+  var subquestion = resolveSubquestion();
+  if (subquestion) {
+    _parseSubquestion(subquestion);
+    modal.setBody(_getDialogueContent(null, _qtype));
+  } else {
+    modal.setBody(_getDialogueContent());
+  }
+  modal.show();
+};
 
-    // Resolve whether cursor is in a subquestion.
-    var subquestion = _resolveSubquestion();
-    if (subquestion) {
-      _parseSubquestion(subquestion);
-      modal.setBody(_getDialogueContent(null, _qtype));
-    } else {
-      modal.setBody(_getDialogueContent());
-    }
-    modal.show();
-  };
 
   /**
    * Return the dialogue content for the tool, attaching any required
@@ -313,7 +302,7 @@ let modal = null;
     }
 
     if (!qtype) {
-      content = mustache.render(TEMPLATE.TYPE, {CSS: CSS,
+      content = Mustache.render(TEMPLATE.TYPE, {CSS: CSS,
         qtype: this._qtype,
         types: this.get('questiontypes')
       });
@@ -325,7 +314,7 @@ let modal = null;
       return content;
     }
 
-    content = mustache.render(TEMPLATE.FORM, {CSS: CSS,
+    content = Mustache.render(TEMPLATE.FORM, {CSS: CSS,
       answerdata: _answerdata,
       elementid: crypto.randomUUID(),
       fractions: FRACTIONS,
@@ -556,7 +545,7 @@ let modal = null;
       option.feedback = strencode(option.feedback);
     });
 
-    const question = mustache.render(TEMPLATE.OUTPUT,
+    const question = Mustache.render(TEMPLATE.OUTPUT,
         {CSS: CSS,
           answerdata: _answerdata,
           qtype: _qtype,
@@ -659,11 +648,11 @@ let modal = null;
    * Check whether cursor is in a subquestion and return subquestion text if
    * true.
    *
-   * @method _resolveSubquestion
+   * @method resolveSubquestion
+   * @param {inymce.Editor} editor
    * @return {Mixed} The substring describing subquestion if found
-   * @private
    */
-  const _resolveSubquestion = function(editor) {
+  const resolveSubquestion = function(editor) {
 
     let node = editor.selection.getStart();
 
@@ -672,12 +661,10 @@ let modal = null;
     }
 
     const selectedNode = node.parent();
-    const re = /\{[0-9]*:(\\.|[^}])*?\}/g;
-
     if (!selectedNode) {
       return false;
     }
-
+    const re = /\{[0-9]*:(\\.|[^}])*?\}/g;
     const subquestions = selectedNode.textContent.match(re);
     if (!subquestions) {
       return false;
@@ -692,21 +679,21 @@ let modal = null;
       return false;
     }
 
-    var startIndex = this._getIndex(selectedNode, selection[0].startContainer, selection[0].startOffset),
-      endIndex = this._getIndex(selectedNode, selection[0].endContainer, selection[0].endOffset);
+    const startIndex = _getIndex(selectedNode, selection[0].startContainer, selection[0].startOffset);
+    const endIndex = _getIndex(selectedNode, selection[0].endContainer, selection[0].endOffset);
 
     subquestions.forEach(function(subquestion) {
       index = selectedNode.textContent.indexOf(subquestion, questionEnd);
       questionEnd = index + subquestion.length;
       if (index <= startIndex && endIndex <= questionEnd) {
         result = subquestion;
-        const startRange = this._getAnchor(selectedNode, index);
-        const endRange = this._getAnchor(selectedNode, questionEnd);
+        const startRange = _getAnchor(selectedNode, index);
+        const endRange = _getAnchor(selectedNode, questionEnd);
         selection[0].setStart(startRange.anchor, startRange.offset);
         selection[0].setEnd(endRange.anchor, endRange.offset);
         _currentSelection = selection;
       }
-    }, this);
+    });
 
     return result;
   };
@@ -734,5 +721,7 @@ let modal = null;
   };
 
 export {
-  displayDialogue
+  displayDialogue,
+  resolveSubquestion,
+  onInit
 };

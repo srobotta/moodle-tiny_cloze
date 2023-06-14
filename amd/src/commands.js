@@ -29,7 +29,7 @@ import {
     examplemenuMenuItemName,
     icon,
 } from './common';
-import {displayDialogue} from './ui';
+import {displayDialogue, onInit, onSelectionChange} from './ui';
 
 /**
  * Get the setup function for the buttons.
@@ -66,5 +66,14 @@ export const getSetup = async() => {
             text: clozeButtonText,
             onAction: () => displayDialogue(editor),
         });
+
+        editor.on('init', () => {
+            onInit(editor);
+        });
+
+        editor.on('selectionchange', () => {
+            onSelectionChange(editor);
+        });
+
     };
 };
