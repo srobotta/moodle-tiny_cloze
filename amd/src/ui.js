@@ -277,7 +277,8 @@ const displayDialogue = async function() {
     _parseSubquestion(subquestion);
     modal.setBody(_getDialogueContent(null, _qtype));
   } else {
-    modal.setBody(_getDialogueContent());
+    const text = _getDialogueContent();
+    modal.setBody(text);
   }
   modal.show();
 };
@@ -296,7 +297,7 @@ const displayDialogue = async function() {
   const _getDialogueContent = function(e, qtype) {
 
     if (_form) {
-      _form.remove().destroy(true);
+      //_form.remove().destroy(true);
     }
 
     if (!qtype) {
@@ -311,7 +312,7 @@ const displayDialogue = async function() {
       content.addEventListener('click', _choiceHandler,
         '.' + CSS.SUBMIT + ', .' + CSS.DUPLICATE);
       content.querySelector('.' + CSS.CANCEL).addEventListener('click', _cancel);
-      return content;
+      return content.outerHTML;
     }
 
     const contentText = Mustache.render(TEMPLATE.FORM, {CSS: CSS,
@@ -352,7 +353,7 @@ const displayDialogue = async function() {
         _addAnswer(e);
       }
     });
-    return content;
+    return content.outerHTML;
   };
 
   /**

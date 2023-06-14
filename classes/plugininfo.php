@@ -28,9 +28,10 @@ use context;
 use editor_tiny\editor;
 use editor_tiny\plugin;
 use editor_tiny\plugin_with_buttons;
+use editor_tiny\plugin_with_configuration;
 use editor_tiny\plugin_with_menuitems;
 
-class plugininfo extends plugin implements plugin_with_buttons, plugin_with_menuitems {
+class plugininfo extends plugin implements plugin_with_buttons, plugin_with_menuitems, plugin_with_configuration {
 
     public static function get_available_buttons(): array {
         return [
