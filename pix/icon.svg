@@ -1,3 +1,6 @@
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd" [
-	<!ENTITY ns_flows "http://ns.adobe.com/Flows/1.0/">
-]><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" preserveAspectRatio="xMinYMid meet" overflow="visible"><path d="M11 4.5H7.5V1c0-.5-.5-1-1-1h-1c-.5 0-1 .5-1 1v3.5H1c-.5 0-1 .5-1 1v1c0 .5.5 1 1 1h3.5V11c0 .5.5 1 1 1h1c.5 0 1-.5 1-1V7.5H11c.6 0 1-.5 1-1v-1c0-.5-.4-1-1-1z" fill="#888"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 -2 20 20">
+<defs>
+	<clipPath id="a"><path d="M0 0h16v16H0z"/></clipPath>
+</defs>
+	<g clip-path="url(#a)"><path d="M9 1h6v3H9V1zM8 12h3v3H8v-3zM1 6h7v3H1V6z"/><path d="M1 1h2v3H1V1zm4 0h2v3H5V1zM1 12h5v3H1v-3zm12 0h2v3h-2v-3zm-3-6h5v3h-5V6z" fill="#8E8E8E"/></g>
+</svg>
