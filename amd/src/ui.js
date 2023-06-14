@@ -263,7 +263,7 @@ const displayDialogue = async function() {
   }
   modal = await ModalFactory.create({
     type: Modal.TYPE,
-    title: get_string('imageproperties', 'tiny_media'),
+    title: get_string('button_clozeedit', 'tiny_cloze'),
     templateContext: {
       elementid: editor.id
     },
