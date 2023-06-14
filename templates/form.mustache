@@ -7,59 +7,59 @@
                 <input id="{{elementid}}_mark" type="text" value="{{marks}}" 
                     class="{{CSS.MARKS}} form-control d-inline mx-1" />
                 <a class="{{CSS.ADD}}" title="{{#str}} addmoreanswerblanks, qtype_calculated {{/str}}">
-                    <img class="icon_smallicon" src="M.util.image_url('t/add', 'core') + '"></a>
+                    <img class="icon_smallicon" src="M.util.image_url(t/add, core) "></a>
                 </div>
             </div>
         <div class="{{CSS.ANSWERS}} mb-3">
-            <ol class="pl-3">{{answerdata}}
+            <ol class="pl-3">{{#answerdata}}
                 <li class="mt-3"><div class="row ml-0">
-                    <div class="{{../CSS.LEFT}} form-group">
+                    <div class="{{CSS.LEFT}} form-group">
                         <label for="{{id}}_answer">{{#str}} answer, question {{/str}}</label>
-                        <input id="{{id}}_answer" type="text" value="{{answer}}" class="{{../CSS.ANSWER}} form-control d-inline mx-2" />
+                        <input id="{{id}}_answer" type="text" value="{{answer}}" class="{{CSS.ANSWER}} form-control d-inline mx-2" />
                         </div>
                     <div class="{{CSS.LEFT}} form-group">
                         <a class="{{CSS.ADD}}" title="{{#str}} addmoreanswerblanks, qtype_calculated {{/str}}">
-                            <img class="icon_smallicon" src="M.util.image_url('t/add', 'core') + '"></a>
+                            <img class="icon_smallicon" src="M.util.image_url(t/add, core)"></a>
                         <a class="{{CSS.DELETE}}" title="{{#str}} delete, core {{/str}}">
-                            <img class="icon_smallicon" src="M.util.image_url('t/delete', 'core') + '"></a>
+                            <img class="icon_smallicon" src="M.util.image_url(t/delete, core)"></a>
                         <a class="{{CSS.RAISE}}" title="{{#str}} up, core {{/str}}">
-                            <img class="icon_smallicon" src="M.util.image_url('t/up', 'core') + '"></a>
+                            <img class="icon_smallicon" src="M.util.image_url(t/up, core)"></a>
                         <a class="{{CSS.LOWER}}" title="{{#str}} down, core {{/str}}">
-                            <img class="icon_smallicon" src="M.util.image_url('t/down', 'core') + '"></a>
+                            <img class="icon_smallicon" src="M.util.image_url(t/down, core)"></a>
                         </div>
                     </div>
-                    {{#if numerical}}
+                    {{#numerical}}
                         <div class="row">
-                            <div class="{{../CSS.RIGHT}} form-group">
+                            <div class="{{CSS.RIGHT}} form-group">
                                 <label for="{{id}}_tolerance">{{#str}} tolerance, qtype_calculated {{/str}}</label>
                                 <input id="{{id}}_tolerance" type="text" value="{{tolerance}}"
-                                       class="{{../../CSS.TOLERANCE}} form-control d-inline mx-2" />
+                                       class="{{CSS.TOLERANCE}} form-control d-inline mx-2" />
                                 </div>
                             </div>
-                    {{/if}}
+                    {{/numerical}}
                     <div class="row">
-                        <div class="{{../CSS.RIGHT}} form-group">
+                        <div class="{{CSS.RIGHT}} form-group">
                             <label for="{{id}}_feedback">{{#str}} feedback, question {{/str}}</label>
                             <input id="{{id}}_feedback" type="text" value="{{feedback}}" 
-                            'class="{{../CSS.FEEDBACK}} form-control d-inline mx-2" />
+                            class="{{CSS.FEEDBACK}} form-control d-inline mx-2" />
                             </div>
-                        <div class="{{../CSS.RIGHT}} form-group">
+                        <div class="{{CSS.RIGHT}} form-group">
                             <label id="{{id}}_grade">{{#str}} grade, grades {{/str}}</label>
-                            <select id="{{id}}_grade" value="{{fraction}}" class="{{../CSS.FRACTION}} custom-select mx-2" selected>
-                                '{{#if fraction}}
+                            <select id="{{id}}_grade" value="{{fraction}}" class="{{CSS.FRACTION}} custom-select mx-2" selected>
+                                {{#fraction}}
                                     <option value="{{../fraction}}">{{../fraction}}%</option>
-                                    '{{/if}}
+                                {{/fraction}}
                                 <option value="">{{#str}} incorrect, question {{/str}}</option>
-                                '{{#../fractions}}
+                                {{#fractions}}
                                     <option value="{{fraction}}">{{fraction}}%</option>
-                                    '{{/../fractions}}
+                                {{/fractions}}
                                 </select>
                             </div>
                         </div></li>
-                '{{/answerdata}}</ol></div>
+                {{/answerdata}}</ol></div>
         <p class="mb-0"><button type="submit" class="{{CSS.SUBMIT}} btn btn-primary mr-1" 
-            'title="{{get_string "common:insert" "editor_tinymce"}}">
-            '{{get_string "common:insert" "editor_tinymce"}}</button>
+            title="{{get_string "common:insert" "editor_tinymce"}}">
+            {{get_string "common:insert" "editor_tinymce"}}</button>
             <button type="submit" class="{{CSS.CANCEL}} btn btn-secondary">{{#str}} cancel, core {{/str}}</button></p>
         </form>
     </div>

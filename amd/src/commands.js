@@ -26,7 +26,7 @@ import {get_string as getString} from 'core/str';
 import {
     component,
     clozeeditButtonName,
-    clozeeditMenuItemName,
+    examplemenuMenuItemName,
     icon,
 } from './common';
 import {displayDialogue, onInit} from './ui';
@@ -41,10 +41,10 @@ import {displayDialogue, onInit} from './ui';
  */
 export const getSetup = async() => {
     const [
-        clozeeditText,
+        clozeButtonText,
         buttonImage,
     ] = await Promise.all([
-        getString('clozeedit_text', component),
+        getString('pluginname', component),
         getButtonImage('icon', component),
     ]);
 
@@ -55,15 +55,15 @@ export const getSetup = async() => {
         // Register the clozeedit Toolbar Button.
         editor.ui.registry.addToggleButton(clozeeditButtonName, {
             icon,
-            tooltip: clozeeditText,
+            tooltip: clozeButtonText,
             onAction: () => displayDialogue(editor),
         });
 
         // Add the examplemenu Menu Item.
         // This allows it to be added to a standard menu, or a context menu.
-        editor.ui.registry.addMenuItem(clozeeditMenuItemName, {
+        editor.ui.registry.addMenuItem(examplemenuMenuItemName, {
             icon,
-            text: clozeeditText,
+            text: clozeButtonText,
             onAction: () => displayDialogue(editor),
         });
 

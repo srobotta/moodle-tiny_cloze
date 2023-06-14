@@ -23,24 +23,28 @@
 
 import {
     clozeeditButtonName,
-    clozeeditMenuItemName,
+    examplemenuMenuItemName,
 } from './common';
 
 import {
     addMenubarItem,
-    addToolbarButton,
+    addToolbarButtons,
 } from 'editor_tiny/utils';
 
 const getToolbarConfiguration = (instanceConfig) => {
     let toolbar = instanceConfig.toolbar;
-    toolbar = addToolbarButton(toolbar, 'content', clozeeditButtonName);
+    toolbar = addToolbarButtons(toolbar, 'content', [
+        clozeeditButtonName,
+    ]);
 
     return toolbar;
 };
 
 const getMenuConfiguration = (instanceConfig) => {
     let menu = instanceConfig.menu;
-    menu = addMenubarItem(menu, 'insert', clozeeditMenuItemName);
+    menu = addMenubarItem(menu, 'file', [
+        examplemenuMenuItemName,
+    ].join(' '));
 
     return menu;
 };
