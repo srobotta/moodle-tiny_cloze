@@ -66,6 +66,15 @@ export const getSetup = async() => {
             icon,
             tooltip: clozeButtonText,
             onAction: () => displayDialogue(editor),
+            onSetup: (api) => {
+                //api.setActive(resolveSubquestion(editor));
+
+                editor.on('click', () =>{
+                     let reg = /\{[0-9]*:(\\.|[^}])*?\}/g;
+                     let isMatching = editor.selection.getStart().parentNode.innerText.match(reg);
+                     api.setActive(isMatching ? true: false);
+                });
+              }
         });
 
         // Add the examplemenu Menu Item.
