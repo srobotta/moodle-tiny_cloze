@@ -49,6 +49,15 @@ export const getSetup = async() => {
     ]);
 
     return (editor) => {
+        // Check whether we are editing a question.
+        const body = document.querySelector('body#page-question-type-multianswer form, ' +
+          'body#page-question-type-multianswerwiris form');
+        // And if the editor is used on the question text.
+        if (!body || editor.id.indexOf('questiontext') === -1) {
+            return;
+        }
+        // Only if both conditions are valid, then continue setting up the plugin.
+
         // Register the Moodle SVG as an icon suitable for use as a TinyMCE toolbar button.
         editor.ui.registry.addIcon(icon, buttonImage.html);
 

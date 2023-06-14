@@ -236,15 +236,7 @@ let modal = null;
    */
   let _currentSelection = null;
 
-
   const onInit = function(ed) {
-    // Check whether we are editing a question.
-    var form = document.querySelector('body#page-question-type-multianswer form, ' +
-      'body#page-question-type-multianswerwiris form');
-    // Only add plugin if this is the first editor on a multianswer question form.
-    if (!form) {
-      return;
-    }
     editor = ed;
   };
 

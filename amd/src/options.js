@@ -16,7 +16,7 @@
 /**
  * Options helper for tiny_cloze plugin.
  *
- * @module      tiny_cloze
+ * @module      tiny_cloze/options
  * @copyright   2023 MoodleDACH
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */

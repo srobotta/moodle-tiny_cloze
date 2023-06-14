@@ -33,15 +33,21 @@ use editor_tiny\plugin_with_menuitems;
 
 class plugininfo extends plugin implements plugin_with_buttons, plugin_with_menuitems, plugin_with_configuration {
 
+    /**
+     * @return string[]
+     */
     public static function get_available_buttons(): array {
         return [
-                'tiny_cloze/plugin',
+            'tiny_cloze',
         ];
     }
 
+    /**
+     * @return string[]
+     */
     public static function get_available_menuitems(): array {
         return [
-                'tiny_cloze/plugin',
+            'tiny_cloze',
         ];
     }
 

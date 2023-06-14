@@ -27,6 +27,7 @@ import {getPluginMetadata} from 'editor_tiny/utils';
 import {component, pluginName} from './common';
 import {getSetup as getCommandSetup} from './commands';
 import * as Configuration from './configuration';
+import {register as registerOptions} from "./options";
 
 // Setup the tiny_cloze Plugin.
 export default new Promise(async(resolve) => {
@@ -44,6 +45,9 @@ export default new Promise(async(resolve) => {
 
     // Reminder: Any asynchronous code must be run before this point.
     tinyMCE.PluginManager.add(pluginName, (editor) => {
+        // Register options.
+        registerOptions(editor);
+
         // Setup any commands such as buttons, menu items, and so on.
         setupCommands(editor);
 
