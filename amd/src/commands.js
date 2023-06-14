@@ -14,7 +14,7 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Commands helper for the Moodle tiny_cloze2 plugin.
+ * Commands helper for the Moodle tiny_cloze plugin.
  *
  * @module      tiny_cloze/commands
  * @copyright   2023 MoodleDACH

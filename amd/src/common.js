@@ -14,7 +14,7 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Common values helper for the Moodle tiny_cloze2 plugin.
+ * Common values helper for the Moodle tiny_cloze plugin.
  *
  * @module      tiny_cloze/common
  * @copyright   2023 MoodleDACH
