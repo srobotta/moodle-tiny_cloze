@@ -29,7 +29,7 @@ import {
     examplemenuMenuItemName,
     icon,
 } from './common';
-import {displayDialogue, onInit, onSelectionChange} from './ui';
+import {displayDialogue, onInit} from './ui';
 
 /**
  * Get the setup function for the buttons.
@@ -70,10 +70,5 @@ export const getSetup = async() => {
         editor.on('init', () => {
             onInit(editor);
         });
-
-        editor.on('selectionchange', () => {
-            onSelectionChange(editor);
-        });
-
     };
 };

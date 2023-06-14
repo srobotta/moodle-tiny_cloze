@@ -234,13 +234,12 @@ let modal = null;
   let _currentSelection = null;
 
 
-  const onInit = function(editor) {
+  const onInit = function() {
     // Check whether we are editing a question.
-    var form = editor.dom.ancestor('body#page-question-type-multianswer form, ' +
+    var form = document.querySelector('body#page-question-type-multianswer form, ' +
       'body#page-question-type-multianswerwiris form');
     // Only add plugin if this is the first editor on a multianswer question form.
-    if (!form ||
-      !form.test('[action="question.php"]')) {
+    if (!form) {
       return;
     }
   };
@@ -447,13 +446,13 @@ const displayDialogue = async function(editor) {
         index = Math.floor(index / 2) + 1;
       }
     }
-    if (e.target.ancestor('li')) {
-      _answerDefault = e.target.ancestor('li').querySelector('.' + CSS.FRACTION).getDOMNode().value;
-      index = _form.querySelectorAll('li').indexOf(e.target.ancestor('li')) + 1;
+    if (e.target.closest('li')) {
+      _answerDefault = e.target.closest('li').querySelector('.' + CSS.FRACTION).getDOMNode().value;
+      index = _form.querySelectorAll('li').indexOf(e.target.closest('li')) + 1;
     }
     let tolerance = 0;
-    if (e.target.ancestor('li') && e.target.ancestor('li').one('.' + CSS.TOLERANCE)) {
-      tolerance = e.target.ancestor('li').querySelector('.' + CSS.TOLERANCE).getDOMNode().value;
+    if (e.target.closest('li') && e.target.closest('li').one('.' + CSS.TOLERANCE)) {
+      tolerance = e.target.closest('li').querySelector('.' + CSS.TOLERANCE).getDOMNode().value;
     }
     _getFormData();
     _answerdata.splice(index, 0, {
@@ -478,7 +477,7 @@ const displayDialogue = async function(editor) {
     e.preventDefault();
     let index = _form.querySelectorAll('.' + CSS.DELETE).indexOf(e.target);
     if (index === -1) {
-      index = _form.querySelectorAll('li').indexOf(e.target.ancestor('li'));
+      index = _form.querySelectorAll('li').indexOf(e.target.closest('li'));
     }
     _getFormData();
     _answerdata.splice(index, 1);
@@ -497,7 +496,7 @@ const displayDialogue = async function(editor) {
    */
   const _lowerAnswer = function(e) {
     e.preventDefault();
-    const li = e.target.ancestor('li');
+    const li = e.target.closest('li');
     li.insertBefore(li.next(), li);
     li.querySelector('.' + CSS.ANSWER).focus();
   };
@@ -511,7 +510,7 @@ const displayDialogue = async function(editor) {
    */
   const _raiseAnswer = function(e) {
     e.preventDefault();
-    const li = e.target.ancestor('li');
+    const li = e.target.closest('li');
     li.insertBefore(li, li.previous());
     li.querySelector('.' + CSS.ANSWER).focus();
   };
