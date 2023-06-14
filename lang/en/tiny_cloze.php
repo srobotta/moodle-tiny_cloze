@@ -29,3 +29,4 @@ $string['pluginname'] = 'Cloze question editor for tiny editor';
 $string['button_clozeedit'] = 'Cloze editor';
 $string['menuitem_examplemenu'] = 'Start the demo';
 $string['privacy:metadata'] = 'Cloze Editor does not store any personal data';
+$string['insert'] = 'Insert question';
