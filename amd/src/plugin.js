@@ -14,7 +14,7 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Tiny tiny_cloze2 for Moodle.
+ * Tiny tiny_cloze for Moodle.
  *
  * @module      tiny_cloze/plugin
  * @copyright   2023 MoodleDACH
@@ -28,7 +28,7 @@ import {component, pluginName} from './common';
 import {getSetup as getCommandSetup} from './commands';
 import * as Configuration from './configuration';
 
-// Setup the tiny_cloze2 Plugin.
+// Setup the tiny_cloze Plugin.
 export default new Promise(async(resolve) => {
     // Note: The PluginManager.add function does not support asynchronous configuration.
     // Perform any asynchronous configuration here, and then call the PluginManager.add function.
