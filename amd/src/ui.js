@@ -25,6 +25,7 @@ import ModalFactory from 'core/modal_factory';
 import Modal from "./modal";
 import Mustache from 'core/mustache';
 import {get_string as getString} from 'core/str';
+import {getQuestionTypes} from './options';
 
 const trim = v => v.toString().replace(/^\s+/, '').replace(/\s+$/, '');
 const strdecode = t => String(t).replace(/\\(#|\}|~)/g, '$1');
@@ -254,18 +255,15 @@ let modal = null;
 const displayDialogue = async function(editor) {
   // Store the current selection.
   _currentSelection = editor.selection.getContent();
-  if (trim(_currentSelection) === '') {
-    return;
+  if (trim(_currentSelection) !== '') {
+    // Save selected string to set answer default answer.
+    _selectedText = _currentSelection.toString();
   }
-
-  // Save selected string to set answer default answer.
-  _selectedText = _currentSelection.toString();
-
   modal = await ModalFactory.create({
     type: Modal.TYPE,
     title: getString('imageproperties', 'tiny_media'),
     templateContext: {
-      elementid: editor.getId()
+      elementid: editor.id
     },
     removeOnClose: true,
     large: true,
@@ -302,8 +300,8 @@ const displayDialogue = async function(editor) {
 
     if (!qtype) {
       content = Mustache.render(TEMPLATE.TYPE, {CSS: CSS,
-        qtype: this._qtype,
-        types: this.get('questiontypes')
+        qtype: _qtype,
+        types: getQuestionTypes()
       });
       _form = content;
 

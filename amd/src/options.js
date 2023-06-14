@@ -20,3 +20,28 @@
  * @copyright   2023 MoodleDACH
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+import {getPluginOptionName} from 'editor_tiny/options';
+import {pluginName} from './common';
+
+const qtypes = getPluginOptionName(pluginName, 'qtypes');
+
+/**
+ * Register the options for the Tiny Equation plugin.
+ *
+ * @param {tinymce.Editor} editor
+ */
+export const register = (editor) => {
+  editor.options.register(qtypes, {
+    processor: 'Array',
+    "default": [],
+  });
+
+};
+
+/**
+ * Get the list of question types.
+ *
+ * @param {tinymce.Editor} editor
+ * @returns {Array}
+ */
+export const getQuestionTypes = (editor) => editor.options.get(qtypes);
