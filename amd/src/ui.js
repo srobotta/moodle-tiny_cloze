@@ -24,7 +24,7 @@
 import ModalFactory from 'core/modal_factory';
 import Modal from "./modal";
 import Mustache from 'core/mustache';
-import {get_string as getString} from 'core/str';
+import {get_string} from 'core/str';
 import {getQuestionTypes} from './options';
 
 const trim = v => v.toString().replace(/^\s+/, '').replace(/\s+$/, '');
@@ -51,11 +51,102 @@ const CSS = {
   TYPE: 'tiny_cloze_qtype'
 };
 const TEMPLATE = {
-    FORM: 'tiny_cloze/form',
+    FORM: '<div class="tiny_cloze">' +
+      '<p class="ml-2">{{qtype}}</p>' +
+      '<form class="tiny_form">' +
+      '<div class="row ml-0">' +
+      '<div class="form-group">' +
+      '<label for="{{elementid}}_mark">{{get_string "defaultmark" "question"}}</label>' +
+      '<input id="{{elementid}}_mark" type="text" value="{{marks}}" ' +
+      'class="{{CSS.MARKS}} form-control d-inline mx-1" />' +
+      '<a class="{{CSS.ADD}}" title="{{get_string "addmoreanswerblanks" "qtype_calculated"}}">' +
+      '<img class="icon_smallicon" src="' +
+      M.util.image_url('t/add', 'core') + '"></a>' +
+      '</div>' +
+      '</div>' +
+      '<div class="{{CSS.ANSWERS}} mb-3">' +
+      '<ol class="pl-3">{{#answerdata}}' +
+      '<li class="mt-3"><div class="row ml-0">' +
+      '<div class="{{../CSS.LEFT}} form-group">' +
+      '<label for="{{id}}_answer">{{get_string "answer" "question"}}</label>' +
+      '<input id="{{id}}_answer" type="text" value="{{answer}}" ' +
+      'class="{{../CSS.ANSWER}} form-control d-inline mx-2" />' +
+      '</div>' +
+      '<div class="{{../CSS.LEFT}} form-group">' +
+      '<a class="{{../CSS.ADD}}" title="{{get_string "addmoreanswerblanks" "qtype_calculated"}}">' +
+      '<img class="icon_smallicon" src="' +
+      M.util.image_url('t/add', 'core') + '"></a>' +
+      '<a class="{{../CSS.DELETE}}" title="{{get_string "delete" "core"}}">' +
+      '<img class="icon_smallicon" src="' +
+      M.util.image_url('t/delete', 'core') + '"></a>' +
+      '<a class="{{../CSS.RAISE}}" title="{{get_string "up" "core"}}">' +
+      '<img class="icon_smallicon" src="' +
+      M.util.image_url('t/up', 'core') + '"></a>' +
+      '<a class="{{../CSS.LOWER}}" title="{{get_string "down" "core"}}">' +
+      '<img class="icon_smallicon" src="' +
+      M.util.image_url('t/down', 'core') + '"></a>' +
+      '</div>' +
+      '</div>' +
+      '{{#if ../numerical}}' +
+      '<div class="row">' +
+      '<div class="{{../CSS.RIGHT}} form-group">' +
+      '<label for="{{id}}_tolerance">{{{get_string "tolerance" "qtype_calculated"}}}</label>' +
+      '<input id="{{id}}_tolerance" type="text" value="{{tolerance}}" ' +
+      'class="{{../../CSS.TOLERANCE}} form-control d-inline mx-2" />' +
+      '</div>' +
+      '</div>' +
+      '{{/if}}' +
+      '<div class="row">' +
+      '<div class="{{../CSS.RIGHT}} form-group">' +
+      '<label for="{{id}}_feedback">{{get_string "feedback" "question"}}</label>' +
+      '<input id="{{id}}_feedback" type="text" value="{{feedback}}" ' +
+      'class="{{../CSS.FEEDBACK}} form-control d-inline mx-2" />' +
+      '</div>' +
+      '<div class="{{../CSS.RIGHT}} form-group">' +
+      '<label id="{{id}}_grade">{{get_string "grade" "grades"}}</label>' +
+      '<select id="{{id}}_grade" value="{{fraction}}" class="{{../CSS.FRACTION}} custom-select mx-2" selected>' +
+      '{{#if fraction}}' +
+      '<option value="{{../fraction}}">{{../fraction}}%</option>' +
+      '{{/if}}' +
+      '<option value="">{{get_string "incorrect" "question"}}</option>' +
+      '{{#../fractions}}' +
+      '<option value="{{fraction}}">{{fraction}}%</option>' +
+      '{{/../fractions}}' +
+      '</select>' +
+      '</div>' +
+      '</div></li>' +
+      '{{/answerdata}}</ol></div>' +
+      '<p class="mb-0"><button type="submit" class="{{CSS.SUBMIT}} btn btn-primary mr-1" ' +
+      'title="{{get_string "common:insert" "editor_tinymce"}}">' +
+      '{{get_string "common:insert" "editor_tinymce"}}</button>' +
+      '<button type="submit" class="{{CSS.CANCEL}} btn btn-secondary">{{get_string "cancel" "core"}}</button></p>' +
+      '</form>' +
+      '</div>',
     OUTPUT: '&#123;{{marks}}:{{qtype}}:{{#answerdata}}~{{#if fraction}}%{{../fraction}}%{{/if}}{{answer}}' +
       '{{#if tolerance}}:{{tolerance}}{{/if}}' +
       '{{#if feedback}}#{{feedback}}{{/if}}{{/answerdata}}&#125;',
-    TYPE: 'tiny_cloze/qtype',
+    TYPE: '<div class="tiny_cloze mt-0 mx-2 mb-2">' +
+      '<p>{{get_string "chooseqtypetoadd" "question"}}</p>' +
+      '<form ="tiny_form">' +
+      '<div class="{{CSS.TYPE}} form-check">' +
+      '{{#types}}' +
+      '<div class="option">' +
+      '<input name="qtype" id="qtype_qtype_{{type}}" value="{{type}}" type="radio" class="form-check-input">' +
+      '<label for="qtype_qtype_{{type}}">' +
+      '<span class="typename">{{type}}</span>' +
+      '<span class="{{../CSS.SUMMARY}}"><h6>{{name}}</h6><p>{{summary}}</p>' +
+      '<ul>{{#options}}' +
+      '<li>{{option}}</li>' +
+      '{{/options}}</ul>' +
+      '</span>' +
+      '</label></div>' +
+      '{{/types}}</div>' +
+      '<p class="mb-0"><button type="submit" class="{{CSS.SUBMIT}} btn btn-primary mr-1" ' +
+      'title="{{get_string "add" "core"}}">{{get_string "add" "core"}}</button>' +
+      '{{#qtype}}<button type="submit" class="{{../CSS.DUPLICATE}} btn btn-secondary mr-1">' +
+      '{{get_string "duplicate" "core"}}</button>{{/qtype}}' +
+      '<button type="submit" class="{{CSS.CANCEL}} btn btn-secondary">{{get_string "cancel" "core"}}</button></p>' +
+      '</form></div>',
   };
   const FRACTIONS = [{fraction: 100},
     {fraction: 50},
@@ -81,6 +172,8 @@ const TEMPLATE = {
     {fraction: -50},
     {fraction: -100},
   ];
+
+  let editor = null;
 
   /**
    * A reference to the currently open form.
@@ -144,7 +237,7 @@ let modal = null;
   let _currentSelection = null;
 
 
-  const onInit = function() {
+  const onInit = function(ed) {
     // Check whether we are editing a question.
     var form = document.querySelector('body#page-question-type-multianswer form, ' +
       'body#page-question-type-multianswerwiris form');
@@ -152,16 +245,16 @@ let modal = null;
     if (!form) {
       return;
     }
+    editor = ed;
   };
 
 /**
  * Display form to edit subquestions.
  *
  * @method displayDialogue
- * @param {tinymce.Editor} editor
  * @private
  */
-const displayDialogue = async function(editor) {
+const displayDialogue = async function() {
   // Store the current selection.
   _currentSelection = editor.selection.getContent();
   if (trim(_currentSelection) !== '') {
@@ -170,7 +263,7 @@ const displayDialogue = async function(editor) {
   }
   modal = await ModalFactory.create({
     type: Modal.TYPE,
-    title: getString('imageproperties', 'tiny_media'),
+    title: get_string('imageproperties', 'tiny_media'),
     templateContext: {
       elementid: editor.id
     },
@@ -179,7 +272,7 @@ const displayDialogue = async function(editor) {
   });
 
   // Resolve whether cursor is in a subquestion.
-  var subquestion = resolveSubquestion();
+  var subquestion = resolveSubquestion(editor);
   if (subquestion) {
     _parseSubquestion(subquestion);
     modal.setBody(_getDialogueContent(null, _qtype));
@@ -201,26 +294,27 @@ const displayDialogue = async function(editor) {
    * @private
    */
   const _getDialogueContent = function(e, qtype) {
-    let content;
 
     if (_form) {
       _form.remove().destroy(true);
     }
 
     if (!qtype) {
-      content = Mustache.render(TEMPLATE.TYPE, {CSS: CSS,
+      const contentText = Mustache.render(TEMPLATE.TYPE, {CSS: CSS,
         qtype: _qtype,
-        types: getQuestionTypes()
+        types: getQuestionTypes(editor)
       });
+      const dom = new DOMParser();
+      const content = dom.parseFromString(contentText, 'text/html').body.firstElementChild;
       _form = content;
 
-      content.delegate('click', _choiceHandler,
+      content.addEventListener('click', _choiceHandler,
         '.' + CSS.SUBMIT + ', .' + CSS.DUPLICATE);
-      content.querySelector('.' + CSS.CANCEL).on('click', _cancel);
+      content.querySelector('.' + CSS.CANCEL).addEventListener('click', _cancel);
       return content;
     }
 
-    content = Mustache.render(TEMPLATE.FORM, {CSS: CSS,
+    const contentText = Mustache.render(TEMPLATE.FORM, {CSS: CSS,
       answerdata: _answerdata,
       elementid: crypto.randomUUID(),
       fractions: FRACTIONS,
@@ -229,16 +323,35 @@ const displayDialogue = async function(editor) {
       numerical: (_qtype === 'NUMERICAL' || _qtype === 'NM')
     });
 
+    const dom = new DOMParser();
+    const content = dom.parseFromString(contentText, 'text/html').body.firstElementChild;
     _form = content;
 
-    content.querySelector('.' + CSS.SUBMIT).on('click', _setSubquestion);
-    content.querySelector('.' + CSS.CANCEL).on('click', _cancel);
-    content.delegate('click', _deleteAnswer, '.' + CSS.DELETE);
-    content.delegate('click', _addAnswer, '.' + CSS.ADD);
-    content.delegate('key', _addAnswer, 'enter', '.' + CSS.ANSWER + ', .' + CSS.FEEDBACK);
-    content.delegate('click', _lowerAnswer, '.' + CSS.LOWER);
-    content.delegate('click', _raiseAnswer, '.' + CSS.RAISE);
-
+    content.querySelector('.' + CSS.SUBMIT).addEventListener('click', _setSubquestion);
+    content.querySelector('.' + CSS.CANCEL).addEventListener('click', _cancel);
+    content.addEventListener('click', e => {
+      if (e.target.classList.contains(CSS.DELETE)) {
+        _deleteAnswer(e);
+        return;
+      }
+      if (e.target.classList.contains(CSS.ADD)) {
+        _addAnswer(e);
+        return;
+      }
+      if (e.target.classList.contains(CSS.LOWER)) {
+        _lowerAnswer(e);
+        return;
+      }
+      if (e.target.classList.contains(CSS.RAISE)) {
+        _raiseAnswer(e);
+        return;
+      }
+    });
+    content.addEventListener('keyup', e => {
+      if (e.target.classList.contains(CSS.ANSWER) || e.target.classList.contains(CSS.FEEDBACK)) {
+        _addAnswer(e);
+      }
+    });
     return content;
   };
 
@@ -358,7 +471,7 @@ const displayDialogue = async function(editor) {
       index = _form.querySelectorAll('li').indexOf(e.target.closest('li')) + 1;
     }
     let tolerance = 0;
-    if (e.target.closest('li') && e.target.closest('li').one('.' + CSS.TOLERANCE)) {
+    if (e.target.closest('li') && e.target.closest('li').querySelector('.' + CSS.TOLERANCE)) {
       tolerance = e.target.closest('li').querySelector('.' + CSS.TOLERANCE).getDOMNode().value;
     }
     _getFormData();
@@ -555,21 +668,18 @@ const displayDialogue = async function(editor) {
    * true.
    *
    * @method resolveSubquestion
-   * @param {inymce.Editor} editor
+   * @param {inymce.Editor} ed
    * @return {Mixed} The substring describing subquestion if found
    */
-  const resolveSubquestion = function(editor) {
+  const resolveSubquestion = function(ed) {
 
-    let node = editor.selection.getStart();
+    editor = ed;
+    const selectedNode = editor.selection.getStart();
 
-    if (!node) {
-      return false;
-    }
-
-    const selectedNode = node.parent();
     if (!selectedNode) {
       return false;
     }
+
     const re = /\{[0-9]*:(\\.|[^}])*?\}/g;
     const subquestions = selectedNode.textContent.match(re);
     if (!subquestions) {
