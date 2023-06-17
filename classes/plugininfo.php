@@ -76,73 +76,83 @@ class plugininfo extends plugin implements plugin_with_buttons, plugin_with_menu
         $multivertical = ['option' => get_string('layoutmultiple_vertical', 'qtype_multianswer')];
 
         $config['qtypes'] = [
-                [
-                        'type' => 'MULTICHOICE',
-                        'name' => get_string('multichoice', 'mod_quiz'),
-                        'summary' => get_string('pluginnamesummary', 'qtype_multichoice'),
-                        'options' => [$selectinline, $singleyes]
-                ],
-                [
-                        'type' => 'MULTICHOICE_H',
-                        'name' => get_string('multichoice', 'mod_quiz'),
-                        'summary' => get_string('pluginnamesummary', 'qtype_multichoice'),
-                        'options' => [$horizontal, $singleyes]
-                ],
-                [
-                        'type' => 'MULTICHOICE_V',
-                        'name' => get_string('multichoice', 'mod_quiz'),
-                        'summary' => get_string('pluginnamesummary', 'qtype_multichoice'),
-                        'options' => [$vertical, $singleyes]
-                ],
-                [
-                        'type' => 'MULTICHOICE_S', 'name' => get_string('multichoice', 'mod_quiz'),
-                        'summary' => get_string('pluginnamesummary', 'qtype_multichoice'),
-                        'options' => [$selectinline, $shuffle, $singleyes]
-                ],
-                [
-                        'type' => 'MULTICHOICE_HS', 'name' => get_string('multichoice', 'mod_quiz'),
-                        'summary' => get_string('pluginnamesummary', 'qtype_multichoice'),
-                        'options' => [$horizontal, $shuffle, $singleyes]
-                ],
-                [
-                        'type' => 'MULTICHOICE_VS', 'name' => get_string('multichoice', 'mod_quiz'),
-                        'summary' => get_string('pluginnamesummary', 'qtype_multichoice'),
-                        'options' => [$vertical, $shuffle, $singleyes]
-                ],
-                [
-                        'type' => 'MULTIRESPONSE', 'name' => get_string('multichoice', 'mod_quiz'),
-                        'summary' => get_string('pluginnamesummary', 'qtype_multichoice'),
-                        'options' => [$multivertical, $singleno]
-                ],
-                [
-                        'type' => 'MULTIRESPONSE_H', 'name' => get_string('multichoice', 'mod_quiz'),
-                        'summary' => get_string('pluginnamesummary', 'qtype_multichoice'),
-                        'options' => [$multihorizontal, $singleno]
-                ],
-                [
-                        'type' => 'MULTIRESPONSE_S', 'name' => get_string('multichoice', 'mod_quiz'),
-                        'summary' => get_string('pluginnamesummary', 'qtype_multichoice'),
-                        'options' => [$multivertical, $shuffle, $singleno]
-                ],
-                [
-                        'type' => 'MULTIRESPONSE_HS', 'name' => get_string('multichoice', 'mod_quiz'),
-                        'summary' => get_string('pluginnamesummary', 'qtype_multichoice'),
-                        'options' => [$multihorizontal, $shuffle, $singleno]
-                ],
-                [
-                        'type' => 'NUMERICAL', 'name' => get_string('numerical', 'mod_quiz'),
-                        'summary' => get_string('pluginnamesummary', 'qtype_numerical')
-                ],
-                [
-                        'type' => 'SHORTANSWER', 'name' => get_string('shortanswer', 'mod_quiz'),
-                        'summary' => get_string('pluginnamesummary', 'qtype_shortanswer'),
-                        'options' => ['option' => get_string('caseno', 'mod_quiz')]
-                ],
-                [
-                        'type' => 'SHORTANSWER_C', 'name' => get_string('shortanswer', 'mod_quiz'),
-                        'summary' => get_string('pluginnamesummary', 'qtype_shortanswer'),
-                        'options' => ['option' => get_string('caseyes', 'mod_quiz')]
-                ],
+            [
+                'type' => 'MULTICHOICE',
+                'name' => get_string('multichoice', 'mod_quiz'),
+                'summary' => get_string('pluginnamesummary', 'qtype_multichoice'),
+                'options' => [$selectinline, $singleyes]
+            ],
+            [
+                'type' => 'MULTICHOICE_H',
+                'name' => get_string('multichoice', 'mod_quiz'),
+                'summary' => get_string('pluginnamesummary', 'qtype_multichoice'),
+                'options' => [$horizontal, $singleyes]
+            ],
+            [
+                'type' => 'MULTICHOICE_V',
+                'name' => get_string('multichoice', 'mod_quiz'),
+                'summary' => get_string('pluginnamesummary', 'qtype_multichoice'),
+                'options' => [$vertical, $singleyes]
+            ],
+            [
+                'type' => 'MULTICHOICE_S',
+                'name' => get_string('multichoice', 'mod_quiz'),
+                'summary' => get_string('pluginnamesummary', 'qtype_multichoice'),
+                'options' => [$selectinline, $shuffle, $singleyes]
+            ],
+            [
+                'type' => 'MULTICHOICE_HS',
+                'name' => get_string('multichoice', 'mod_quiz'),
+                'summary' => get_string('pluginnamesummary', 'qtype_multichoice'),
+                'options' => [$horizontal, $shuffle, $singleyes]
+            ],
+            [
+                'type' => 'MULTICHOICE_VS',
+                'name' => get_string('multichoice', 'mod_quiz'),
+                'summary' => get_string('pluginnamesummary', 'qtype_multichoice'),
+                'options' => [$vertical, $shuffle, $singleyes]
+            ],
+            [
+                'type' => 'MULTIRESPONSE',
+                'name' => get_string('multichoice', 'mod_quiz'),
+                'summary' => get_string('pluginnamesummary', 'qtype_multichoice'),
+                'options' => [$multivertical, $singleno]
+            ],
+            [
+                'type' => 'MULTIRESPONSE_H',
+                'name' => get_string('multichoice', 'mod_quiz'),
+                'summary' => get_string('pluginnamesummary', 'qtype_multichoice'),
+                'options' => [$multihorizontal, $singleno]
+            ],
+            [
+                'type' => 'MULTIRESPONSE_S',
+                'name' => get_string('multichoice', 'mod_quiz'),
+                'summary' => get_string('pluginnamesummary', 'qtype_multichoice'),
+                'options' => [$multivertical, $shuffle, $singleno]
+            ],
+            [
+                'type' => 'MULTIRESPONSE_HS',
+                'name' => get_string('multichoice', 'mod_quiz'),
+                'summary' => get_string('pluginnamesummary', 'qtype_multichoice'),
+                'options' => [$multihorizontal, $shuffle, $singleno]
+            ],
+            [
+                'type' => 'NUMERICAL',
+                'name' => get_string('numerical', 'mod_quiz'),
+                'summary' => get_string('pluginnamesummary', 'qtype_numerical')
+            ],
+            [
+                'type' => 'SHORTANSWER',
+                'name' => get_string('shortanswer', 'mod_quiz'),
+                'summary' => get_string('pluginnamesummary', 'qtype_shortanswer'),
+                'options' => ['option' => get_string('caseno', 'mod_quiz')]
+            ],
+            [
+                'type' => 'SHORTANSWER_C',
+                'name' => get_string('shortanswer', 'mod_quiz'),
+                'summary' => get_string('pluginnamesummary', 'qtype_shortanswer'),
+                'options' => ['option' => get_string('caseyes', 'mod_quiz')]
+            ],
         ];
 
         return $config;
