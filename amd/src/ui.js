@@ -76,46 +76,46 @@ const TEMPLATE = {
       '<div class="{{CSS.ANSWERS}} mb-3">' +
       '<ol class="pl-3">{{#answerdata}}' +
       '<li class="mt-3"><div class="row ml-0">' +
-      '<div class="{{../CSS.LEFT}} form-group">' +
+      '<div class="{{CSS.LEFT}} form-group">' +
       '<label for="{{id}}_answer">{{get_string "answer" "question"}}</label>' +
       '<input id="{{id}}_answer" type="text" value="{{answer}}" ' +
-      'class="{{../CSS.ANSWER}} form-control d-inline mx-2" />' +
+      'class="{{CSS.ANSWER}} form-control d-inline mx-2" />' +
       '</div>' +
-      '<div class="{{../CSS.LEFT}} form-group">' +
-      '<a class="{{../CSS.ADD}}" title="{{get_string "addmoreanswerblanks" "qtype_calculated"}}">' +
+      '<div class="{{CSS.LEFT}} form-group">' +
+      '<a class="{{CSS.ADD}}" title="{{get_string "addmoreanswerblanks" "qtype_calculated"}}">' +
       '<img class="icon_smallicon" src="' +
       M.util.image_url('t/add', 'core') + '"></a>' +
-      '<a class="{{../CSS.DELETE}}" title="{{get_string "delete" "core"}}">' +
+      '<a class="{{CSS.DELETE}}" title="{{get_string "delete" "core"}}">' +
       '<img class="icon_smallicon" src="' +
       M.util.image_url('t/delete', 'core') + '"></a>' +
-      '<a class="{{../CSS.RAISE}}" title="{{get_string "up" "core"}}">' +
+      '<a class="{{CSS.RAISE}}" title="{{get_string "up" "core"}}">' +
       '<img class="icon_smallicon" src="' +
       M.util.image_url('t/up', 'core') + '"></a>' +
-      '<a class="{{../CSS.LOWER}}" title="{{get_string "down" "core"}}">' +
+      '<a class="{{CSS.LOWER}}" title="{{get_string "down" "core"}}">' +
       '<img class="icon_smallicon" src="' +
       M.util.image_url('t/down', 'core') + '"></a>' +
       '</div>' +
       '</div>' +
       '{{#if ../numerical}}' +
       '<div class="row">' +
-      '<div class="{{../CSS.RIGHT}} form-group">' +
+      '<div class="{{CSS.RIGHT}} form-group">' +
       '<label for="{{id}}_tolerance">{{{get_string "tolerance" "qtype_calculated"}}}</label>' +
       '<input id="{{id}}_tolerance" type="text" value="{{tolerance}}" ' +
-      'class="{{../../CSS.TOLERANCE}} form-control d-inline mx-2" />' +
+      'class="{{CSS.TOLERANCE}} form-control d-inline mx-2" />' +
       '</div>' +
       '</div>' +
       '{{/if}}' +
       '<div class="row">' +
-      '<div class="{{../CSS.RIGHT}} form-group">' +
+      '<div class="{{CSS.RIGHT}} form-group">' +
       '<label for="{{id}}_feedback">{{get_string "feedback" "question"}}</label>' +
       '<input id="{{id}}_feedback" type="text" value="{{feedback}}" ' +
-      'class="{{../CSS.FEEDBACK}} form-control d-inline mx-2" />' +
+      'class="{{CSS.FEEDBACK}} form-control d-inline mx-2" />' +
       '</div>' +
-      '<div class="{{../CSS.RIGHT}} form-group">' +
+      '<div class="{{CSS.RIGHT}} form-group">' +
       '<label id="{{id}}_grade">{{get_string "grade" "grades"}}</label>' +
-      '<select id="{{id}}_grade" value="{{fraction}}" class="{{../CSS.FRACTION}} custom-select mx-2" selected>' +
+      '<select id="{{id}}_grade" class="{{CSS.FRACTION}} custom-select mx-2" selected="selected">' +
       '{{#if fraction}}' +
-      '<option value="{{../fraction}}">{{../fraction}}%</option>' +
+      '<option value="{{fraction}}">{{fraction}}%</option>' +
       '{{/if}}' +
       '<option value="">{{get_string "incorrect" "question"}}</option>' +
       '{{#../fractions}}' +
@@ -136,14 +136,14 @@ const TEMPLATE = {
       '{{#if feedback}}#{{feedback}}{{/if}}{{/answerdata}}&#125;',
     TYPE: '<div class="tiny_cloze mt-0 mx-2 mb-2">' +
       '<p>{{get_string "chooseqtypetoadd" "question"}}</p>' +
-      '<form ="tiny_form">' +
+      '<form name="tiny_form">' +
       '<div class="{{CSS.TYPE}} form-check">' +
       '{{#types}}' +
       '<div class="option">' +
       '<input name="qtype" id="qtype_qtype_{{type}}" value="{{type}}" type="radio" class="form-check-input">' +
       '<label for="qtype_qtype_{{type}}">' +
       '<span class="typename">{{type}}</span>' +
-      '<span class="{{../CSS.SUMMARY}}"><h6>{{name}}</h6><p>{{summary}}</p>' +
+      '<span class="{{CSS.SUMMARY}}"><h6>{{name}}</h6><p>{{summary}}</p>' +
       '<ul>{{#options}}' +
       '<li>{{option}}</li>' +
       '{{/options}}</ul>' +
@@ -152,7 +152,7 @@ const TEMPLATE = {
       '{{/types}}</div>' +
       '<p class="mb-0"><button type="submit" class="{{CSS.SUBMIT}} btn btn-primary mr-1" ' +
       'title="{{get_string "add" "core"}}">{{get_string "add" "core"}}</button>' +
-      '{{#qtype}}<button type="submit" class="{{../CSS.DUPLICATE}} btn btn-secondary mr-1">' +
+      '{{#qtype}}<button type="submit" class="{{CSS.DUPLICATE}} btn btn-secondary mr-1">' +
       '{{get_string "duplicate" "core"}}</button>{{/qtype}}' +
       '<button type="submit" class="{{CSS.CANCEL}} btn btn-secondary">{{get_string "cancel" "core"}}</button></p>' +
       '</form></div>',
@@ -523,7 +523,7 @@ const onBlur = function() {
     _qtype = parts[2];
     _getAnswerDefault();
     _answerdata = [];
-    const answers = parts[3].match(/(\\.|[^~])*/g);
+    const answers = parts[6].match(/(\\.|[^~])*/g);
     if (!answers) {
       return;
     }
