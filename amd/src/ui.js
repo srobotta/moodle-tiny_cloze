@@ -26,11 +26,17 @@ import Modal from "./modal";
 import Mustache from 'core/mustache';
 import {get_string} from 'core/str';
 import {getQuestionTypes} from './options';
+import {component} from './common';
 
 const trim = v => v.toString().replace(/^\s+/, '').replace(/\s+$/, '');
+const isNull = a => a === null || a === undefined;
 const strdecode = t => String(t).replace(/\\(#|\}|~)/g, '$1');
 const strencode = t => String(t).replace(/(#|\}|~)/g, '\\$1');
 
+const markerClass = 'cloze-question-marker';
+const markerSpan = '<span contenteditable="false" class="' + markerClass + '" data-mce-contenteditable="false">';
+// Regex to recognize the question string in the text e.g. {1:NUMERICAL:...} or {:MULTICHOICE:...}
+const reQtype = /\{([0-9]*):(MULTICHOICE(_H|_V|_S|_HS|_VS)?|MULTIRESPONSE(_H|_S|_HS)?|NUMERICAL|SHORTANSWER(_C)?|SA|NM):(.*?)\}/g;
 const CSS = {
   ANSWER: 'tiny_cloze_answer',
   ANSWERS: 'tiny_cloze_answers',
@@ -175,6 +181,7 @@ const TEMPLATE = {
 
   let editor = null;
 
+  let isBlurred = false;
   /**
    * A reference to the currently open form.
    *
@@ -238,6 +245,7 @@ let modal = null;
 
   const onInit = function(ed) {
     editor = ed;
+    addMakers();
   };
 
 /**
@@ -255,7 +263,7 @@ const displayDialogue = async function() {
   }
   modal = await ModalFactory.create({
     type: Modal.TYPE,
-    title: get_string('button_clozeedit', 'tiny_cloze'),
+    title: get_string('button_clozeedit', component),
     templateContext: {
       elementid: editor.id
     },
@@ -273,6 +281,84 @@ const displayDialogue = async function() {
     modal.setBody(text);
   }
   modal.show();
+};
+
+const addMakers = function() {
+
+  let content = editor.getContent();
+  let newContent = '';
+
+  // Do not use a variable whether text is already highlighted, do a check for the existing class
+  // because this is safe for many tiny element windows at one page.
+  if (content.indexOf(markerClass) !== -1) {
+    return;
+  }
+
+  let m;
+  do {
+    m = content.match(reQtype);
+    if (!m) {
+      newContent += content;
+      break;
+    }
+    // Copy the current match to the new string preceeded with the <span>
+    const pos = content.indexOf(m[0]);
+    newContent += content.substring(0, pos) + markerSpan + content.substring(pos, pos + m[0].length);
+    content = content.substring(pos + m[0].length + 1);
+
+    // Count the { in the string, should be just one.
+    let level = (m[0].match(/\{/g) || []).length;
+    if (level === 1) {
+      newContent += '</span>';
+      continue;
+    }
+    // If there are more { than } in the string, then we did not find the corresponding } that belongs to the cloze string.
+    while (level > 1) {
+      const a = content.indexOf('{');
+      const b = content.indexOf('}');
+      if (a > -1 && b > -1 && a < b) {
+        level++;
+        newContent = content.substring(0, a);
+        content = content.substring(a + 1);
+      } else if (b > -1) {
+        newContent = content.substring(0, b);
+        content = content.substring(b + 1);
+        level--;
+      } else {
+        level = 1; // Should not happen, just to stop the endless loop.
+      }
+    }
+    newContent += '</span>';
+  } while (m);
+  editor.setContent(newContent);
+};
+
+const removeMarkers = function() {
+  for (const span of editor.dom.select('span.' + markerClass)) {
+    editor.dom.setOuterHTML(span, span.innerHTML);
+  }
+};
+
+const onProcess = function(content, event) {
+  if (!isNull(content.save) && content.save === true) {
+    if (event === 'PostProcess') {
+      // When the blur event was triggered, the editor is still there, we need to reapply
+      // the previously removed styling. If this was a submit event, then do not reapply the
+      // styling to prevent that this is saved in the database.
+      if (isBlurred) {
+        addMakers();
+        isBlurred = false;
+      }
+    } else {
+      removeMarkers();
+    }
+  }
+};
+/**
+ * Notice that when the editor content is blurred, because the focus left the editor window.
+ */
+const onBlur = function() {
+  isBlurred = true;
 };
 
 
@@ -406,8 +492,7 @@ const displayDialogue = async function() {
    * @param {String} question The question string
    */
   const _parseSubquestion = function(question) {
-    const re = /\{([0-9]*):([_A-Z]+):(.*?)\}$/g;
-    const parts = re.exec(question);
+    const parts = reQtype.exec(question);
     if (!parts) {
       return;
     }
@@ -608,129 +693,30 @@ const displayDialogue = async function() {
   };
 
   /**
-   * Locate a node and offset to be used as a end of a range representing an
-   * offset in the text value of a node.
-   * true.
-   *
-   * @method _getAnchor
-   * @param {DOMNode} node Parent node with text value
-   * @param {Integer} offset Position of character with in text of parent node
-   * @return {Object} An object with anchor and offset for the character
-   * with offset in string.
-   * @private
-   */
-  const _getAnchor = function(node, offset) {
-    if (!node.hasChildNodes()) {
-      return {anchor: node, offset: offset};
-    }
-    let child = node.firstChild;
-    while (offset > child.textContent.length) {
-      offset -= child.textContent.length;
-      child = child.nextSibling;
-    }
-    return _getAnchor(child, offset);
-  };
-
-  /**
-   * Find the offset for the text of a child with within the text of parent
-   *
-   * @method _getOffset
-   * @param {DOMNode} container Parent node with text value
-   * @param {DOMNode} node The node at returned offset
-   * @return {Integer} The offset of the child's text
-   * @private
-   */
-  const _getOffset = function(container, node) {
-    if (container === node) {
-      return 0;
-    }
-    if (!container.contains(node)) {
-      return 0;
-    }
-    let offset = 0;
-    let child = container.firstChild;
-    while (!child.contains(node)) {
-      offset += child.textContent.length;
-      child = child.nextSibling;
-    }
-    return offset + _getOffset(child, node);
-  };
-
-  /**
    * Check whether cursor is in a subquestion and return subquestion text if
    * true.
    *
    * @method resolveSubquestion
-   * @param {inymce.Editor} ed
-   * @return {Mixed} The substring describing subquestion if found
+   * @return {Mixed} The selected innerHTML of the selected node with the subquestion if found, false otherwise.
    */
-  const resolveSubquestion = function(ed) {
-
-    editor = ed;
-    const selectedNode = editor.selection.getStart();
-
-    if (!selectedNode) {
-      return false;
-    }
-
-    const re = /\{[0-9]*:(\\.|[^}])*?\}/g;
-    const subquestions = selectedNode.textContent.match(re);
-    if (!subquestions) {
-      return false;
-    }
-
-    let index = null;
-    const selection = editor.selection.getContent();
-    let result = '';
-    let questionEnd = 0;
-
-    if (!selection || selection.length === 0) {
-      return false;
-    }
-
-    const startIndex = _getIndex(selectedNode, selection[0].startContainer, selection[0].startOffset);
-    const endIndex = _getIndex(selectedNode, selection[0].endContainer, selection[0].endOffset);
-
-    subquestions.forEach(function(subquestion) {
-      index = selectedNode.textContent.indexOf(subquestion, questionEnd);
-      questionEnd = index + subquestion.length;
-      if (index <= startIndex && endIndex <= questionEnd) {
-        result = subquestion;
-        const startRange = _getAnchor(selectedNode, index);
-        const endRange = _getAnchor(selectedNode, questionEnd);
-        selection[0].setStart(startRange.anchor, startRange.offset);
-        selection[0].setEnd(endRange.anchor, endRange.offset);
-        _currentSelection = selection;
+  const resolveSubquestion = function() {
+    let span = false;
+    editor.dom.getParents(editor.selection.getStart(), elm => {
+      // Are we in a span that encapsulates the cloze question?
+      if (!isNull(elm.classList)) {
+        // If we are on an opening/closing lang tag, we need to search for the corresponding opening/closing tag.
+        if (elm.classList.contains(markerClass)) {
+          span = elm.innerHTML;
+        }
       }
     });
-
-    return result;
-  };
-
-  /**
-   * Calculate the position in text of parent node an selection end point.
-   *
-   * @method _getIndex
-   * @param {Node} selectedNode parent node
-   * @param {Node} container selection end point container node
-   * @param {Integer} offset selection end point offset
-   * @return {String} The substring describing subquestion
-   * @private
-   */
-  const _getIndex = function(selectedNode, container, offset) {
-    let index;
-    if (!container.firstChild) {
-      index = _getOffset(selectedNode, container) + offset;
-    } else if (container.childNodes[offset]) {
-      index = _getOffset(selectedNode, container.childNodes[offset]);
-    } else {
-      index = _getOffset(selectedNode, container.lastChild) + container.lastChild.textContent.length;
-    }
-    return index;
+    return span;
   };
 
 export {
   displayDialogue,
   resolveSubquestion,
-  onInit
+  onInit,
+  onProcess,
+  onBlur
 };

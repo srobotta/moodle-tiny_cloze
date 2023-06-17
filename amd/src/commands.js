@@ -29,7 +29,7 @@ import {
     examplemenuMenuItemName,
     icon,
 } from './common';
-import {displayDialogue, onInit} from './ui';
+import {displayDialogue, resolveSubquestion, onInit, onProcess, onBlur} from './ui';
 
 /**
  * Get the setup function for the buttons.
@@ -67,12 +67,8 @@ export const getSetup = async() => {
             tooltip: clozeButtonText,
             onAction: () => displayDialogue(editor),
             onSetup: (api) => {
-                //api.setActive(resolveSubquestion(editor));
-
-                editor.on('click', () =>{
-                     let reg = /\{[0-9]*:(\\.|[^}])*?\}/g;
-                     let isMatching = editor.selection.getStart().parentNode.innerText.match(reg);
-                     api.setActive(isMatching ? true: false);
+                editor.on('click', () => {
+                     api.setActive(resolveSubquestion() !== false);
                 });
               }
         });
@@ -85,8 +81,10 @@ export const getSetup = async() => {
             onAction: () => displayDialogue(editor),
         });
 
-        editor.on('init', () => {
-            onInit(editor);
-        });
+        editor.on('init', () => onInit(editor));
+        editor.on('PreProcess', format => onProcess(format, 'PreProcess'));
+        editor.on('PostProcess', format => onProcess(format, 'PostProcess'));
+        editor.on('blur', () => onBlur());
+
     };
 };
