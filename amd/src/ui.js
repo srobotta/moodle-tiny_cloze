@@ -28,15 +28,18 @@ import {get_string} from 'core/str';
 import {getQuestionTypes} from './options';
 import {component} from './common';
 
+// Helper functions.
 const trim = v => v.toString().replace(/^\s+/, '').replace(/\s+$/, '');
 const isNull = a => a === null || a === undefined;
 const strdecode = t => String(t).replace(/\\(#|\}|~)/g, '$1');
 const strencode = t => String(t).replace(/(#|\}|~)/g, '\\$1');
 
+// Marker class and the whole span element that is used to encapsulate the cloze question text.
 const markerClass = 'cloze-question-marker';
 const markerSpan = '<span contenteditable="false" class="' + markerClass + '" data-mce-contenteditable="false">';
 // Regex to recognize the question string in the text e.g. {1:NUMERICAL:...} or {:MULTICHOICE:...}
 const reQtype = /\{([0-9]*):(MULTICHOICE(_H|_V|_S|_HS|_VS)?|MULTIRESPONSE(_H|_S|_HS)?|NUMERICAL|SHORTANSWER(_C)?|SA|NM):(.*?)\}/g;
+// CSS classes that are used in the modal dialogue.
 const CSS = {
   ANSWER: 'tiny_cloze_answer',
   ANSWERS: 'tiny_cloze_answers',
@@ -243,7 +246,11 @@ let modal = null;
    */
   let _currentSelection = null;
 
-  const onInit = function(ed) {
+/**
+ * Inject the editor instance and add markers to the cloze question texts.
+ * @param {tinymce.Editor} ed
+ */
+const onInit = function(ed) {
     editor = ed;
     addMakers();
   };
@@ -283,13 +290,20 @@ const displayDialogue = async function() {
   modal.show();
 };
 
+/**
+ * Search for cloze questions based on a regular expression. All the matching snippets at least contain the cloze
+ * question definition. Although Moodle does not support encapsulated other functions within curly brackets, we
+ * still try to find the correct closing bracket. The so extracted cloze question is surrounded by a marker span
+ * element, that contains attributes so that the content inside the span cannot be modified by the editor (in the
+ * textarea). Also, this makes it a lot easier to select the question, edit it in the dialogue and replace the result
+ * in the existing text area.
+ */
 const addMakers = function() {
 
   let content = editor.getContent();
   let newContent = '';
 
-  // Do not use a variable whether text is already highlighted, do a check for the existing class
-  // because this is safe for many tiny element windows at one page.
+  // Check if there is already a marker span. In this case we do not have to do anything.
   if (content.indexOf(markerClass) !== -1) {
     return;
   }
@@ -297,30 +311,31 @@ const addMakers = function() {
   let m;
   do {
     m = content.match(reQtype);
-    if (!m) {
+    if (!m) { // No match of a cloze question, then we are done.
       newContent += content;
       break;
     }
-    // Copy the current match to the new string preceeded with the <span>
+    // Copy the current match to the new string preceded with the <span>.
     const pos = content.indexOf(m[0]);
     newContent += content.substring(0, pos) + markerSpan + content.substring(pos, pos + m[0].length);
     content = content.substring(pos + m[0].length + 1);
 
-    // Count the { in the string, should be just one.
+    // Count the { in the string, should be just one (the very first one at position 0).
     let level = (m[0].match(/\{/g) || []).length;
     if (level === 1) {
+      // If that's the case, we close the span and the cloze question text is the innerHTML of that marker span.
       newContent += '</span>';
-      continue;
+      continue; // Look for the next matching cloze question.
     }
     // If there are more { than } in the string, then we did not find the corresponding } that belongs to the cloze string.
     while (level > 1) {
       const a = content.indexOf('{');
       const b = content.indexOf('}');
-      if (a > -1 && b > -1 && a < b) {
+      if (a > -1 && b > -1 && a < b) { // The { is before another } so remember to find as many } until we back at level 1.
         level++;
         newContent = content.substring(0, a);
         content = content.substring(a + 1);
-      } else if (b > -1) {
+      } else if (b > -1) {  // We found a closing } to a previously {.
         newContent = content.substring(0, b);
         content = content.substring(b + 1);
         level--;
@@ -333,12 +348,20 @@ const addMakers = function() {
   editor.setContent(newContent);
 };
 
+/**
+ * Look for the marker span elements around a cloze question and remove that span.
+ */
 const removeMarkers = function() {
   for (const span of editor.dom.select('span.' + markerClass)) {
     editor.dom.setOuterHTML(span, span.innerHTML);
   }
 };
 
+/**
+ *
+ * @param {object} content
+ * @param {string} event
+ */
 const onProcess = function(content, event) {
   if (!isNull(content.save) && content.save === true) {
     if (event === 'PostProcess') {
@@ -355,7 +378,7 @@ const onProcess = function(content, event) {
   }
 };
 /**
- * Notice that when the editor content is blurred, because the focus left the editor window.
+ * Notice when the editor content is blurred, because the focus left the editor window.
  */
 const onBlur = function() {
   isBlurred = true;
@@ -703,11 +726,8 @@ const onBlur = function() {
     let span = false;
     editor.dom.getParents(editor.selection.getStart(), elm => {
       // Are we in a span that encapsulates the cloze question?
-      if (!isNull(elm.classList)) {
-        // If we are on an opening/closing lang tag, we need to search for the corresponding opening/closing tag.
-        if (elm.classList.contains(markerClass)) {
-          span = elm.innerHTML;
-        }
+      if (!isNull(elm.classList) && elm.classList.contains(markerClass)) {
+        span = elm.innerHTML;
       }
     });
     return span;
