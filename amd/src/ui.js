@@ -21,6 +21,7 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+import ModalEvents from 'core/modal_events';
 import ModalFactory from 'core/modal_factory';
 import Modal from "./modal";
 import Mustache from 'core/mustache';
@@ -29,7 +30,7 @@ import {getQuestionTypes} from './options';
 import {component} from './common';
 
 // Helper functions.
-const trim = v => v.toString().replace(/^\s+/, '').replace(/\s+$/, '');
+//const trim = v => v.toString().replace(/^\s+/, '').replace(/\s+$/, '');
 const isNull = a => a === null || a === undefined;
 const strdecode = t => String(t).replace(/\\(#|\}|~)/g, '$1');
 const strencode = t => String(t).replace(/(#|\}|~)/g, '\\$1');
@@ -39,6 +40,7 @@ const markerClass = 'cloze-question-marker';
 const markerSpan = '<span contenteditable="false" class="' + markerClass + '" data-mce-contenteditable="false">';
 // Regex to recognize the question string in the text e.g. {1:NUMERICAL:...} or {:MULTICHOICE:...}
 const reQtype = /\{([0-9]*):(MULTICHOICE(_H|_V|_S|_HS|_VS)?|MULTIRESPONSE(_H|_S|_HS)?|NUMERICAL|SHORTANSWER(_C)?|SA|NM):(.*?)\}/g;
+
 // CSS classes that are used in the modal dialogue.
 const CSS = {
   ANSWER: 'tiny_cloze_answer',
@@ -62,13 +64,13 @@ const CSS = {
 const TEMPLATE = {
     FORM: '<div class="tiny_cloze">' +
       '<p class="ml-2">{{qtype}}</p>' +
-      '<form class="tiny_form">' +
+      '<form name="tiny_cloze_form">' +
       '<div class="row ml-0">' +
       '<div class="form-group">' +
-      '<label for="{{elementid}}_mark">{{get_string "defaultmark" "question"}}</label>' +
+      '<label for="{{elementid}}_mark">{{STR.defaultmark}}</label>' +
       '<input id="{{elementid}}_mark" type="text" value="{{marks}}" ' +
       'class="{{CSS.MARKS}} form-control d-inline mx-1" />' +
-      '<a class="{{CSS.ADD}}" title="{{get_string "addmoreanswerblanks" "qtype_calculated"}}">' +
+      '<a class="{{CSS.ADD}}" title="{{STR.addmoreanswerblanks}}">' +
       '<img class="icon_smallicon" src="' +
       M.util.image_url('t/add', 'core') + '"></a>' +
       '</div>' +
@@ -77,66 +79,61 @@ const TEMPLATE = {
       '<ol class="pl-3">{{#answerdata}}' +
       '<li class="mt-3"><div class="row ml-0">' +
       '<div class="{{CSS.LEFT}} form-group">' +
-      '<label for="{{id}}_answer">{{get_string "answer" "question"}}</label>' +
+      '<label for="{{id}}_answer">{{STR.answer}}</label>' +
       '<input id="{{id}}_answer" type="text" value="{{answer}}" ' +
       'class="{{CSS.ANSWER}} form-control d-inline mx-2" />' +
       '</div>' +
       '<div class="{{CSS.LEFT}} form-group">' +
-      '<a class="{{CSS.ADD}}" title="{{get_string "addmoreanswerblanks" "qtype_calculated"}}">' +
+      '<a class="{{CSS.ADD}}" title="{{STR.addmoreanswerblanks}}">' +
       '<img class="icon_smallicon" src="' +
       M.util.image_url('t/add', 'core') + '"></a>' +
-      '<a class="{{CSS.DELETE}}" title="{{get_string "delete" "core"}}">' +
+      '<a class="{{CSS.DELETE}}" title="{{STR.delete}}">' +
       '<img class="icon_smallicon" src="' +
       M.util.image_url('t/delete', 'core') + '"></a>' +
-      '<a class="{{CSS.RAISE}}" title="{{get_string "up" "core"}}">' +
+      '<a class="{{CSS.RAISE}}" title="{{STR.up}}">' +
       '<img class="icon_smallicon" src="' +
       M.util.image_url('t/up', 'core') + '"></a>' +
-      '<a class="{{CSS.LOWER}}" title="{{get_string "down" "core"}}">' +
+      '<a class="{{CSS.LOWER}}" title="{{STR.down}}">' +
       '<img class="icon_smallicon" src="' +
       M.util.image_url('t/down', 'core') + '"></a>' +
       '</div>' +
       '</div>' +
-      '{{#if ../numerical}}' +
+      '{{#numerical}}' +
       '<div class="row">' +
       '<div class="{{CSS.RIGHT}} form-group">' +
-      '<label for="{{id}}_tolerance">{{{get_string "tolerance" "qtype_calculated"}}}</label>' +
+      '<label for="{{id}}_tolerance">{{{STR.tolerance}}}</label>' +
       '<input id="{{id}}_tolerance" type="text" value="{{tolerance}}" ' +
       'class="{{CSS.TOLERANCE}} form-control d-inline mx-2" />' +
       '</div>' +
       '</div>' +
-      '{{/if}}' +
+      '{{/numerical}}' +
       '<div class="row">' +
       '<div class="{{CSS.RIGHT}} form-group">' +
-      '<label for="{{id}}_feedback">{{get_string "feedback" "question"}}</label>' +
+      '<label for="{{id}}_feedback">{{STR.feedback}}</label>' +
       '<input id="{{id}}_feedback" type="text" value="{{feedback}}" ' +
       'class="{{CSS.FEEDBACK}} form-control d-inline mx-2" />' +
       '</div>' +
       '<div class="{{CSS.RIGHT}} form-group">' +
-      '<label id="{{id}}_grade">{{get_string "grade" "grades"}}</label>' +
-      '<select id="{{id}}_grade" class="{{CSS.FRACTION}} custom-select mx-2" selected="selected">' +
-      '{{#if fraction}}' +
-      '<option value="{{fraction}}">{{fraction}}%</option>' +
-      '{{/if}}' +
-      '<option value="">{{get_string "incorrect" "question"}}</option>' +
-      '{{#../fractions}}' +
-      '<option value="{{fraction}}">{{fraction}}%</option>' +
-      '{{/../fractions}}' +
+      '<label id="{{id}}_grade">{{STR.grade}}</label>' +
+      '<select id="{{id}}_grade" class="{{CSS.FRACTION}} custom-select mx-2">' +
+      '{{#fraction}}' +
+      '<option value="">{{STR.incorrect}}</option>' +
+      '{{#fractions}}' +
+      '<option value="{{value}}"{{#selected}} selected="selected"{{/selected}}>{{value}}%</option>' +
+      '{{/fractions}}' +
+      '{{/fraction}}' +
       '</select>' +
       '</div>' +
       '</div></li>' +
       '{{/answerdata}}</ol></div>' +
-      '<p class="mb-0"><button type="submit" class="{{CSS.SUBMIT}} btn btn-primary mr-1" ' +
-      'title="{{get_string "common:insert" "editor_tinymce"}}">' +
-      '{{get_string "common:insert" "editor_tinymce"}}</button>' +
-      '<button type="submit" class="{{CSS.CANCEL}} btn btn-secondary">{{get_string "cancel" "core"}}</button></p>' +
       '</form>' +
       '</div>',
-    OUTPUT: '&#123;{{marks}}:{{qtype}}:{{#answerdata}}~{{#if fraction}}%{{../fraction}}%{{/if}}{{answer}}' +
-      '{{#if tolerance}}:{{tolerance}}{{/if}}' +
-      '{{#if feedback}}#{{feedback}}{{/if}}{{/answerdata}}&#125;',
+    OUTPUT: '&#123;{{marks}}:{{qtype}}:{{#answerdata}}~{{#fraction}}%{{fraction}}%{{/fraction}}{{answer}}' +
+      '{{#tolerance}}:{{tolerance}}{{/tolerance}}' +
+      '{{#feedback}}#{{feedback}}{{/feedback}}{{/answerdata}}&#125;',
     TYPE: '<div class="tiny_cloze mt-0 mx-2 mb-2">' +
-      '<p>{{get_string "chooseqtypetoadd" "question"}}</p>' +
-      '<form name="tiny_form">' +
+      '<p>{{STR.chooseqtypetoadd}}</p>' +
+      '<form name="tiny_cloze_form">' +
       '<div class="{{CSS.TYPE}} form-check">' +
       '{{#types}}' +
       '<div class="option">' +
@@ -150,39 +147,73 @@ const TEMPLATE = {
       '</span>' +
       '</label></div>' +
       '{{/types}}</div>' +
-      '<p class="mb-0"><button type="submit" class="{{CSS.SUBMIT}} btn btn-primary mr-1" ' +
-      'title="{{get_string "add" "core"}}">{{get_string "add" "core"}}</button>' +
-      '{{#qtype}}<button type="submit" class="{{CSS.DUPLICATE}} btn btn-secondary mr-1">' +
-      '{{get_string "duplicate" "core"}}</button>{{/qtype}}' +
-      '<button type="submit" class="{{CSS.CANCEL}} btn btn-secondary">{{get_string "cancel" "core"}}</button></p>' +
       '</form></div>',
   };
-  const FRACTIONS = [{fraction: 100},
-    {fraction: 50},
-    {fraction: 33.33333},
-    {fraction: 25},
-    {fraction: 20},
-    {fraction: 16.66667},
-    {fraction: 14.28571},
-    {fraction: 12.5},
-    {fraction: 11.11111},
-    {fraction: 10},
-    {fraction: 5},
-    {fraction: 0},
-    {fraction: -5},
-    {fraction: -10},
-    {fraction: -11.11111},
-    {fraction: -12.5},
-    {fraction: -14.28571},
-    {fraction: -16.66667},
-    {fraction: -20},
-    {fraction: -25},
-    {fraction: -33.333},
-    {fraction: -50},
-    {fraction: -100},
+  const FRACTIONS = [
+    {value: 100},
+    {value: 50},
+    {value: 33.33333},
+    {value: 25},
+    {value: 20},
+    {value: 16.66667},
+    {value: 14.28571},
+    {value: 12.5},
+    {value: 11.11111},
+    {value: 10},
+    {value: 5},
+    {value: 0},
+    {value: -5},
+    {value: -10},
+    {value: -11.11111},
+    {value: -12.5},
+    {value: -14.28571},
+    {value: -16.66667},
+    {value: -20},
+    {value: -25},
+    {value: -33.333},
+    {value: -50},
+    {value: -100},
   ];
 
-  let editor = null;
+// Language strings used in the modal dialogue.
+let STR = {};
+const getStr = async() => {
+  const res = await Promise.all([
+    get_string('answer', 'question'),
+    get_string('chooseqtypetoadd', 'question'),
+    get_string('defaultmark', 'question'),
+    get_string('feedback', 'question'),
+    get_string('incorrect', 'question'),
+    get_string('addmoreanswerblanks', 'qtype_calculated'),
+    get_string('delete', 'core'),
+    get_string('up', 'core'),
+    get_string('down', 'core'),
+    get_string('tolerance', 'qtype_calculated'),
+    get_string('grade', 'grades'),
+  ]);
+  [
+    'answer',
+    'chooseqtypetoadd',
+    'defaultmark',
+    'feedback',
+    'incorrect',
+    'addmoreanswerblanks',
+    'delete',
+    'up',
+    'down',
+    'tolerance',
+    'grade',
+  ].map((l, i) => {
+    STR[l] = res[i];
+  });
+};
+
+/**
+ * The editor instance that is injected via the onInit() function.
+ *
+ * @type tinymce.Editor
+ */
+let editor = null;
 
   let isBlurred = false;
   /**
@@ -216,11 +247,11 @@ const TEMPLATE = {
   /**
    * The text initial selected to use as answer default
    *
-   * @param _selectedText
-   * @type String
+   * @param _selectedNode
+   * @type Node
    * @private
    */
-  let _selectedText = null;
+  let _selectedNode = null;
 
 
   /**
@@ -238,14 +269,6 @@ const TEMPLATE = {
  */
 let modal = null;
 
-  /**
-   * The selection object returned by the browser.
-   *
-   * @type Range|null
-   * @default null
-   */
-  let _currentSelection = null;
-
 /**
  * Inject the editor instance and add markers to the cloze question texts.
  * @param {tinymce.Editor} ed
@@ -253,6 +276,7 @@ let modal = null;
 const onInit = function(ed) {
     editor = ed;
     addMakers();
+    getStr();
   };
 
 /**
@@ -262,12 +286,7 @@ const onInit = function(ed) {
  * @private
  */
 const displayDialogue = async function() {
-  // Store the current selection.
-  _currentSelection = editor.selection.getContent();
-  if (trim(_currentSelection) !== '') {
-    // Save selected string to set answer default answer.
-    _selectedText = _currentSelection.toString();
-  }
+  // Create the modal dialogue. Depending on whether we have a selected node or not, the content is different.
   modal = await ModalFactory.create({
     type: Modal.TYPE,
     title: get_string('button_clozeedit', component),
@@ -279,15 +298,16 @@ const displayDialogue = async function() {
   });
 
   // Resolve whether cursor is in a subquestion.
-  var subquestion = resolveSubquestion(editor);
+  var subquestion = resolveSubquestion();
   if (subquestion) {
-    _parseSubquestion(subquestion);
-    modal.setBody(_getDialogueContent(null, _qtype));
+    _selectedNode = subquestion;
+    _parseSubquestion(subquestion.innerHTML);
+    _setDialogueContent(_qtype);
   } else {
-    const text = _getDialogueContent();
-    modal.setBody(text);
+    _selectedNode = null;
+    // That's the content with the list of question types to select one from.
+    _setDialogueContent();
   }
-  modal.show();
 };
 
 /**
@@ -318,7 +338,7 @@ const addMakers = function() {
     // Copy the current match to the new string preceded with the <span>.
     const pos = content.indexOf(m[0]);
     newContent += content.substring(0, pos) + markerSpan + content.substring(pos, pos + m[0].length);
-    content = content.substring(pos + m[0].length + 1);
+    content = content.substring(pos + m[0].length);
 
     // Count the { in the string, should be just one (the very first one at position 0).
     let level = (m[0].match(/\{/g) || []).length;
@@ -389,72 +409,96 @@ const onBlur = function() {
    * Return the dialogue content for the tool, attaching any required
    * events.
    *
-   * @method _getDialogueContent
-   * @param {Event} e The event causing content to change
+   * @method _setDialogueContent
    * @param {String} qtype The question type to be used
    * @return {Node} The content to place in the dialogue.
    * @private
    */
-  const _getDialogueContent = function(e, qtype) {
+  const _setDialogueContent = function(qtype) {
 
-    if (_form) {
-      //_form.remove().destroy(true);
-    }
-
+    let contentText;
     if (!qtype) {
-      const contentText = Mustache.render(TEMPLATE.TYPE, {CSS: CSS,
+      contentText = Mustache.render(TEMPLATE.TYPE, {
+        CSS: CSS,
+        STR: STR,
         qtype: _qtype,
         types: getQuestionTypes(editor)
       });
-      const dom = new DOMParser();
-      const content = dom.parseFromString(contentText, 'text/html').body.firstElementChild;
-      _form = content;
+    } else {
+      contentText = Mustache.render(TEMPLATE.FORM, {
+        CSS: CSS,
+        STR: STR,
+        answerdata: _answerdata,
+        elementid: crypto.randomUUID(),
+        qtype: _qtype,
+        marks: _marks,
+        numerical: (_qtype === 'NUMERICAL' || _qtype === 'NM')
+      });
+    }
+    modal.setBody(contentText);
+    modal.show();
+    const $root = modal.getRoot();
+    const root = $root[0];
+    _form = root.querySelector('form');
+    $root.on(ModalEvents.cancel, _cancel);
 
-      content.addEventListener('click', _choiceHandler,
-        '.' + CSS.SUBMIT + ', .' + CSS.DUPLICATE);
-      content.querySelector('.' + CSS.CANCEL).addEventListener('click', _cancel);
-      return content.outerHTML;
+    if (!qtype) {
+      $root.on(ModalEvents.save, (event) => {
+        _choiceHandler(event);
+      });
+      return;
     }
 
-    const contentText = Mustache.render(TEMPLATE.FORM, {CSS: CSS,
-      answerdata: _answerdata,
-      elementid: crypto.randomUUID(),
-      fractions: FRACTIONS,
-      qtype: _qtype,
-      marks: _marks,
-      numerical: (_qtype === 'NUMERICAL' || _qtype === 'NM')
+    $root.on(ModalEvents.save, (event) => {
+      _setSubquestion(event);
     });
 
-    const dom = new DOMParser();
-    const content = dom.parseFromString(contentText, 'text/html').body.firstElementChild;
-    _form = content;
+    const getTarget = e => {
+      let p = e.target;
+      while (!isNull(p) && p.nodeType === 1 && p.tagName !== 'A') {
+        p = p.parentNode;
+      }
+      if (isNull(p.classList)) {
+        return null;
+      }
+      return p;
+    };
 
-    content.querySelector('.' + CSS.SUBMIT).addEventListener('click', _setSubquestion);
-    content.querySelector('.' + CSS.CANCEL).addEventListener('click', _cancel);
-    content.addEventListener('click', e => {
-      if (e.target.classList.contains(CSS.DELETE)) {
-        _deleteAnswer(e);
+    _form.addEventListener('click', e => {
+      const p = getTarget(e);
+      if (isNull(p)) {
         return;
       }
-      if (e.target.classList.contains(CSS.ADD)) {
-        _addAnswer(e);
+      if (p.classList.contains(CSS.DELETE)) {
+        e.preventDefault();
+        _deleteAnswer(p);
         return;
       }
-      if (e.target.classList.contains(CSS.LOWER)) {
-        _lowerAnswer(e);
+      if (p.classList.contains(CSS.ADD)) {
+        e.preventDefault();
+        _addAnswer(p);
         return;
       }
-      if (e.target.classList.contains(CSS.RAISE)) {
-        _raiseAnswer(e);
+      if (p.classList.contains(CSS.LOWER)) {
+        e.preventDefault();
+        _lowerAnswer(p);
         return;
+      }
+      if (p.classList.contains(CSS.RAISE)) {
+        e.preventDefault();
+        _raiseAnswer(p);
       }
     });
-    content.addEventListener('keyup', e => {
-      if (e.target.classList.contains(CSS.ANSWER) || e.target.classList.contains(CSS.FEEDBACK)) {
-        _addAnswer(e);
+    _form.addEventListener('keyup', e => {
+      const p = getTarget(e);
+      if (isNull(p)) {
+        return;
+      }
+      if (p.classList.contains(CSS.ANSWER) || p.classList.contains(CSS.FEEDBACK)) {
+        e.preventDefault();
+        _addAnswer(p);
       }
     });
-    return content.outerHTML;
   };
 
   /**
@@ -489,21 +533,23 @@ const onBlur = function() {
     e.preventDefault();
     let qtype = _form.querySelector('input[name=qtype]:checked');
     if (qtype) {
-      _qtype = qtype.get('value');
+      _qtype = qtype.value;
       _getAnswerDefault();
     }
-    if (e && e.currentTarget && e.currentTarget.hasClass(CSS.SUBMIT)) {
       _answerdata = [
         {
           id: crypto.randomUUID(),
-          answer: _selectedText,
+          answer: '',
           feedback: '',
           fraction: 100,
+          fractions: FRACTIONS.map((item) => ({
+            value: item.value,
+            selected: item.value === 100,
+          })),
           tolerance: 0
         }
       ];
-    }
-    modal.setBody(_getDialogueContent(e, _qtype));
+    _setDialogueContent(_qtype);
     _form.querySelector('.' + CSS.ANSWER).focus();
   };
 
@@ -530,6 +576,7 @@ const onBlur = function() {
     answers.forEach(function(answer) {
       const options = /^(%(-?[.0-9]+)%|(=?))((\\.|[^#])*)#?(.*)/.exec(answer);
       if (options && options[4]) {
+        const frac = options[3] ? 100 : options[2] || 0;
         if (_qtype === 'NUMERICAL' ||_qtype === 'NM') {
           const tolerance = /^([^:]*):?(.*)/.exec(options[4])[2] || 0;
           _answerdata.push({
@@ -537,7 +584,11 @@ const onBlur = function() {
             answer: strdecode(options[4].replace(/:.*/, '')),
             feedback: strdecode(options[6]),
             tolerance: tolerance,
-            fraction: options[3] ? 100 : options[2] || 0
+            fraction: frac,
+            fractions: FRACTIONS.map((item) => ({
+              value: item.value,
+              selected: item.value.toString() === frac,
+            })),
           });
           return;
         }
@@ -545,7 +596,11 @@ const onBlur = function() {
           answer: strdecode(options[4]),
           id: crypto.randomUUID(),
           feedback: strdecode(options[6]),
-          fraction: options[3] ? 100 : options[2] || 0
+          fraction: frac,
+          fractions: FRACTIONS.map((item) => ({
+            value: item.value,
+            selected: item.value.toString() === frac,
+          })),
         });
       }
     });
@@ -555,25 +610,24 @@ const onBlur = function() {
    * Insert a new set of answer blanks before the button.
    *
    * @method _addAnswer
-   * @param {Event} e Event from button click or return
+   * @param {Node} a Node that is the referred element
    * @private
    */
-  const _addAnswer = function(e) {
-    e.preventDefault();
-    let index = _form.querySelectorAll('.' + CSS.ADD).indexOf(e.target);
+  const _addAnswer = function(a) {
+    let index = _form.querySelectorAll('.' + CSS.ADD).indexOf(a);
     if (index === -1) {
-      index = _form.querySelectorAll('.' + CSS.ANSWER + ', .' + CSS.FEEDBACK).indexOf(e.target);
+      index = _form.querySelectorAll('.' + CSS.ANSWER + ', .' + CSS.FEEDBACK).indexOf(a);
       if (index !== -1) {
         index = Math.floor(index / 2) + 1;
       }
     }
-    if (e.target.closest('li')) {
-      _answerDefault = e.target.closest('li').querySelector('.' + CSS.FRACTION).getDOMNode().value;
-      index = _form.querySelectorAll('li').indexOf(e.target.closest('li')) + 1;
+    if (a.closest('li')) {
+      _answerDefault = a.closest('li').querySelector('.' + CSS.FRACTION).getDOMNode().value;
+      index = _form.querySelectorAll('li').indexOf(a.closest('li')) + 1;
     }
     let tolerance = 0;
-    if (e.target.closest('li') && e.target.closest('li').querySelector('.' + CSS.TOLERANCE)) {
-      tolerance = e.target.closest('li').querySelector('.' + CSS.TOLERANCE).getDOMNode().value;
+    if (a.closest('li') && a.closest('li').querySelector('.' + CSS.TOLERANCE)) {
+      tolerance = a.closest('li').querySelector('.' + CSS.TOLERANCE).getDOMNode().value;
     }
     _getFormData();
     _answerdata.splice(index, 0, {
@@ -583,7 +637,7 @@ const onBlur = function() {
       fraction: _answerDefault,
       tolerance: tolerance
     });
-    modal.setBody(_getDialogueContent(e, _qtype));
+    _setDialogueContent(_qtype);
     _form.querySelectorAll('.' + CSS.ANSWER).item(index).focus();
   };
 
@@ -591,18 +645,17 @@ const onBlur = function() {
    * Delete set of answer blanks before the button.
    *
    * @method _deleteAnswer
-   * @param {Event} e Event from button click
+   * @param {Node} a Node that is the referred element
    * @private
    */
-  const _deleteAnswer = function(e) {
-    e.preventDefault();
-    let index = _form.querySelectorAll('.' + CSS.DELETE).indexOf(e.target);
+  const _deleteAnswer = function(a) {
+    let index = _form.querySelectorAll('.' + CSS.DELETE).indexOf(a);
     if (index === -1) {
-      index = _form.querySelectorAll('li').indexOf(e.target.closest('li'));
+      index = _form.querySelectorAll('li').indexOf(a.closest('li'));
     }
     _getFormData();
     _answerdata.splice(index, 1);
-    modal.setBody(_getDialogueContent(e, _qtype));
+    _setDialogueContent(_qtype);
     const answers = _form.querySelectorAll('.' + CSS.ANSWER);
     index = Math.min(index, answers.size() - 1);
     answers.item(index).focus();
@@ -612,13 +665,12 @@ const onBlur = function() {
    * Lower answer option
    *
    * @method _lowerAnswer
-   * @param {Event} e Event from button click
+   * @param {Node} a Node that is the referred element
    * @private
    */
-  const _lowerAnswer = function(e) {
-    e.preventDefault();
-    const li = e.target.closest('li');
-    li.insertBefore(li.next(), li);
+  const _lowerAnswer = function(a) {
+    const li = a.closest('li');
+    li.before(li.nextSibling);
     li.querySelector('.' + CSS.ANSWER).focus();
   };
 
@@ -626,13 +678,12 @@ const onBlur = function() {
    * Raise answer option
    *
    * @method _raiseAnswer
-   * @param {Event} e Event from button click
+   * @param {Node} a Node that is the referred element
    * @private
    */
-  const _raiseAnswer = function(e) {
-    e.preventDefault();
-    const li = e.target.closest('li');
-    li.insertBefore(li, li.previous());
+  const _raiseAnswer = function(a) {
+    const li = a.closest('li');
+    li.after(li.previousSibling);
     li.querySelector('.' + CSS.ANSWER).focus();
   };
 
@@ -653,10 +704,9 @@ const onBlur = function() {
    *
    * @method _setSubquestion
    * @param {Event} e Event from button click
-   * @param {tinymce.Editor} editor
    * @private
    */
-  const _setSubquestion = function(e, editor) {
+  const _setSubquestion = function(e) {
     e.preventDefault();
     _getFormData();
 
@@ -665,24 +715,35 @@ const onBlur = function() {
       option.feedback = strencode(option.feedback);
     });
 
-    const question = Mustache.render(TEMPLATE.OUTPUT,
-        {CSS: CSS,
-          answerdata: _answerdata,
-          qtype: _qtype,
-          marks: _marks
-        });
+    const question = Mustache.render(TEMPLATE.OUTPUT, {
+      answerdata: _answerdata,
+      qtype: _qtype,
+      marks: _marks
+    });
+
+    const newQuestion = markerSpan + question + '</span>';
 
     modal.hide();
     editor.focus();
-    editor.setSelection(_currentSelection);
-
-    // Save the selection before inserting the new question.
-    let selection = window.rangy.saveSelection();
-    editor.insertContent(question);
-    //host.insertContentAtFocusPoint(question);
-
-    // Select the inserted text.
-    window.rangy.restoreSelection(selection);
+    if (_selectedNode) {
+      const dom = new DOMParser();
+      const newNode = dom.parseFromString(newQuestion, 'text/html').body.firstElementChild;
+      //_selectedNode.insertAdjacentHTML('afterend', newNode);
+      // Once the new tags are placed at the correct position, we can remove the original span tag.
+      //_selectedNode.remove();
+      //_selectedNode.innerHTML = newQuestion;
+      const doc = editor.dom.getRoot();
+      for (const span of doc.select('.' + markerClass))  {
+        if (span === _selectedNode) {
+          _selectedNode.replaceChild(newNode);
+          break;
+        }
+      }
+      editor.setContent(doc.outerHTML);
+      //_selectedNode = newNode;
+    } else {
+      editor.insertContent(newQuestion);
+    }
   };
 
   /**
@@ -700,18 +761,19 @@ const onBlur = function() {
     const feedbacks = _form.querySelectorAll('.' + CSS.FEEDBACK);
     const fractions = _form.querySelectorAll('.' + CSS.FRACTION);
     const tolerances = _form.querySelectorAll('.' + CSS.TOLERANCE);
-    for (let i = 0; i < answers.size(); i++) {
-      answer = answers.item(i).getDOMNode().value;
-      if (this._qtype === 'NM' || this._qtype === 'NUMERICAL') {
+    for (let i = 0; i < answers.length; i++) {
+      answer = answers.item(i).value;
+      if (_qtype === 'NM' || _qtype === 'NUMERICAL') {
         answer = Number(answer);
       }
-      _answerdata.push({answer: answer,
+      _answerdata.push({
+        answer: answer,
         id: crypto.randomUUID(),
-        feedback: feedbacks.item(i).getDOMNode().value,
-        fraction: fractions.item(i).getDOMNode().value,
-        tolerance: tolerances.item(i) ? tolerances.item(i).getDOMNode().value : 0}
-      );
-      _marks = _form.querySelector('.' + CSS.MARKS).getDOMNode().value;
+        feedback: feedbacks.item(i).value,
+        fraction: fractions.item(i).value,
+        tolerance: !isNull(tolerances.item(i)) ? tolerances.item(i).value : 0
+      });
+      _marks = _form.querySelector('.' + CSS.MARKS).value;
     }
   };
 
@@ -720,14 +782,14 @@ const onBlur = function() {
    * true.
    *
    * @method resolveSubquestion
-   * @return {Mixed} The selected innerHTML of the selected node with the subquestion if found, false otherwise.
+   * @return {Mixed} The selected node of with the subquestion if found, false otherwise.
    */
   const resolveSubquestion = function() {
     let span = false;
     editor.dom.getParents(editor.selection.getStart(), elm => {
       // Are we in a span that encapsulates the cloze question?
       if (!isNull(elm.classList) && elm.classList.contains(markerClass)) {
-        span = elm.innerHTML;
+        span = elm;
       }
     });
     return span;

@@ -35,7 +35,6 @@ export const register = (editor) => {
     processor: 'Array',
     "default": [],
   });
-
 };
 
 /**
@@ -45,3 +44,5 @@ export const register = (editor) => {
  * @returns {Array}
  */
 export const getQuestionTypes = (editor) => editor.options.get(qtypes);
+
+
