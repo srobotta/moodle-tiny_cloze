@@ -253,6 +253,7 @@ let editor = null;
    */
   let _selectedNode = null;
 
+  let _selectedOffset = -1;
 
   /**
    * The maximum marks for the sub question
@@ -301,10 +302,18 @@ const displayDialogue = async function() {
   var subquestion = resolveSubquestion();
   if (subquestion) {
     _selectedNode = subquestion;
+    const marker = editor.dom.select('.' + markerClass);
+    for (let i = 0; i < marker.length; i++) {
+      if (marker[i] === subquestion) {
+        _selectedOffset = i;
+        break;
+      }
+    }
     _parseSubquestion(subquestion.innerHTML);
     _setDialogueContent(_qtype);
   } else {
     _selectedNode = null;
+    _selectedOffset = -1;
     // That's the content with the list of question types to select one from.
     _setDialogueContent();
   }
@@ -726,23 +735,9 @@ const onBlur = function() {
     modal.hide();
     editor.focus();
     if (_selectedNode) {
-      const dom = new DOMParser();
-      const newNode = dom.parseFromString(newQuestion, 'text/html').body.firstElementChild;
-      //_selectedNode.insertAdjacentHTML('afterend', newNode);
-      // Once the new tags are placed at the correct position, we can remove the original span tag.
-      //_selectedNode.remove();
-      //_selectedNode.innerHTML = newQuestion;
-      const doc = editor.dom.getRoot();
-      for (const span of doc.select('.' + markerClass))  {
-        if (span === _selectedNode) {
-          _selectedNode.replaceChild(newNode);
-          break;
-        }
-      }
-      editor.setContent(doc.outerHTML);
-      //_selectedNode = newNode;
+      editor.dom.select('.' + markerClass)[_selectedOffset].innerHTML = newQuestion;
     } else {
-      editor.insertContent(newQuestion);
+      editor.execCommand('mceInsertContent', false, newQuestion);
     }
   };
 
