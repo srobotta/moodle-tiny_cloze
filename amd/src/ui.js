@@ -34,6 +34,14 @@ import {component} from './common';
 const isNull = a => a === null || a === undefined;
 const strdecode = t => String(t).replace(/\\(#|\}|~)/g, '$1');
 const strencode = t => String(t).replace(/(#|\}|~)/g, '\\$1');
+const indexOfNode = (list, node) => {
+  for (let i = 0; i < list.length; i++) {
+    if (list[i] === node) {
+      return i;
+    }
+  }
+  return -1;
+};
 
 // Marker class and the whole span element that is used to encapsulate the cloze question text.
 const markerClass = 'cloze-question-marker';
@@ -287,6 +295,7 @@ const onInit = function(ed) {
  * @private
  */
 const displayDialogue = async function() {
+  const currentSel = editor.selection.getSel();
   // Create the modal dialogue. Depending on whether we have a selected node or not, the content is different.
   modal = await ModalFactory.create({
     type: Modal.TYPE,
@@ -302,18 +311,12 @@ const displayDialogue = async function() {
   var subquestion = resolveSubquestion();
   if (subquestion) {
     _selectedNode = subquestion;
-    const marker = editor.dom.select('.' + markerClass);
-    for (let i = 0; i < marker.length; i++) {
-      if (marker[i] === subquestion) {
-        _selectedOffset = i;
-        break;
-      }
-    }
+    _selectedOffset = indexOfNode(editor.dom.select('.' + markerClass), subquestion);
     _parseSubquestion(subquestion.innerHTML);
     _setDialogueContent(_qtype);
   } else {
     _selectedNode = null;
-    _selectedOffset = -1;
+    _selectedOffset = currentSel.anchorOffset;
     // That's the content with the list of question types to select one from.
     _setDialogueContent();
   }
@@ -449,18 +452,16 @@ const onBlur = function() {
     const $root = modal.getRoot();
     const root = $root[0];
     _form = root.querySelector('form');
-    $root.on(ModalEvents.cancel, _cancel);
+    $root.off(ModalEvents.cancel, _cancel);
+    $root.off(ModalEvents.save, _choiceHandler);
+    $root.off(ModalEvents.save, _setSubquestion);
+    root.addEventListener(ModalEvents.cancel, _cancel);
 
     if (!qtype) {
-      $root.on(ModalEvents.save, (event) => {
-        _choiceHandler(event);
-      });
+      $root.on(ModalEvents.save, _choiceHandler);
       return;
     }
-
-    $root.on(ModalEvents.save, (event) => {
-      _setSubquestion(event);
-    });
+    $root.on(ModalEvents.save, _setSubquestion);
 
     const getTarget = e => {
       let p = e.target;
@@ -623,20 +624,20 @@ const onBlur = function() {
    * @private
    */
   const _addAnswer = function(a) {
-    let index = _form.querySelectorAll('.' + CSS.ADD).indexOf(a);
+    let index = indexOfNode(_form.querySelectorAll('.' + CSS.ADD), a);
     if (index === -1) {
-      index = _form.querySelectorAll('.' + CSS.ANSWER + ', .' + CSS.FEEDBACK).indexOf(a);
+      index = indexOfNode(_form.querySelectorAll('.' + CSS.ANSWER + ', .' + CSS.FEEDBACK), a);
       if (index !== -1) {
         index = Math.floor(index / 2) + 1;
       }
     }
     if (a.closest('li')) {
-      _answerDefault = a.closest('li').querySelector('.' + CSS.FRACTION).getDOMNode().value;
-      index = _form.querySelectorAll('li').indexOf(a.closest('li')) + 1;
+      _answerDefault = a.closest('li').querySelector('.' + CSS.FRACTION).value;
+      index = indexOfNode(_form.querySelectorAll('li'), a.closest('li')) + 1;
     }
     let tolerance = 0;
     if (a.closest('li') && a.closest('li').querySelector('.' + CSS.TOLERANCE)) {
-      tolerance = a.closest('li').querySelector('.' + CSS.TOLERANCE).getDOMNode().value;
+      tolerance = a.closest('li').querySelector('.' + CSS.TOLERANCE).value;
     }
     _getFormData();
     _answerdata.splice(index, 0, {
@@ -644,6 +645,10 @@ const onBlur = function() {
       answer: '',
       feedback: '',
       fraction: _answerDefault,
+      fractions: FRACTIONS.map((item) => ({
+        value: item.value,
+        selected: item.value.toString() === _answerDefault,
+      })),
       tolerance: tolerance
     });
     _setDialogueContent(_qtype);
@@ -658,15 +663,15 @@ const onBlur = function() {
    * @private
    */
   const _deleteAnswer = function(a) {
-    let index = _form.querySelectorAll('.' + CSS.DELETE).indexOf(a);
+    let index = indexOfNode(_form.querySelectorAll('.' + CSS.DELETE), a);
     if (index === -1) {
-      index = _form.querySelectorAll('li').indexOf(a.closest('li'));
+      index = indexOfNode(_form.querySelectorAll('li'), a.closest('li'));
     }
     _getFormData();
     _answerdata.splice(index, 1);
     _setDialogueContent(_qtype);
     const answers = _form.querySelectorAll('.' + CSS.ANSWER);
-    index = Math.min(index, answers.size() - 1);
+    index = Math.min(index, answers.length - 1);
     answers.item(index).focus();
   };
 
@@ -737,7 +742,11 @@ const onBlur = function() {
     if (_selectedNode) {
       editor.dom.select('.' + markerClass)[_selectedOffset].innerHTML = newQuestion;
     } else {
-      editor.execCommand('mceInsertContent', false, newQuestion);
+      const selectedNode = editor.selection.getSel().anchorNode;
+
+      const newText = selectedNode.textContent.substr(0, _selectedOffset)
+        + newQuestion + selectedNode.textContent.substr(_selectedOffset);
+      editor.insertContent(newText);
     }
   };
 
@@ -766,6 +775,10 @@ const onBlur = function() {
         id: crypto.randomUUID(),
         feedback: feedbacks.item(i).value,
         fraction: fractions.item(i).value,
+        fractions: FRACTIONS.map((item) => ({
+          value: item.value,
+          selected: item.value.toString() === fractions.item(i).value,
+        })),
         tolerance: !isNull(tolerances.item(i)) ? tolerances.item(i).value : 0
       });
       _marks = _form.querySelector('.' + CSS.MARKS).value;
