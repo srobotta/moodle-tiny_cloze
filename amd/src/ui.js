@@ -42,6 +42,17 @@ const indexOfNode = (list, node) => {
   }
   return -1;
 };
+const getFractionOptions = s => {
+  let html = '<option value="">' + STR.incorrect + '</option>';
+  FRACTIONS.map((item) => {
+    html += '<option value="' + item.value + '"';
+    if (item.value.toString() === s) {
+      html += ' selected="selected"';
+    }
+    html += '>' + item.value + '%</option>';
+  });
+  return html;
+};
 
 // Marker class and the whole span element that is used to encapsulate the cloze question text.
 const markerClass = 'cloze-question-marker';
@@ -124,12 +135,7 @@ const TEMPLATE = {
       '<div class="{{CSS.RIGHT}} form-group">' +
       '<label id="{{id}}_grade">{{STR.grade}}</label>' +
       '<select id="{{id}}_grade" class="{{CSS.FRACTION}} custom-select mx-2">' +
-      '{{#fraction}}' +
-      '<option value="">{{STR.incorrect}}</option>' +
-      '{{#fractions}}' +
-      '<option value="{{value}}"{{#selected}} selected="selected"{{/selected}}>{{value}}%</option>' +
-      '{{/fractions}}' +
-      '{{/fraction}}' +
+      '{{{fractionOptions}}}' +
       '</select>' +
       '</div>' +
       '</div></li>' +
@@ -552,10 +558,7 @@ const onBlur = function() {
           answer: '',
           feedback: '',
           fraction: 100,
-          fractions: FRACTIONS.map((item) => ({
-            value: item.value,
-            selected: item.value === 100,
-          })),
+          fractionOptions: getFractionOptions('100'),
           tolerance: 0
         }
       ];
@@ -595,10 +598,7 @@ const onBlur = function() {
             feedback: strdecode(options[6]),
             tolerance: tolerance,
             fraction: frac,
-            fractions: FRACTIONS.map((item) => ({
-              value: item.value,
-              selected: item.value.toString() === frac,
-            })),
+            fractionOptions: getFractionOptions(frac),
           });
           return;
         }
@@ -607,10 +607,7 @@ const onBlur = function() {
           id: crypto.randomUUID(),
           feedback: strdecode(options[6]),
           fraction: frac,
-          fractions: FRACTIONS.map((item) => ({
-            value: item.value,
-            selected: item.value.toString() === frac,
-          })),
+          fractionOptions: getFractionOptions(frac),
         });
       }
     });
@@ -645,10 +642,7 @@ const onBlur = function() {
       answer: '',
       feedback: '',
       fraction: _answerDefault,
-      fractions: FRACTIONS.map((item) => ({
-        value: item.value,
-        selected: item.value.toString() === _answerDefault,
-      })),
+      fractionOptions: getFractionOptions(_answerDefault),
       tolerance: tolerance
     });
     _setDialogueContent(_qtype);
@@ -742,11 +736,13 @@ const onBlur = function() {
     if (_selectedNode) {
       editor.dom.select('.' + markerClass)[_selectedOffset].innerHTML = newQuestion;
     } else {
+      /* correct position within the text node, however the text node itself is still there as well.
       const selectedNode = editor.selection.getSel().anchorNode;
-
       const newText = selectedNode.textContent.substr(0, _selectedOffset)
         + newQuestion + selectedNode.textContent.substr(_selectedOffset);
       editor.insertContent(newText);
+       */
+      editor.insertContent(newQuestion);
     }
   };
 
@@ -775,10 +771,7 @@ const onBlur = function() {
         id: crypto.randomUUID(),
         feedback: feedbacks.item(i).value,
         fraction: fractions.item(i).value,
-        fractions: FRACTIONS.map((item) => ({
-          value: item.value,
-          selected: item.value.toString() === fractions.item(i).value,
-        })),
+        fractionOptions: getFractionOptions(fractions.item(i).value),
         tolerance: !isNull(tolerances.item(i)) ? tolerances.item(i).value : 0
       });
       _marks = _form.querySelector('.' + CSS.MARKS).value;
