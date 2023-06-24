@@ -248,7 +248,6 @@ let editor = null;
    */
   let _answerdata = [];
 
-  let _answerDefault = '';
   /**
    * The sub question type to be edited
    *
@@ -518,24 +517,23 @@ const onBlur = function() {
   };
 
   /**
-   * Find the correct answer default for the current question type
+   * Find the correct default answer for the current question type.
    *
    * @method _getAnswerDefault
    * @private
    * @return {String} Default answer
    */
   const _getAnswerDefault = function() {
+    let answerDefault = '';
     switch (_qtype) {
       case 'SHORTANSWER':
       case 'SA':
       case 'NUMERICAL':
       case 'NM':
-        _answerDefault = 100;
+        answerDefault = 100;
         break;
-      default:
-        _answerDefault = '';
     }
-    return _answerDefault;
+    return answerDefault;
   };
 
   /**
@@ -628,8 +626,9 @@ const onBlur = function() {
         index = Math.floor(index / 2) + 1;
       }
     }
+    let answerDefault = _getAnswerDefault();
     if (a.closest('li')) {
-      _answerDefault = a.closest('li').querySelector('.' + CSS.FRACTION).value;
+      answerDefault = a.closest('li').querySelector('.' + CSS.FRACTION).value;
       index = indexOfNode(_form.querySelectorAll('li'), a.closest('li')) + 1;
     }
     let tolerance = 0;
@@ -641,8 +640,8 @@ const onBlur = function() {
       id: crypto.randomUUID(),
       answer: '',
       feedback: '',
-      fraction: _answerDefault,
-      fractionOptions: getFractionOptions(_answerDefault),
+      fraction: answerDefault,
+      fractionOptions: getFractionOptions(answerDefault),
       tolerance: tolerance
     });
     _setDialogueContent(_qtype);
