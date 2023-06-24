@@ -43,7 +43,11 @@ const indexOfNode = (list, node) => {
   return -1;
 };
 const getFractionOptions = s => {
-  let html = '<option value="">' + STR.incorrect + '</option>';
+  let html = '<option value="">' + STR.incorrect + '</option><option value="="';
+  if (s === '=') {
+    html += ' selected="selected"';
+  }
+  html += '>' + STR.correct + '</option>';
   FRACTIONS.map((item) => {
     html += '<option value="' + item.value + '"';
     if (item.value.toString() === s) {
@@ -142,9 +146,6 @@ const TEMPLATE = {
       '{{/answerdata}}</ol></div>' +
       '</form>' +
       '</div>',
-    OUTPUT: '&#123;{{marks}}:{{qtype}}:{{#answerdata}}~{{#fraction}}%{{fraction}}%{{/fraction}}{{answer}}' +
-      '{{#tolerance}}:{{tolerance}}{{/tolerance}}' +
-      '{{#feedback}}#{{feedback}}{{/feedback}}{{/answerdata}}&#125;',
     TYPE: '<div class="tiny_cloze mt-0 mx-2 mb-2">' +
       '<p>{{STR.chooseqtypetoadd}}</p>' +
       '<form name="tiny_cloze_form">' +
@@ -197,6 +198,7 @@ const getStr = async() => {
     get_string('chooseqtypetoadd', 'question'),
     get_string('defaultmark', 'question'),
     get_string('feedback', 'question'),
+    get_string('correct', 'question'),
     get_string('incorrect', 'question'),
     get_string('addmoreanswerblanks', 'qtype_calculated'),
     get_string('delete', 'core'),
@@ -210,6 +212,7 @@ const getStr = async() => {
     'chooseqtypetoadd',
     'defaultmark',
     'feedback',
+    'correct',
     'incorrect',
     'addmoreanswerblanks',
     'delete',
@@ -600,7 +603,7 @@ const _parseSubquestion = function(question) {
   answers.forEach(function(answer) {
     const options = /^(%(-?[.0-9]+)%|(=?))((\\.|[^#])*)#?(.*)/.exec(answer);
     if (options && options[4]) {
-      const frac = options[3] ? 100 : options[2] || 0;
+      const frac = options[3] ? (options[3] === '=' ? '=' : 100) : options[2] || 0;
       if (_qtype === 'NUMERICAL' ||_qtype === 'NM') {
         const tolerance = /^([^:]*):?(.*)/.exec(options[4])[2] || 0;
         _answerdata.push({
@@ -730,16 +733,24 @@ const _setSubquestion = function(e) {
   e.preventDefault();
   _getFormData();
 
-  _answerdata.forEach(function(option) {
-    option.answer = strencode(option.answer);
-    option.feedback = strencode(option.feedback);
-  });
+  // Build the parser function from the data, that is going to be placed into the editor content.
+  let question = '{' + _marks + ':' + _qtype + ':';
 
-  const question = Mustache.render(TEMPLATE.OUTPUT, {
-    answerdata: _answerdata,
-    qtype: _qtype,
-    marks: _marks
-  });
+  for (let i = 0; i < _answerdata.length; i++) {
+    question += _answerdata[i].fraction && !isNaN(_answerdata[i].fraction)
+      ? '%' + _answerdata[i].fraction + '%' : _answerdata[i].fraction;
+    question += strencode(_answerdata[i].answer);
+    if (_answerdata[i].tolerance) {
+      question += ':' + _answerdata[i].tolerance;
+    }
+    if (_answerdata[i].feedback) {
+      question += '#' + strencode(_answerdata[i].feedback);
+    }
+    if (i < _answerdata.length - 1) {
+      question += '~';
+    }
+  }
+  question += '}';
 
   const newQuestion = markerSpan + question + '</span>';
 
