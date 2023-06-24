@@ -226,87 +226,100 @@ const getStr = async() => {
  * The editor instance that is injected via the onInit() function.
  *
  * @type tinymce.Editor
+ * @private
  */
-let editor = null;
+let _editor = null;
 
-  let isBlurred = false;
-  /**
-   * A reference to the currently open form.
-   *
-   * @param _form
-   * @type Node
-   * @private
-   */
-  let _form = null;
+/**
+ * Remember the blur event to reapply the marker <span>s because they get lost in the first place.
+ * @type {boolean}
+ * @private
+ */
+let _isBlurred = false;
 
-  /**
-   * An array containing the current answers options
-   *
-   * @param _answerdata
-   * @type Array
-   * @private
-   */
-  let _answerdata = [];
+/**
+ * A reference to the currently open form.
+ *
+ * @param _form
+ * @type Node
+ * @private
+ */
+let _form = null;
 
-  /**
-   * The sub question type to be edited
-   *
-   * @param _qtype
-   * @type String
-   * @private
-   */
-  let _qtype = null;
+/**
+ * An array containing the current answers options
+ *
+ * @param _answerdata
+ * @type Array
+ * @private
+ */
+let _answerdata = [];
 
-  /**
-   * The text initial selected to use as answer default
-   *
-   * @param _selectedNode
-   * @type Node
-   * @private
-   */
-  let _selectedNode = null;
+/**
+ * The sub question type to be edited
+ *
+ * @param _qtype
+ * @type String
+ * @private
+ */
+let _qtype = null;
 
-  let _selectedOffset = -1;
+/**
+ * The text initial selected to use as answer default
+ *
+ * @param _selectedNode
+ * @type Node
+ * @private
+ */
+let _selectedNode = null;
 
-  /**
-   * The maximum marks for the sub question
-   *
-   * @param _marks
-   * @type Integer
-   * @private
-   */
-  let _marks = 1;
+/**
+ * Remember the offset of the selection or the cursor position.
+ * @type {number}
+ * @private
+ */
+let _selectedOffset = -1;
+
+/**
+ * The maximum marks for the sub question
+ *
+ * @param _marks
+ * @type Integer
+ * @private
+ */
+let _marks = 1;
 
 /**
  * The modal dialogue to be displayed when designing the cloze question types.
  * @type {null}
  */
-let modal = null;
+let _modal = null;
 
 /**
  * Inject the editor instance and add markers to the cloze question texts.
  * @param {tinymce.Editor} ed
  */
 const onInit = function(ed) {
-    editor = ed;
-    addMakers();
-    getStr();
-  };
+  _editor = ed;
+  _addMakers();
+  getStr();
+};
 
 /**
- * Display form to edit subquestions.
+ * Display modal dialogue to edit a cloze question. Either a form is displayed to edit subquestion or a list
+ * of possible questions is show.
  *
  * @method displayDialogue
  * @private
  */
 const displayDialogue = async function() {
-  const currentSel = editor.selection.getSel();
+  const currentSel = _editor.selection.getSel();
   // Create the modal dialogue. Depending on whether we have a selected node or not, the content is different.
-  modal = await ModalFactory.create({
+  _modal = await ModalFactory.create({
     type: Modal.TYPE,
     title: get_string('button_clozeedit', component),
     templateContext: {
-      elementid: editor.id
+      elementid: _editor.id
     },
     removeOnClose: true,
     large: true,
@@ -316,7 +329,7 @@ const displayDialogue = async function() {
   var subquestion = resolveSubquestion();
   if (subquestion) {
     _selectedNode = subquestion;
-    _selectedOffset = indexOfNode(editor.dom.select('.' + markerClass), subquestion);
+    _selectedOffset = indexOfNode(_editor.dom.select('.' + markerClass), subquestion);
     _parseSubquestion(subquestion.innerHTML);
     _setDialogueContent(_qtype);
   } else {
@@ -335,9 +348,9 @@ const displayDialogue = async function() {
  * textarea). Also, this makes it a lot easier to select the question, edit it in the dialogue and replace the result
  * in the existing text area.
  */
-const addMakers = function() {
+const _addMakers = function() {
 
-  let content = editor.getContent();
+  let content = _editor.getContent();
   let newContent = '';
 
   // Check if there is already a marker span. In this case we do not have to do anything.
@@ -382,15 +395,15 @@ const addMakers = function() {
     }
     newContent += '</span>';
   } while (m);
-  editor.setContent(newContent);
+  _editor.setContent(newContent);
 };
 
 /**
  * Look for the marker span elements around a cloze question and remove that span.
  */
-const removeMarkers = function() {
-  for (const span of editor.dom.select('span.' + markerClass)) {
-    editor.dom.setOuterHTML(span, span.innerHTML);
+const _removeMarkers = function() {
+  for (const span of _editor.dom.select('span.' + markerClass)) {
+    _editor.dom.setOuterHTML(span, span.innerHTML);
   }
 };
 
@@ -405,395 +418,395 @@ const onProcess = function(content, event) {
       // When the blur event was triggered, the editor is still there, we need to reapply
       // the previously removed styling. If this was a submit event, then do not reapply the
       // styling to prevent that this is saved in the database.
-      if (isBlurred) {
-        addMakers();
-        isBlurred = false;
+      if (_isBlurred) {
+        _addMakers();
+        _isBlurred = false;
       }
     } else {
-      removeMarkers();
+      _removeMarkers();
     }
   }
 };
+
 /**
  * Notice when the editor content is blurred, because the focus left the editor window.
  */
 const onBlur = function() {
-  isBlurred = true;
+  _isBlurred = true;
 };
 
+/**
+ * Return the dialogue content for the tool, attaching any required
+ * events.
+ *
+ * @method _setDialogueContent
+ * @param {String} qtype The question type to be used
+ * @return {Node} The content to place in the dialogue.
+ * @private
+ */
+const _setDialogueContent = function(qtype) {
 
-  /**
-   * Return the dialogue content for the tool, attaching any required
-   * events.
-   *
-   * @method _setDialogueContent
-   * @param {String} qtype The question type to be used
-   * @return {Node} The content to place in the dialogue.
-   * @private
-   */
-  const _setDialogueContent = function(qtype) {
+  let contentText;
+  if (!qtype) {
+    contentText = Mustache.render(TEMPLATE.TYPE, {
+      CSS: CSS,
+      STR: STR,
+      qtype: _qtype,
+      types: getQuestionTypes(_editor)
+    });
+  } else {
+    contentText = Mustache.render(TEMPLATE.FORM, {
+      CSS: CSS,
+      STR: STR,
+      answerdata: _answerdata,
+      elementid: crypto.randomUUID(),
+      qtype: _qtype,
+      marks: _marks,
+      numerical: (_qtype === 'NUMERICAL' || _qtype === 'NM')
+    });
+  }
+  _modal.setBody(contentText);
+  _modal.show();
+  const $root = _modal.getRoot();
+  const root = $root[0];
+  _form = root.querySelector('form');
+  $root.off(ModalEvents.cancel, _cancel);
+  $root.off(ModalEvents.save, _choiceHandler);
+  $root.off(ModalEvents.save, _setSubquestion);
+  root.addEventListener(ModalEvents.cancel, _cancel);
 
-    let contentText;
-    if (!qtype) {
-      contentText = Mustache.render(TEMPLATE.TYPE, {
-        CSS: CSS,
-        STR: STR,
-        qtype: _qtype,
-        types: getQuestionTypes(editor)
-      });
-    } else {
-      contentText = Mustache.render(TEMPLATE.FORM, {
-        CSS: CSS,
-        STR: STR,
-        answerdata: _answerdata,
-        elementid: crypto.randomUUID(),
-        qtype: _qtype,
-        marks: _marks,
-        numerical: (_qtype === 'NUMERICAL' || _qtype === 'NM')
-      });
+  if (!qtype) {
+    $root.on(ModalEvents.save, _choiceHandler);
+    return;
+  }
+  $root.on(ModalEvents.save, _setSubquestion);
+
+  const getTarget = e => {
+    let p = e.target;
+    while (!isNull(p) && p.nodeType === 1 && p.tagName !== 'A') {
+      p = p.parentNode;
     }
-    modal.setBody(contentText);
-    modal.show();
-    const $root = modal.getRoot();
-    const root = $root[0];
-    _form = root.querySelector('form');
-    $root.off(ModalEvents.cancel, _cancel);
-    $root.off(ModalEvents.save, _choiceHandler);
-    $root.off(ModalEvents.save, _setSubquestion);
-    root.addEventListener(ModalEvents.cancel, _cancel);
+    if (isNull(p.classList)) {
+      return null;
+    }
+    return p;
+  };
 
-    if (!qtype) {
-      $root.on(ModalEvents.save, _choiceHandler);
+  _form.addEventListener('click', e => {
+    const p = getTarget(e);
+    if (isNull(p)) {
       return;
     }
-    $root.on(ModalEvents.save, _setSubquestion);
-
-    const getTarget = e => {
-      let p = e.target;
-      while (!isNull(p) && p.nodeType === 1 && p.tagName !== 'A') {
-        p = p.parentNode;
-      }
-      if (isNull(p.classList)) {
-        return null;
-      }
-      return p;
-    };
-
-    _form.addEventListener('click', e => {
-      const p = getTarget(e);
-      if (isNull(p)) {
-        return;
-      }
-      if (p.classList.contains(CSS.DELETE)) {
-        e.preventDefault();
-        _deleteAnswer(p);
-        return;
-      }
-      if (p.classList.contains(CSS.ADD)) {
-        e.preventDefault();
-        _addAnswer(p);
-        return;
-      }
-      if (p.classList.contains(CSS.LOWER)) {
-        e.preventDefault();
-        _lowerAnswer(p);
-        return;
-      }
-      if (p.classList.contains(CSS.RAISE)) {
-        e.preventDefault();
-        _raiseAnswer(p);
-      }
-    });
-    _form.addEventListener('keyup', e => {
-      const p = getTarget(e);
-      if (isNull(p)) {
-        return;
-      }
-      if (p.classList.contains(CSS.ANSWER) || p.classList.contains(CSS.FEEDBACK)) {
-        e.preventDefault();
-        _addAnswer(p);
-      }
-    });
-  };
-
-  /**
-   * Find the correct default answer for the current question type.
-   *
-   * @method _getAnswerDefault
-   * @private
-   * @return {String} Default answer
-   */
-  const _getAnswerDefault = function() {
-    let answerDefault = '';
-    switch (_qtype) {
-      case 'SHORTANSWER':
-      case 'SA':
-      case 'NUMERICAL':
-      case 'NM':
-        answerDefault = 100;
-        break;
-    }
-    return answerDefault;
-  };
-
-  /**
-   * Handle question choice
-   *
-   * @method _choiceHandler
-   * @private
-   * @param {Event} e Event from button click in chooser
-   */
-  const _choiceHandler = function(e) {
-    e.preventDefault();
-    let qtype = _form.querySelector('input[name=qtype]:checked');
-    if (qtype) {
-      _qtype = qtype.value;
-      _getAnswerDefault();
-    }
-      _answerdata = [
-        {
-          id: crypto.randomUUID(),
-          answer: '',
-          feedback: '',
-          fraction: 100,
-          fractionOptions: getFractionOptions('100'),
-          tolerance: 0
-        }
-      ];
-    _setDialogueContent(_qtype);
-    _form.querySelector('.' + CSS.ANSWER).focus();
-  };
-
-  /**
-   * Parse question and set properties found
-   *
-   * @method _parseSubquestion
-   * @private
-   * @param {String} question The question string
-   */
-  const _parseSubquestion = function(question) {
-    const parts = reQtype.exec(question);
-    if (!parts) {
+    if (p.classList.contains(CSS.DELETE)) {
+      e.preventDefault();
+      _deleteAnswer(p);
       return;
     }
-    _marks = parts[1];
-    _qtype = parts[2];
+    if (p.classList.contains(CSS.ADD)) {
+      e.preventDefault();
+      _addAnswer(p);
+      return;
+    }
+    if (p.classList.contains(CSS.LOWER)) {
+      e.preventDefault();
+      _lowerAnswer(p);
+      return;
+    }
+    if (p.classList.contains(CSS.RAISE)) {
+      e.preventDefault();
+      _raiseAnswer(p);
+    }
+  });
+  _form.addEventListener('keyup', e => {
+    const p = getTarget(e);
+    if (isNull(p)) {
+      return;
+    }
+    if (p.classList.contains(CSS.ANSWER) || p.classList.contains(CSS.FEEDBACK)) {
+      e.preventDefault();
+      _addAnswer(p);
+    }
+  });
+};
+
+/**
+ * Find the correct default answer for the current question type.
+ *
+ * @method _getAnswerDefault
+ * @private
+ * @return {String} Default answer
+ */
+const _getAnswerDefault = function() {
+  let answerDefault = '';
+  switch (_qtype) {
+    case 'SHORTANSWER':
+    case 'SA':
+    case 'NUMERICAL':
+    case 'NM':
+      answerDefault = 100;
+      break;
+  }
+  return answerDefault;
+};
+
+/**
+ * Handle question choice
+ *
+ * @method _choiceHandler
+ * @private
+ * @param {Event} e Event from button click in chooser
+ */
+const _choiceHandler = function(e) {
+  e.preventDefault();
+  let qtype = _form.querySelector('input[name=qtype]:checked');
+  if (qtype) {
+    _qtype = qtype.value;
     _getAnswerDefault();
-    _answerdata = [];
-    const answers = parts[6].match(/(\\.|[^~])*/g);
-    if (!answers) {
-      return;
-    }
-    answers.forEach(function(answer) {
-      const options = /^(%(-?[.0-9]+)%|(=?))((\\.|[^#])*)#?(.*)/.exec(answer);
-      if (options && options[4]) {
-        const frac = options[3] ? 100 : options[2] || 0;
-        if (_qtype === 'NUMERICAL' ||_qtype === 'NM') {
-          const tolerance = /^([^:]*):?(.*)/.exec(options[4])[2] || 0;
-          _answerdata.push({
-            id: crypto.randomUUID(),
-            answer: strdecode(options[4].replace(/:.*/, '')),
-            feedback: strdecode(options[6]),
-            tolerance: tolerance,
-            fraction: frac,
-            fractionOptions: getFractionOptions(frac),
-          });
-          return;
-        }
+  }
+    _answerdata = [
+      {
+        id: crypto.randomUUID(),
+        answer: '',
+        feedback: '',
+        fraction: 100,
+        fractionOptions: getFractionOptions('100'),
+        tolerance: 0
+      }
+    ];
+  _setDialogueContent(_qtype);
+  _form.querySelector('.' + CSS.ANSWER).focus();
+};
+
+/**
+ * Parse question and set properties found
+ *
+ * @method _parseSubquestion
+ * @private
+ * @param {String} question The question string
+ */
+const _parseSubquestion = function(question) {
+  const parts = reQtype.exec(question);
+  if (!parts) {
+    return;
+  }
+  _marks = parts[1];
+  _qtype = parts[2];
+  _getAnswerDefault();
+  _answerdata = [];
+  const answers = parts[6].match(/(\\.|[^~])*/g);
+  if (!answers) {
+    return;
+  }
+  answers.forEach(function(answer) {
+    const options = /^(%(-?[.0-9]+)%|(=?))((\\.|[^#])*)#?(.*)/.exec(answer);
+    if (options && options[4]) {
+      const frac = options[3] ? 100 : options[2] || 0;
+      if (_qtype === 'NUMERICAL' ||_qtype === 'NM') {
+        const tolerance = /^([^:]*):?(.*)/.exec(options[4])[2] || 0;
         _answerdata.push({
-          answer: strdecode(options[4]),
           id: crypto.randomUUID(),
+          answer: strdecode(options[4].replace(/:.*/, '')),
           feedback: strdecode(options[6]),
+          tolerance: tolerance,
           fraction: frac,
           fractionOptions: getFractionOptions(frac),
         });
-      }
-    });
-  };
-
-  /**
-   * Insert a new set of answer blanks before the button.
-   *
-   * @method _addAnswer
-   * @param {Node} a Node that is the referred element
-   * @private
-   */
-  const _addAnswer = function(a) {
-    let index = indexOfNode(_form.querySelectorAll('.' + CSS.ADD), a);
-    if (index === -1) {
-      index = indexOfNode(_form.querySelectorAll('.' + CSS.ANSWER + ', .' + CSS.FEEDBACK), a);
-      if (index !== -1) {
-        index = Math.floor(index / 2) + 1;
-      }
-    }
-    let answerDefault = _getAnswerDefault();
-    if (a.closest('li')) {
-      answerDefault = a.closest('li').querySelector('.' + CSS.FRACTION).value;
-      index = indexOfNode(_form.querySelectorAll('li'), a.closest('li')) + 1;
-    }
-    let tolerance = 0;
-    if (a.closest('li') && a.closest('li').querySelector('.' + CSS.TOLERANCE)) {
-      tolerance = a.closest('li').querySelector('.' + CSS.TOLERANCE).value;
-    }
-    _getFormData();
-    _answerdata.splice(index, 0, {
-      id: crypto.randomUUID(),
-      answer: '',
-      feedback: '',
-      fraction: answerDefault,
-      fractionOptions: getFractionOptions(answerDefault),
-      tolerance: tolerance
-    });
-    _setDialogueContent(_qtype);
-    _form.querySelectorAll('.' + CSS.ANSWER).item(index).focus();
-  };
-
-  /**
-   * Delete set of answer blanks before the button.
-   *
-   * @method _deleteAnswer
-   * @param {Node} a Node that is the referred element
-   * @private
-   */
-  const _deleteAnswer = function(a) {
-    let index = indexOfNode(_form.querySelectorAll('.' + CSS.DELETE), a);
-    if (index === -1) {
-      index = indexOfNode(_form.querySelectorAll('li'), a.closest('li'));
-    }
-    _getFormData();
-    _answerdata.splice(index, 1);
-    _setDialogueContent(_qtype);
-    const answers = _form.querySelectorAll('.' + CSS.ANSWER);
-    index = Math.min(index, answers.length - 1);
-    answers.item(index).focus();
-  };
-
-  /**
-   * Lower answer option
-   *
-   * @method _lowerAnswer
-   * @param {Node} a Node that is the referred element
-   * @private
-   */
-  const _lowerAnswer = function(a) {
-    const li = a.closest('li');
-    li.before(li.nextSibling);
-    li.querySelector('.' + CSS.ANSWER).focus();
-  };
-
-  /**
-   * Raise answer option
-   *
-   * @method _raiseAnswer
-   * @param {Node} a Node that is the referred element
-   * @private
-   */
-  const _raiseAnswer = function(a) {
-    const li = a.closest('li');
-    li.after(li.previousSibling);
-    li.querySelector('.' + CSS.ANSWER).focus();
-  };
-
-  /**
-   * Reset and hide form.
-   *
-   * @method _cancel
-   * @param {Event} e Event from button click
-   * @private
-   */
-  const _cancel = function(e) {
-    e.preventDefault();
-    modal.hide();
-  };
-
-  /**
-   * Insert content into editor and reset and hide form.
-   *
-   * @method _setSubquestion
-   * @param {Event} e Event from button click
-   * @private
-   */
-  const _setSubquestion = function(e) {
-    e.preventDefault();
-    _getFormData();
-
-    _answerdata.forEach(function(option) {
-      option.answer = strencode(option.answer);
-      option.feedback = strencode(option.feedback);
-    });
-
-    const question = Mustache.render(TEMPLATE.OUTPUT, {
-      answerdata: _answerdata,
-      qtype: _qtype,
-      marks: _marks
-    });
-
-    const newQuestion = markerSpan + question + '</span>';
-
-    modal.hide();
-    editor.focus();
-    if (_selectedNode) {
-      editor.dom.select('.' + markerClass)[_selectedOffset].innerHTML = newQuestion;
-    } else {
-      /* correct position within the text node, however the text node itself is still there as well.
-      const selectedNode = editor.selection.getSel().anchorNode;
-      const newText = selectedNode.textContent.substr(0, _selectedOffset)
-        + newQuestion + selectedNode.textContent.substr(_selectedOffset);
-      editor.insertContent(newText);
-       */
-      editor.insertContent(newQuestion);
-    }
-  };
-
-  /**
-   * Read and process the current data in the form.
-   *
-   * @method _setSubquestion
-   * @chainable
-   * @return {Object} self
-   * @private
-   */
-  const _getFormData = function() {
-    _answerdata = [];
-    let answer;
-    const answers = _form.querySelectorAll('.' + CSS.ANSWER);
-    const feedbacks = _form.querySelectorAll('.' + CSS.FEEDBACK);
-    const fractions = _form.querySelectorAll('.' + CSS.FRACTION);
-    const tolerances = _form.querySelectorAll('.' + CSS.TOLERANCE);
-    for (let i = 0; i < answers.length; i++) {
-      answer = answers.item(i).value;
-      if (_qtype === 'NM' || _qtype === 'NUMERICAL') {
-        answer = Number(answer);
+        return;
       }
       _answerdata.push({
-        answer: answer,
+        answer: strdecode(options[4]),
         id: crypto.randomUUID(),
-        feedback: feedbacks.item(i).value,
-        fraction: fractions.item(i).value,
-        fractionOptions: getFractionOptions(fractions.item(i).value),
-        tolerance: !isNull(tolerances.item(i)) ? tolerances.item(i).value : 0
+        feedback: strdecode(options[6]),
+        fraction: frac,
+        fractionOptions: getFractionOptions(frac),
       });
-      _marks = _form.querySelector('.' + CSS.MARKS).value;
     }
-  };
+  });
+};
 
-  /**
-   * Check whether cursor is in a subquestion and return subquestion text if
-   * true.
-   *
-   * @method resolveSubquestion
-   * @return {Mixed} The selected node of with the subquestion if found, false otherwise.
-   */
-  const resolveSubquestion = function() {
-    let span = false;
-    editor.dom.getParents(editor.selection.getStart(), elm => {
-      // Are we in a span that encapsulates the cloze question?
-      if (!isNull(elm.classList) && elm.classList.contains(markerClass)) {
-        span = elm;
-      }
+/**
+ * Insert a new set of answer blanks before the button.
+ *
+ * @method _addAnswer
+ * @param {Node} a Node that is the referred element
+ * @private
+ */
+const _addAnswer = function(a) {
+  let index = indexOfNode(_form.querySelectorAll('.' + CSS.ADD), a);
+  if (index === -1) {
+    index = indexOfNode(_form.querySelectorAll('.' + CSS.ANSWER + ', .' + CSS.FEEDBACK), a);
+    if (index !== -1) {
+      index = Math.floor(index / 2) + 1;
+    }
+  }
+  let answerDefault = _getAnswerDefault();
+  if (a.closest('li')) {
+    answerDefault = a.closest('li').querySelector('.' + CSS.FRACTION).value;
+    index = indexOfNode(_form.querySelectorAll('li'), a.closest('li')) + 1;
+  }
+  let tolerance = 0;
+  if (a.closest('li') && a.closest('li').querySelector('.' + CSS.TOLERANCE)) {
+    tolerance = a.closest('li').querySelector('.' + CSS.TOLERANCE).value;
+  }
+  _getFormData();
+  _answerdata.splice(index, 0, {
+    id: crypto.randomUUID(),
+    answer: '',
+    feedback: '',
+    fraction: answerDefault,
+    fractionOptions: getFractionOptions(answerDefault),
+    tolerance: tolerance
+  });
+  _setDialogueContent(_qtype);
+  _form.querySelectorAll('.' + CSS.ANSWER).item(index).focus();
+};
+
+/**
+ * Delete set of answer blanks before the button.
+ *
+ * @method _deleteAnswer
+ * @param {Node} a Node that is the referred element
+ * @private
+ */
+const _deleteAnswer = function(a) {
+  let index = indexOfNode(_form.querySelectorAll('.' + CSS.DELETE), a);
+  if (index === -1) {
+    index = indexOfNode(_form.querySelectorAll('li'), a.closest('li'));
+  }
+  _getFormData();
+  _answerdata.splice(index, 1);
+  _setDialogueContent(_qtype);
+  const answers = _form.querySelectorAll('.' + CSS.ANSWER);
+  index = Math.min(index, answers.length - 1);
+  answers.item(index).focus();
+};
+
+/**
+ * Lower answer option
+ *
+ * @method _lowerAnswer
+ * @param {Node} a Node that is the referred element
+ * @private
+ */
+const _lowerAnswer = function(a) {
+  const li = a.closest('li');
+  li.before(li.nextSibling);
+  li.querySelector('.' + CSS.ANSWER).focus();
+};
+
+/**
+ * Raise answer option
+ *
+ * @method _raiseAnswer
+ * @param {Node} a Node that is the referred element
+ * @private
+ */
+const _raiseAnswer = function(a) {
+  const li = a.closest('li');
+  li.after(li.previousSibling);
+  li.querySelector('.' + CSS.ANSWER).focus();
+};
+
+/**
+ * Reset and hide form.
+ *
+ * @method _cancel
+ * @param {Event} e Event from button click
+ * @private
+ */
+const _cancel = function(e) {
+  e.preventDefault();
+  _modal.hide();
+};
+
+/**
+ * Insert content into editor and reset and hide form.
+ *
+ * @method _setSubquestion
+ * @param {Event} e Event from button click
+ * @private
+ */
+const _setSubquestion = function(e) {
+  e.preventDefault();
+  _getFormData();
+
+  _answerdata.forEach(function(option) {
+    option.answer = strencode(option.answer);
+    option.feedback = strencode(option.feedback);
+  });
+
+  const question = Mustache.render(TEMPLATE.OUTPUT, {
+    answerdata: _answerdata,
+    qtype: _qtype,
+    marks: _marks
+  });
+
+  const newQuestion = markerSpan + question + '</span>';
+
+  _modal.hide();
+  _editor.focus();
+  if (_selectedNode) {
+    _editor.dom.select('.' + markerClass)[_selectedOffset].innerHTML = newQuestion;
+  } else {
+    /* correct position within the text node, however the text node itself is still there as well.
+    const selectedNode = _editor.selection.getSel().anchorNode;
+    const newText = selectedNode.textContent.substr(0, _selectedOffset)
+      + newQuestion + selectedNode.textContent.substr(_selectedOffset);
+    _editor.insertContent(newText);
+     */
+    _editor.insertContent(newQuestion);
+  }
+};
+
+/**
+ * Read and process the current data in the form.
+ *
+ * @method _setSubquestion
+ * @chainable
+ * @return {Object} self
+ * @private
+ */
+const _getFormData = function() {
+  _answerdata = [];
+  let answer;
+  const answers = _form.querySelectorAll('.' + CSS.ANSWER);
+  const feedbacks = _form.querySelectorAll('.' + CSS.FEEDBACK);
+  const fractions = _form.querySelectorAll('.' + CSS.FRACTION);
+  const tolerances = _form.querySelectorAll('.' + CSS.TOLERANCE);
+  for (let i = 0; i < answers.length; i++) {
+    answer = answers.item(i).value;
+    if (_qtype === 'NM' || _qtype === 'NUMERICAL') {
+      answer = Number(answer);
+    }
+    _answerdata.push({
+      answer: answer,
+      id: crypto.randomUUID(),
+      feedback: feedbacks.item(i).value,
+      fraction: fractions.item(i).value,
+      fractionOptions: getFractionOptions(fractions.item(i).value),
+      tolerance: !isNull(tolerances.item(i)) ? tolerances.item(i).value : 0
     });
-    return span;
-  };
+    _marks = _form.querySelector('.' + CSS.MARKS).value;
+  }
+};
+
+/**
+ * Check whether cursor is in a subquestion and return subquestion text if
+ * true.
+ *
+ * @method resolveSubquestion
+ * @return {Mixed} The selected node of with the subquestion if found, false otherwise.
+ */
+const resolveSubquestion = function() {
+  let span = false;
+  _editor.dom.getParents(_editor.selection.getStart(), elm => {
+    // Are we in a span that encapsulates the cloze question?
+    if (!isNull(elm.classList) && elm.classList.contains(markerClass)) {
+      span = elm;
+    }
+  });
+  return span;
+};
 
 export {
   displayDialogue,
