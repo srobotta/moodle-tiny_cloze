@@ -26,7 +26,6 @@ import {get_string as getString} from 'core/str';
 import {
     component,
     clozeeditButtonName,
-    examplemenuMenuItemName,
     icon,
 } from './common';
 import {displayDialogue, resolveSubquestion, onInit, onProcess, onBlur} from './ui';
@@ -73,9 +72,8 @@ export const getSetup = async() => {
               }
         });
 
-        // Add the examplemenu Menu Item.
-        // This allows it to be added to a standard menu, or a context menu.
-        editor.ui.registry.addMenuItem(examplemenuMenuItemName, {
+        // Register the menu item.
+        editor.ui.registry.addMenuItem(clozeeditButtonName, {
             icon,
             text: clozeButtonText,
             onAction: () => displayDialogue(editor),
@@ -85,6 +83,5 @@ export const getSetup = async() => {
         editor.on('PreProcess', format => onProcess(format, 'PreProcess'));
         editor.on('PostProcess', format => onProcess(format, 'PostProcess'));
         editor.on('blur', () => onBlur());
-
     };
 };

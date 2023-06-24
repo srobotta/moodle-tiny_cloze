@@ -25,8 +25,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$string['pluginname'] = 'Cloze question editor for tiny editor';
+$string['pluginname'] = 'Cloze question editor';
 $string['button_clozeedit'] = 'Cloze editor';
-$string['menuitem_examplemenu'] = 'Start the demo';
 $string['privacy:metadata'] = 'Cloze Editor does not store any personal data';
 $string['insert'] = 'Insert question';

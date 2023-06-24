@@ -23,7 +23,6 @@
 
 import {
     clozeeditButtonName,
-    examplemenuMenuItemName,
 } from './common';
 
 import {
@@ -42,8 +41,8 @@ const getToolbarConfiguration = (instanceConfig) => {
 
 const getMenuConfiguration = (instanceConfig) => {
     let menu = instanceConfig.menu;
-    menu = addMenubarItem(menu, 'file', [
-        examplemenuMenuItemName,
+    menu = addMenubarItem(menu, 'insert', [
+        clozeeditButtonName,
     ].join(' '));
 
     return menu;

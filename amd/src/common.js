@@ -28,5 +28,4 @@ export default {
     pluginName: `${component}/plugin`,
     icon: component,
     clozeeditButtonName: `${component}_clozeedit`,
-    examplemenuMenuItemName: `${component}_examplemenu`,
 };
