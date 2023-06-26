@@ -26,7 +26,6 @@ import ModalFactory from 'core/modal_factory';
 import Modal from "./modal";
 import Mustache from 'core/mustache';
 import {get_string} from 'core/str';
-import {getQuestionTypes} from './options';
 import {component} from './common';
 
 // Helper functions.
@@ -157,7 +156,7 @@ const TEMPLATE = {
       '<span class="typename">{{type}}</span>' +
       '<span class="{{CSS.SUMMARY}}"><h6>{{name}}</h6><p>{{summary}}</p>' +
       '<ul>{{#options}}' +
-      '<li>{{option}}</li>' +
+      '<li>{{.}}</li>' +
       '{{/options}}</ul>' +
       '</span>' +
       '</label></div>' +
@@ -206,6 +205,22 @@ const getStr = async() => {
     get_string('down', 'core'),
     get_string('tolerance', 'qtype_calculated'),
     get_string('grade', 'grades'),
+    get_string('caseno', 'mod_quiz'),
+    get_string('caseyes', 'mod_quiz'),
+    get_string('answersingleno', 'qtype_multichoice'),
+    get_string('answersingleyes', 'qtype_multichoice'),
+    get_string('layoutselectinline', 'qtype_multianswer'),
+    get_string('layouthorizontal', 'qtype_multianswer'),
+    get_string('layoutvertical', 'qtype_multianswer'),
+    get_string('shufflewithin', 'mod_quiz'),
+    get_string('layoutmultiple_horizontal', 'qtype_multianswer'),
+    get_string('layoutmultiple_vertical', 'qtype_multianswer'),
+    get_string('pluginnamesummary', 'qtype_multichoice'),
+    get_string('pluginnamesummary', 'qtype_shortanswer'),
+    get_string('pluginnamesummary', 'qtype_numerical'),
+    get_string('multichoice', 'mod_quiz'),
+    get_string('numerical', 'mod_quiz'),
+    get_string('shortanswer', 'mod_quiz')
   ]);
   [
     'answer',
@@ -220,9 +235,106 @@ const getStr = async() => {
     'down',
     'tolerance',
     'grade',
+    'caseno',
+    'caseyes',
+    'singleno',
+    'singleyes',
+    'selectinline',
+    'horizontal',
+    'vertical',
+    'shuffle',
+    'multi_horizontal',
+    'multi_vertical',
+    'summary_multichoice',
+    'summary_shortanswer',
+    'summary_numerical',
+    'multichoice',
+    'numerical',
+    'shortanswer',
   ].map((l, i) => {
     STR[l] = res[i];
   });
+};
+const getQuestionTypes = function() {
+  return [
+    {
+      'type': 'MULTICHOICE',
+      'name': STR.multichoice,
+      'summary': STR.summary_multichoice,
+      'options': [STR.selectinline, STR.singleyes],
+    },
+    {
+      'type': 'MULTICHOICE_H',
+      'name': STR.multichoice,
+      'summary': STR.summary_multichoice,
+      'options': [STR.horizontal, STR.singleyes],
+    },
+    {
+      'type': 'MULTICHOICE_V',
+      'name': STR.multichoice,
+      'summary': STR.summary_multichoice,
+      'options': [STR.vertical, STR.singleyes],
+    },
+    {
+      'type': 'MULTICHOICE_S',
+      'name': STR.multichoice,
+      'summary': STR.summary_multichoice,
+      'options': [STR.selectinline, STR.shuffle, STR.singleyes],
+    },
+    {
+      'type': 'MULTICHOICE_HS',
+      'name': STR.multichoice,
+      'summary': STR.summary_multichoice,
+      'options': [STR.horizontal, STR.shuffle, STR.singleyes],
+    },
+    {
+      'type': 'MULTICHOICE_VS',
+      'name': STR.multichoice,
+      'summary': STR.summary_multichoice,
+      'options': [STR.vertical, STR.shuffle, STR.singleyes],
+    },
+    {
+      'type': 'MULTIRESPONSE',
+      'name': STR.multichoice,
+      'summary': STR.summary_multichoice,
+      'options': [STR.multi_vertical, STR.singleno],
+    },
+    {
+      'type': 'MULTIRESPONSE_H',
+      'name': STR.multichoice,
+      'summary': STR.summary_multichoice,
+      'options': [STR.multi_horizontal, STR.singleno],
+    },
+    {
+      'type': 'MULTIRESPONSE_S',
+      'name': STR.multichoice,
+      'summary': STR.summary_multichoice,
+      'options': [STR.multi_vertical, STR.shuffle, STR.singleno],
+    },
+    {
+      'type': 'MULTIRESPONSE_HS',
+      'name': STR.multichoice,
+      'summary': STR.summary_multichoice,
+      'options': [STR.multi_horizontal, STR.shuffle, STR.singleno],
+    },
+    {
+      'type': 'NUMERICAL',
+      'name': STR.numerical,
+      'summary': STR.summary_numerical,
+    },
+    {
+      'type': 'SHORTANSWER',
+      'name': STR.shortanswer,
+      'summary': STR.summary_shortanswer,
+      'options': [STR.caseno],
+    },
+    {
+      'type': 'SHORTANSWER_C',
+      'name': STR.shortanswer,
+      'summary': STR.summary_shortanswer,
+      'options': [STR.caseyes],
+    },
+  ];
 };
 
 /**
@@ -455,7 +567,7 @@ const _setDialogueContent = function(qtype) {
       CSS: CSS,
       STR: STR,
       qtype: _qtype,
-      types: getQuestionTypes(_editor)
+      types: getQuestionTypes()
     });
   } else {
     contentText = Mustache.render(TEMPLATE.FORM, {
