@@ -61,7 +61,8 @@ const getFractionOptions = s => {
 const markerClass = 'cloze-question-marker';
 const markerSpan = '<span contenteditable="false" class="' + markerClass + '" data-mce-contenteditable="false">';
 // Regex to recognize the question string in the text e.g. {1:NUMERICAL:...} or {:MULTICHOICE:...}
-const reQtype = /\{([0-9]*):(MULTICHOICE(_H|_V|_S|_HS|_VS)?|MULTIRESPONSE(_H|_S|_HS)?|NUMERICAL|SHORTANSWER(_C)?|SA|NM):(.*?)\}/g;
+// eslint-disable-next-line max-len
+const reQtype = /\{([0-9]*):(MULTICHOICE(_H|_V|_S|_HS|_VS)?|MULTIRESPONSE(_H|_S|_HS)?|NUMERICAL|SHORTANSWER(_C)?|SAC?|NM|MWC?|MC(V|H|VS|HS)?|MR(V|H|VS|HS)?):(.*?)\}/g;
 
 // CSS classes that are used in the modal dialogue.
 const CSS = {
@@ -259,77 +260,90 @@ const getQuestionTypes = function() {
   return [
     {
       'type': 'MULTICHOICE',
+      'abbr': ['MC'],
       'name': STR.multichoice,
       'summary': STR.summary_multichoice,
       'options': [STR.selectinline, STR.singleyes],
     },
     {
       'type': 'MULTICHOICE_H',
+      'abbr': ['MCH'],
       'name': STR.multichoice,
       'summary': STR.summary_multichoice,
       'options': [STR.horizontal, STR.singleyes],
     },
     {
       'type': 'MULTICHOICE_V',
+      'abbr': ['MCV'],
       'name': STR.multichoice,
       'summary': STR.summary_multichoice,
       'options': [STR.vertical, STR.singleyes],
     },
     {
       'type': 'MULTICHOICE_S',
+      'abbr': ['MCS'],
       'name': STR.multichoice,
       'summary': STR.summary_multichoice,
       'options': [STR.selectinline, STR.shuffle, STR.singleyes],
     },
     {
       'type': 'MULTICHOICE_HS',
+      'abbr': ['MCHS'],
       'name': STR.multichoice,
       'summary': STR.summary_multichoice,
       'options': [STR.horizontal, STR.shuffle, STR.singleyes],
     },
     {
       'type': 'MULTICHOICE_VS',
+      'abbr': ['MCVS'],
       'name': STR.multichoice,
       'summary': STR.summary_multichoice,
       'options': [STR.vertical, STR.shuffle, STR.singleyes],
     },
     {
       'type': 'MULTIRESPONSE',
+      'abbr': ['MR'],
       'name': STR.multichoice,
       'summary': STR.summary_multichoice,
       'options': [STR.multi_vertical, STR.singleno],
     },
     {
       'type': 'MULTIRESPONSE_H',
+      'abbr': ['MRH'],
       'name': STR.multichoice,
       'summary': STR.summary_multichoice,
       'options': [STR.multi_horizontal, STR.singleno],
     },
     {
       'type': 'MULTIRESPONSE_S',
+      'abbr': ['MRS'],
       'name': STR.multichoice,
       'summary': STR.summary_multichoice,
       'options': [STR.multi_vertical, STR.shuffle, STR.singleno],
     },
     {
       'type': 'MULTIRESPONSE_HS',
+      'abbr': ['MRHS'],
       'name': STR.multichoice,
       'summary': STR.summary_multichoice,
       'options': [STR.multi_horizontal, STR.shuffle, STR.singleno],
     },
     {
       'type': 'NUMERICAL',
+      'abbr': ['NM'],
       'name': STR.numerical,
       'summary': STR.summary_numerical,
     },
     {
       'type': 'SHORTANSWER',
+      'abbr': ['SA', 'MW'],
       'name': STR.shortanswer,
       'summary': STR.summary_shortanswer,
       'options': [STR.caseno],
     },
     {
       'type': 'SHORTANSWER_C',
+      'abbr': ['SAC', 'MWC'],
       'name': STR.shortanswer,
       'summary': STR.summary_shortanswer,
       'options': [STR.caseyes],
@@ -706,9 +720,20 @@ const _parseSubquestion = function(question) {
   }
   _marks = parts[1];
   _qtype = parts[2];
+  // Convert the short notation to the long form e.g. SA to SHORTANSWER.
+  if (_qtype.length < 5) {
+    getQuestionTypes().map((l) => {
+      for (const a of l.abbr) {
+        if (a === _qtype) {
+          _qtype = l.type;
+          return;
+        }
+      }
+    });
+  }
   _getAnswerDefault();
   _answerdata = [];
-  const answers = parts[6].match(/(\\.|[^~])*/g);
+  const answers = parts[8].match(/(\\.|[^~])*/g);
   if (!answers) {
     return;
   }
@@ -716,7 +741,7 @@ const _parseSubquestion = function(question) {
     const options = /^(%(-?[.0-9]+)%|(=?))((\\.|[^#])*)#?(.*)/.exec(answer);
     if (options && options[4]) {
       const frac = options[3] ? (options[3] === '=' ? '=' : 100) : options[2] || 0;
-      if (_qtype === 'NUMERICAL' ||_qtype === 'NM') {
+      if (_qtype === 'NUMERICAL' || _qtype === 'NM') {
         const tolerance = /^([^:]*):?(.*)/.exec(options[4])[2] || 0;
         _answerdata.push({
           id: crypto.randomUUID(),
