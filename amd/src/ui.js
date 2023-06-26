@@ -659,26 +659,6 @@ const _setDialogueContent = function(qtype) {
 };
 
 /**
- * Find the correct default answer for the current question type.
- *
- * @method _getAnswerDefault
- * @private
- * @return {String} Default answer
- */
-const _getAnswerDefault = function() {
-  let answerDefault = '';
-  switch (_qtype) {
-    case 'SHORTANSWER':
-    case 'SA':
-    case 'NUMERICAL':
-    case 'NM':
-      answerDefault = 100;
-      break;
-  }
-  return answerDefault;
-};
-
-/**
  * Handle question choice
  *
  * @method _choiceHandler
@@ -690,7 +670,6 @@ const _choiceHandler = function(e) {
   let qtype = _form.querySelector('input[name=qtype]:checked');
   if (qtype) {
     _qtype = qtype.value;
-    _getAnswerDefault();
   }
     _answerdata = [
       {
@@ -731,7 +710,6 @@ const _parseSubquestion = function(question) {
       }
     });
   }
-  _getAnswerDefault();
   _answerdata = [];
   const answers = parts[8].match(/(\\.|[^~])*/g);
   if (!answers) {
@@ -779,9 +757,9 @@ const _addAnswer = function(a) {
       index = Math.floor(index / 2) + 1;
     }
   }
-  let answerDefault = _getAnswerDefault();
+  let fraction = '';
   if (a.closest('li')) {
-    answerDefault = a.closest('li').querySelector('.' + CSS.FRACTION).value;
+    fraction = a.closest('li').querySelector('.' + CSS.FRACTION).value;
     index = indexOfNode(_form.querySelectorAll('li'), a.closest('li')) + 1;
   }
   let tolerance = 0;
@@ -793,8 +771,8 @@ const _addAnswer = function(a) {
     id: crypto.randomUUID(),
     answer: '',
     feedback: '',
-    fraction: answerDefault,
-    fractionOptions: getFractionOptions(answerDefault),
+    fraction: fraction,
+    fractionOptions: getFractionOptions(fraction),
     tolerance: tolerance
   });
   _setDialogueContent(_qtype);
