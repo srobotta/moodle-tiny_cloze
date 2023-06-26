@@ -86,7 +86,7 @@ const CSS = {
 };
 const TEMPLATE = {
     FORM: '<div class="tiny_cloze">' +
-      '<p class="ml-2">{{qtype}}</p>' +
+      '<p>{{name}} ({{qtype}})</p>' +
       '<form name="tiny_cloze_form">' +
       '<div class="row ml-0">' +
       '<div class="form-group">' +
@@ -590,6 +590,7 @@ const _setDialogueContent = function(qtype) {
       answerdata: _answerdata,
       elementid: crypto.randomUUID(),
       qtype: _qtype,
+      name: getQuestionTypes().filter(q => _qtype === q.type)[0].name,
       marks: _marks,
       numerical: (_qtype === 'NUMERICAL' || _qtype === 'NM')
     });
