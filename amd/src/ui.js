@@ -407,15 +407,6 @@ let _answerdata = [];
 let _qtype = null;
 
 /**
- * The text initial selected to use as answer default
- *
- * @param _selectedNode
- * @type Node
- * @private
- */
-let _selectedNode = null;
-
-/**
  * Remember the pos of the selected node.
  * @type {number}
  * @private
@@ -479,12 +470,14 @@ const displayDialogue = async function() {
   // Resolve whether cursor is in a subquestion.
   var subquestion = resolveSubquestion();
   if (subquestion) {
-    _selectedNode = subquestion;
+    // Subquestion found, remember which node of the marker nodes is selected.
     _selectedOffset = indexOfNode(_editor.dom.select('.' + markerClass), subquestion);
     _parseSubquestion(subquestion.innerHTML);
     _setDialogueContent(_qtype);
   } else {
-    _selectedNode = null;
+    // No subquestion found, no offset to remember, but we place a marker at the position where the question
+    // will be inserted later.
+    _selectedOffset = -1;
     _editor.insertContent(markerSpan.replace(markerClass, markerClass + ' new') + markerNewPos + '</span>');
     _setDialogueContent();
   }
@@ -550,7 +543,8 @@ const _addMakers = function() {
 };
 
 /**
- * Look for the marker span elements around a cloze question and remove that span.
+ * Look for the marker span elements around a cloze question and remove that span. Also the marker for a new
+ * node to be inserted would be removed here as well.
  */
 const _removeMarkers = function() {
   for (const span of _editor.dom.select('span.' + markerClass)) {
@@ -559,7 +553,9 @@ const _removeMarkers = function() {
 };
 
 /**
- *
+ * Parsing the content and adding or removing the markers. This happens when the editor mode is switched from WYSIWYG
+ * to source mode and vice versa. Also when saving the content the markers must be removed. During blur the content
+ * is also modified, here we have to add the markers again (the blurred flag was set before by the blur event).
  * @param {object} content
  * @param {string} event
  */
@@ -587,8 +583,11 @@ const onBlur = function() {
 };
 
 /**
- * Return the dialogue content for the tool, attaching any required
- * events.
+ * Set the dialogue content for the tool, attaching any required events. Either the modal dialogue displays
+ * a list of the question types for the form for a particular question to edit. The set content is also
+ * called when the form has changed (up or down move, deletion and adding a response). We must be aware of that
+ * an event to the dialogue buttons must attached once only. Therefore when the form content is modified, only
+ * the form events for the answers are set again, the general events are nor (nomodalevents is true then).
  *
  * @method _setDialogueContent
  * @param {String} qtype The question type to be used
@@ -633,13 +632,13 @@ const _setDialogueContent = function(qtype, nomodalevents) {
     _modal.registerCloseOnCancel();
     $root.on(ModalEvents.cancel, _cancel);
 
-    if (!qtype) {
+    if (!qtype) { // For the question list we need the choice handler only and we are done.
       $root.on(ModalEvents.save, _choiceHandler);
       return;
-    }
+    } // Handler to add the question string to the editor content.
     $root.on(ModalEvents.save, _setSubquestion);
   }
-
+  // The form needs events for the icons to move up/down, add or delete a response.
   const getTarget = e => {
     let p = e.target;
     while (!isNull(p) && p.nodeType === 1 && p.tagName !== 'A') {
@@ -689,7 +688,7 @@ const _setDialogueContent = function(qtype, nomodalevents) {
 };
 
 /**
- * Handle question choice
+ * Handle question choice.
  *
  * @method _choiceHandler
  * @private
@@ -712,7 +711,7 @@ const _choiceHandler = function(e) {
     }
   ];
   _modal.destroy();
-  // Create the modal dialogue. Depending on whether we have a selected node or not, the content is different.
+  // Our choice is stored in _qtype. We need to create the modal dialogue with the form now.
   _createModal().then(function () {
     _setDialogueContent(_qtype);
     _form.querySelector('.' + CSS.ANSWER).focus();
@@ -720,18 +719,18 @@ const _choiceHandler = function(e) {
 };
 
 /**
- * Parse question and set properties found
+ * Parse question and set properties found.
  *
  * @method _parseSubquestion
  * @private
  * @param {String} question The question string
  */
 const _parseSubquestion = function(question) {
-  _answerdata = [];
-  let parts = reQtype.exec(question);
+  _answerdata = []; // Flush answers to have an empty dialogue if something goes wrong parsing the question string.
+  const parts = reQtype.exec(question);
   reQtype.lastIndex = 0; // Reset lastIndex so that the next match starts from the beginning of the question string.
   if (!parts) {
-      return;
+    return;
   }
   _marks = parts[1];
   _qtype = parts[2];
@@ -746,7 +745,6 @@ const _parseSubquestion = function(question) {
       }
     });
   }
-  _answerdata = [];
   const answers = parts[8].match(/(\\.|[^~])*/g);
   if (!answers) {
     return;
@@ -779,7 +777,7 @@ const _parseSubquestion = function(question) {
 };
 
 /**
- * Insert a new set of answer blanks before the button.
+ * Insert a new set of answer blanks below the button.
  *
  * @method _addAnswer
  * @param {Node} a Node that is the referred element
@@ -816,7 +814,7 @@ const _addAnswer = function(a) {
 };
 
 /**
- * Delete set of answer blanks before the button.
+ * Delete set of answer next to the button.
  *
  * @method _deleteAnswer
  * @param {Node} a Node that is the referred element
@@ -870,6 +868,7 @@ const _raiseAnswer = function(a) {
  */
 const _cancel = function(e) {
   e.preventDefault();
+  // In case there is a marker where the new question should be inserted in the text it needs to be removed.
   for (const span of _editor.dom.select('.' + markerClass + '.new')) {
     span.remove();
   }
@@ -877,7 +876,7 @@ const _cancel = function(e) {
 };
 
 /**
- * Insert content into editor and reset and hide form.
+ * Insert question string into editor content and reset and hide form.
  *
  * @method _setSubquestion
  * @param {Event} e Event from button click
@@ -909,9 +908,10 @@ const _setSubquestion = function(e) {
   _modal.destroy();
   _modal = null;
   _editor.focus();
-  if (_selectedNode) {
+  if (_selectedOffset > -1) { // We have to replace one of the marker spans (the innerHTML contains the question string).
     _editor.dom.select('.' + markerClass)[_selectedOffset].innerHTML = question;
   } else {
+    // Find the new maker, add the question string and remove the new flag.
     const newEl = _editor.dom.select('.' + markerClass + '.new');
     if (newEl.length > 0) {
       newEl[0].innerHTML = question;
@@ -921,11 +921,9 @@ const _setSubquestion = function(e) {
 };
 
 /**
- * Read and process the current data in the form.
+ * Read the form data, process it and store the result in the internal  _answerdata array.
  *
- * @method _setSubquestion
- * @chainable
- * @return {Object} self
+ * @method _getFormData
  * @private
  */
 const _getFormData = function() {
