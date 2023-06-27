@@ -23,7 +23,7 @@
 
 import ModalEvents from 'core/modal_events';
 import ModalFactory from 'core/modal_factory';
-import Modal from "./modal";
+import Modal from "core/modal";
 import Mustache from 'core/mustache';
 import {get_string} from 'core/str';
 import {component} from './common';
@@ -60,6 +60,7 @@ const getFractionOptions = s => {
 // Marker class and the whole span element that is used to encapsulate the cloze question text.
 const markerClass = 'cloze-question-marker';
 const markerSpan = '<span contenteditable="false" class="' + markerClass + '" data-mce-contenteditable="false">';
+const markerNewPos = '{cloze_question_new_marker}';
 // Regex to recognize the question string in the text e.g. {1:NUMERICAL:...} or {:MULTICHOICE:...}
 // eslint-disable-next-line max-len
 const reQtype = /\{([0-9]*):(MULTICHOICE(_H|_V|_S|_HS|_VS)?|MULTIRESPONSE(_H|_S|_HS)?|NUMERICAL|SHORTANSWER(_C)?|SAC?|NM|MWC?|MC(V|H|VS|HS)?|MR(V|H|VS|HS)?):(.*?)\}/g;
@@ -163,6 +164,8 @@ const TEMPLATE = {
       '</label></div>' +
       '{{/types}}</div>' +
       '</form></div>',
+    FOOTER: '<button type="button" class="btn btn-secondary" data-action="cancel">{{cancel}}</button>' +
+      '<button type="button" class="btn btn-primary" data-action="save">{{submit}}</button>',
   };
   const FRACTIONS = [
     {value: 100},
@@ -222,7 +225,11 @@ const getStr = async() => {
     get_string('multichoice', component),
     get_string('multiresponse', component),
     get_string('numerical', 'mod_quiz'),
-    get_string('shortanswer', 'mod_quiz')
+    get_string('shortanswer', 'mod_quiz'),
+    get_string('cancel', 'core'),
+    get_string('select', component),
+    get_string('insert', component),
+    get_string('pluginname', component),
   ]);
   [
     'answer',
@@ -254,6 +261,10 @@ const getStr = async() => {
     'multiresponse',
     'numerical',
     'shortanswer',
+    'btn_cancel',
+    'btn_select',
+    'btn_insert',
+    'title',
   ].map((l, i) => {
     STR[l] = res[i];
   });
@@ -405,7 +416,7 @@ let _qtype = null;
 let _selectedNode = null;
 
 /**
- * Remember the offset of the selection or the cursor position.
+ * Remember the pos of the selected node.
  * @type {number}
  * @private
  */
@@ -432,8 +443,27 @@ let _modal = null;
  */
 const onInit = function(ed) {
   _editor = ed;
+  ed.dom.addStyle('.' + markerClass + '.new { display:none;}');
   _addMakers();
   getStr();
+};
+
+/**
+ * Create the modal.
+ * @return {Promise<void>}
+ * @private
+ */
+const _createModal = async function() {
+  // Create the modal dialogue. Depending on whether we have a selected node or not, the content is different.
+  _modal = await ModalFactory.create({
+    type: Modal.TYPE,
+    title: STR.title,
+    templateContext: {
+      elementid: _editor.id
+    },
+    removeOnClose: true,
+    large: true,
+  });
 };
 
 /**
@@ -444,17 +474,7 @@ const onInit = function(ed) {
  * @private
  */
 const displayDialogue = async function() {
-  const currentSel = _editor.selection.getSel();
-  // Create the modal dialogue. Depending on whether we have a selected node or not, the content is different.
-  _modal = await ModalFactory.create({
-    type: Modal.TYPE,
-    title: get_string('button_clozeedit', component),
-    templateContext: {
-      elementid: _editor.id
-    },
-    removeOnClose: true,
-    large: true,
-  });
+  await _createModal();
 
   // Resolve whether cursor is in a subquestion.
   var subquestion = resolveSubquestion();
@@ -465,8 +485,7 @@ const displayDialogue = async function() {
     _setDialogueContent(_qtype);
   } else {
     _selectedNode = null;
-    _selectedOffset = currentSel.anchorOffset;
-    // That's the content with the list of question types to select one from.
+    _editor.insertContent(markerSpan.replace(markerClass, markerClass + ' new') + markerNewPos + '</span>');
     _setDialogueContent();
   }
 };
@@ -526,6 +545,7 @@ const _addMakers = function() {
     }
     newContent += '</span>';
   } while (m);
+  newContent = newContent.replace(markerNewPos, markerSpan.replace(markerClass, markerClass + ' new') + markerNewPos + '</span>');
   _editor.setContent(newContent);
 };
 
@@ -553,7 +573,7 @@ const onProcess = function(content, event) {
         _addMakers();
         _isBlurred = false;
       }
-    } else {
+    } else if (!_modal) {
       _removeMarkers();
     }
   }
@@ -572,11 +592,15 @@ const onBlur = function() {
  *
  * @method _setDialogueContent
  * @param {String} qtype The question type to be used
+ * @param {boolean} nomodalevents Optional do not attach events.
  * @return {Node} The content to place in the dialogue.
  * @private
  */
-const _setDialogueContent = function(qtype) {
-
+const _setDialogueContent = function(qtype, nomodalevents) {
+  const footer = Mustache.render(TEMPLATE.FOOTER, {
+    cancel: STR.btn_cancel,
+    submit: !qtype ? STR.btn_select : STR.btn_insert,
+  });
   let contentText;
   if (!qtype) {
     contentText = Mustache.render(TEMPLATE.TYPE, {
@@ -598,20 +622,23 @@ const _setDialogueContent = function(qtype) {
     });
   }
   _modal.setBody(contentText);
+  _modal.setFooter(footer);
   _modal.show();
   const $root = _modal.getRoot();
-  const root = $root[0];
-  _form = root.querySelector('form');
-  $root.off(ModalEvents.cancel, _cancel);
-  $root.off(ModalEvents.save, _choiceHandler);
-  $root.off(ModalEvents.save, _setSubquestion);
-  root.addEventListener(ModalEvents.cancel, _cancel);
+  _form = $root.get(0).querySelector('form');
 
-  if (!qtype) {
-    $root.on(ModalEvents.save, _choiceHandler);
-    return;
+  if (!nomodalevents) {
+    _modal.registerEventListeners();
+    _modal.registerCloseOnSave();
+    _modal.registerCloseOnCancel();
+    $root.on(ModalEvents.cancel, _cancel);
+
+    if (!qtype) {
+      $root.on(ModalEvents.save, _choiceHandler);
+      return;
+    }
+    $root.on(ModalEvents.save, _setSubquestion);
   }
-  $root.on(ModalEvents.save, _setSubquestion);
 
   const getTarget = e => {
     let p = e.target;
@@ -674,18 +701,22 @@ const _choiceHandler = function(e) {
   if (qtype) {
     _qtype = qtype.value;
   }
-    _answerdata = [
-      {
-        id: crypto.randomUUID(),
-        answer: '',
-        feedback: '',
-        fraction: 100,
-        fractionOptions: getFractionOptions('100'),
-        tolerance: 0
-      }
-    ];
-  _setDialogueContent(_qtype);
-  _form.querySelector('.' + CSS.ANSWER).focus();
+  _answerdata = [
+    {
+      id: crypto.randomUUID(),
+      answer: '',
+      feedback: '',
+      fraction: 100,
+      fractionOptions: getFractionOptions('100'),
+      tolerance: 0
+    }
+  ];
+  _modal.destroy();
+  // Create the modal dialogue. Depending on whether we have a selected node or not, the content is different.
+  _createModal().then(function () {
+    _setDialogueContent(_qtype);
+    _form.querySelector('.' + CSS.ANSWER).focus();
+  });
 };
 
 /**
@@ -696,9 +727,11 @@ const _choiceHandler = function(e) {
  * @param {String} question The question string
  */
 const _parseSubquestion = function(question) {
-  const parts = reQtype.exec(question);
+  _answerdata = [];
+  let parts = reQtype.exec(question);
+  reQtype.lastIndex = 0; // Reset lastIndex so that the next match starts from the beginning of the question string.
   if (!parts) {
-    return;
+      return;
   }
   _marks = parts[1];
   _qtype = parts[2];
@@ -778,7 +811,7 @@ const _addAnswer = function(a) {
     fractionOptions: getFractionOptions(fraction),
     tolerance: tolerance
   });
-  _setDialogueContent(_qtype);
+  _setDialogueContent(_qtype, true);
   _form.querySelectorAll('.' + CSS.ANSWER).item(index).focus();
 };
 
@@ -796,7 +829,7 @@ const _deleteAnswer = function(a) {
   }
   _getFormData();
   _answerdata.splice(index, 1);
-  _setDialogueContent(_qtype);
+  _setDialogueContent(_qtype, true);
   const answers = _form.querySelectorAll('.' + CSS.ANSWER);
   index = Math.min(index, answers.length - 1);
   answers.item(index).focus();
@@ -837,6 +870,9 @@ const _raiseAnswer = function(a) {
  */
 const _cancel = function(e) {
   e.preventDefault();
+  for (const span of _editor.dom.select('.' + markerClass + '.new')) {
+    span.remove();
+  }
   _modal.hide();
 };
 
@@ -870,20 +906,17 @@ const _setSubquestion = function(e) {
   }
   question += '}';
 
-  const newQuestion = markerSpan + question + '</span>';
-
-  _modal.hide();
+  _modal.destroy();
+  _modal = null;
   _editor.focus();
   if (_selectedNode) {
-    _editor.dom.select('.' + markerClass)[_selectedOffset].innerHTML = newQuestion;
+    _editor.dom.select('.' + markerClass)[_selectedOffset].innerHTML = question;
   } else {
-    /* correct position within the text node, however the text node itself is still there as well.
-    const selectedNode = _editor.selection.getSel().anchorNode;
-    const newText = selectedNode.textContent.substr(0, _selectedOffset)
-      + newQuestion + selectedNode.textContent.substr(_selectedOffset);
-    _editor.insertContent(newText);
-     */
-    _editor.insertContent(newQuestion);
+    const newEl = _editor.dom.select('.' + markerClass + '.new');
+    if (newEl.length > 0) {
+      newEl[0].innerHTML = question;
+      newEl[0].classList.remove('new');
+    }
   }
 };
 
@@ -927,14 +960,17 @@ const _getFormData = function() {
  * @return {Mixed} The selected node of with the subquestion if found, false otherwise.
  */
 const resolveSubquestion = function() {
-  let span = false;
-  _editor.dom.getParents(_editor.selection.getStart(), elm => {
+  let span = _editor.selection.getStart();
+  if (!isNull(span.classList) && span.classList.contains(markerClass)) {
+    return span;
+  }
+  _editor.dom.getParents(span, elm => {
     // Are we in a span that encapsulates the cloze question?
     if (!isNull(elm.classList) && elm.classList.contains(markerClass)) {
-      span = elm;
+      return elm;
     }
   });
-  return span;
+  return false;
 };
 
 export {
