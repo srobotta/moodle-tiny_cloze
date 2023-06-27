@@ -219,7 +219,8 @@ const getStr = async() => {
     get_string('pluginnamesummary', 'qtype_multichoice'),
     get_string('pluginnamesummary', 'qtype_shortanswer'),
     get_string('pluginnamesummary', 'qtype_numerical'),
-    get_string('multichoice', 'mod_quiz'),
+    get_string('multichoice', component),
+    get_string('multiresponse', component),
     get_string('numerical', 'mod_quiz'),
     get_string('shortanswer', 'mod_quiz')
   ]);
@@ -250,6 +251,7 @@ const getStr = async() => {
     'summary_shortanswer',
     'summary_numerical',
     'multichoice',
+    'multiresponse',
     'numerical',
     'shortanswer',
   ].map((l, i) => {
@@ -303,28 +305,28 @@ const getQuestionTypes = function() {
     {
       'type': 'MULTIRESPONSE',
       'abbr': ['MR'],
-      'name': STR.multichoice,
+      'name': STR.multiresponse,
       'summary': STR.summary_multichoice,
       'options': [STR.multi_vertical, STR.singleno],
     },
     {
       'type': 'MULTIRESPONSE_H',
       'abbr': ['MRH'],
-      'name': STR.multichoice,
+      'name': STR.multiresponse,
       'summary': STR.summary_multichoice,
       'options': [STR.multi_horizontal, STR.singleno],
     },
     {
       'type': 'MULTIRESPONSE_S',
       'abbr': ['MRS'],
-      'name': STR.multichoice,
+      'name': STR.multiresponse,
       'summary': STR.summary_multichoice,
       'options': [STR.multi_vertical, STR.shuffle, STR.singleno],
     },
     {
       'type': 'MULTIRESPONSE_HS',
       'abbr': ['MRHS'],
-      'name': STR.multichoice,
+      'name': STR.multiresponse,
       'summary': STR.summary_multichoice,
       'options': [STR.multi_horizontal, STR.shuffle, STR.singleno],
     },

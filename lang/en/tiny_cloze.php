@@ -29,3 +29,5 @@ $string['pluginname'] = 'Cloze question editor';
 $string['button_clozeedit'] = 'Cloze editor';
 $string['privacy:metadata'] = 'Cloze Editor does not store any personal data';
 $string['insert'] = 'Insert question';
+$string['multichoice'] = 'Multiple choice - single response';
+$string['multiresponse'] = 'Multiple choice - multiple response';
