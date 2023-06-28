@@ -374,7 +374,7 @@ let _editor = null;
 
 /**
  * Remember the blur event to reapply the marker <span>s because they get lost in the first place.
- * @type {boolean}
+ * @type boolean
  * @private
  */
 let _isBlurred = false;
@@ -424,7 +424,7 @@ let _marks = 1;
 
 /**
  * The modal dialogue to be displayed when designing the cloze question types.
- * @type {null}
+ * @type {Modal|null}
  */
 let _modal = null;
 
@@ -433,9 +433,12 @@ let _modal = null;
  * @param {tinymce.Editor} ed
  */
 const onInit = function(ed) {
-  _editor = ed;
+  _editor = ed; // The current editor instance.
+  // Hide the new question marker from the user.
   ed.dom.addStyle('.' + markerClass + '.new { display:none;}');
+  // Add the marker spans.
   _addMakers();
+  // And get the language strings.
   getStr();
 };
 
@@ -543,7 +546,7 @@ const _addMakers = function() {
 };
 
 /**
- * Look for the marker span elements around a cloze question and remove that span. Also the marker for a new
+ * Look for the marker span elements around a cloze question and remove that span. Also, the marker for a new
  * node to be inserted would be removed here as well.
  */
 const _removeMarkers = function() {
@@ -554,7 +557,7 @@ const _removeMarkers = function() {
 
 /**
  * Parsing the content and adding or removing the markers. This happens when the editor mode is switched from WYSIWYG
- * to source mode and vice versa. Also when saving the content the markers must be removed. During blur the content
+ * to source mode and vice versa. Also, when saving the content the markers must be removed. During blur the content
  * is also modified, here we have to add the markers again (the blurred flag was set before by the blur event).
  * @param {object} content
  * @param {string} event
