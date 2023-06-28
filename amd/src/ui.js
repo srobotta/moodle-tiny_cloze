@@ -25,11 +25,10 @@ import ModalEvents from 'core/modal_events';
 import ModalFactory from 'core/modal_factory';
 import Modal from "core/modal";
 import Mustache from 'core/mustache';
-import {get_string} from 'core/str';
+import {get_string as getString} from 'core/str';
 import {component} from './common';
 
 // Helper functions.
-//const trim = v => v.toString().replace(/^\s+/, '').replace(/\s+$/, '');
 const isNull = a => a === null || a === undefined;
 const strdecode = t => String(t).replace(/\\(#|\}|~)/g, '$1');
 const strencode = t => String(t).replace(/(#|\}|~)/g, '\\$1');
@@ -47,7 +46,7 @@ const getFractionOptions = s => {
     html += ' selected="selected"';
   }
   html += '>' + STR.correct + '</option>';
-  FRACTIONS.map((item) => {
+  FRACTIONS.forEach(item => {
     html += '<option value="' + item.value + '"';
     if (item.value.toString() === s) {
       html += ' selected="selected"';
@@ -197,39 +196,39 @@ const TEMPLATE = {
 let STR = {};
 const getStr = async() => {
   const res = await Promise.all([
-    get_string('answer', 'question'),
-    get_string('chooseqtypetoadd', 'question'),
-    get_string('defaultmark', 'question'),
-    get_string('feedback', 'question'),
-    get_string('correct', 'question'),
-    get_string('incorrect', 'question'),
-    get_string('addmoreanswerblanks', 'qtype_calculated'),
-    get_string('delete', 'core'),
-    get_string('up', 'core'),
-    get_string('down', 'core'),
-    get_string('tolerance', 'qtype_calculated'),
-    get_string('grade', 'grades'),
-    get_string('caseno', 'mod_quiz'),
-    get_string('caseyes', 'mod_quiz'),
-    get_string('answersingleno', 'qtype_multichoice'),
-    get_string('answersingleyes', 'qtype_multichoice'),
-    get_string('layoutselectinline', 'qtype_multianswer'),
-    get_string('layouthorizontal', 'qtype_multianswer'),
-    get_string('layoutvertical', 'qtype_multianswer'),
-    get_string('shufflewithin', 'mod_quiz'),
-    get_string('layoutmultiple_horizontal', 'qtype_multianswer'),
-    get_string('layoutmultiple_vertical', 'qtype_multianswer'),
-    get_string('pluginnamesummary', 'qtype_multichoice'),
-    get_string('pluginnamesummary', 'qtype_shortanswer'),
-    get_string('pluginnamesummary', 'qtype_numerical'),
-    get_string('multichoice', component),
-    get_string('multiresponse', component),
-    get_string('numerical', 'mod_quiz'),
-    get_string('shortanswer', 'mod_quiz'),
-    get_string('cancel', 'core'),
-    get_string('select', component),
-    get_string('insert', component),
-    get_string('pluginname', component),
+    getString('answer', 'question'),
+    getString('chooseqtypetoadd', 'question'),
+    getString('defaultmark', 'question'),
+    getString('feedback', 'question'),
+    getString('correct', 'question'),
+    getString('incorrect', 'question'),
+    getString('addmoreanswerblanks', 'qtype_calculated'),
+    getString('delete', 'core'),
+    getString('up', 'core'),
+    getString('down', 'core'),
+    getString('tolerance', 'qtype_calculated'),
+    getString('grade', 'grades'),
+    getString('caseno', 'mod_quiz'),
+    getString('caseyes', 'mod_quiz'),
+    getString('answersingleno', 'qtype_multichoice'),
+    getString('answersingleyes', 'qtype_multichoice'),
+    getString('layoutselectinline', 'qtype_multianswer'),
+    getString('layouthorizontal', 'qtype_multianswer'),
+    getString('layoutvertical', 'qtype_multianswer'),
+    getString('shufflewithin', 'mod_quiz'),
+    getString('layoutmultiple_horizontal', 'qtype_multianswer'),
+    getString('layoutmultiple_vertical', 'qtype_multianswer'),
+    getString('pluginnamesummary', 'qtype_multichoice'),
+    getString('pluginnamesummary', 'qtype_shortanswer'),
+    getString('pluginnamesummary', 'qtype_numerical'),
+    getString('multichoice', component),
+    getString('multiresponse', component),
+    getString('numerical', 'mod_quiz'),
+    getString('shortanswer', 'mod_quiz'),
+    getString('cancel', 'core'),
+    getString('select', component),
+    getString('insert', component),
+    getString('pluginname', component),
   ]);
   [
     'answer',
@@ -267,6 +266,7 @@ const getStr = async() => {
     'title',
   ].map((l, i) => {
     STR[l] = res[i];
+    return '';
   });
 };
 const getQuestionTypes = function() {
@@ -424,7 +424,7 @@ let _marks = 1;
 
 /**
  * The modal dialogue to be displayed when designing the cloze question types.
- * @type {Modal|null}
+ * @type Modal|null
  */
 let _modal = null;
 
@@ -531,7 +531,7 @@ const _addMakers = function() {
         level++;
         newContent = content.substring(0, a);
         content = content.substring(a + 1);
-      } else if (b > -1) {  // We found a closing } to a previously {.
+      } else if (b > -1) { // We found a closing } to a previously {.
         newContent = content.substring(0, b);
         content = content.substring(b + 1);
         level--;
@@ -595,7 +595,6 @@ const onBlur = function() {
  * @method _setDialogueContent
  * @param {String} qtype The question type to be used
  * @param {boolean} nomodalevents Optional do not attach events.
- * @return {Node} The content to place in the dialogue.
  * @private
  */
 const _setDialogueContent = function(qtype, nomodalevents) {
@@ -715,10 +714,11 @@ const _choiceHandler = function(e) {
   ];
   _modal.destroy();
   // Our choice is stored in _qtype. We need to create the modal dialogue with the form now.
-  _createModal().then(function () {
+  _createModal().then(() => {
     _setDialogueContent(_qtype);
     _form.querySelector('.' + CSS.ANSWER).focus();
-  });
+    return '';
+  }).catch();
 };
 
 /**
@@ -739,7 +739,7 @@ const _parseSubquestion = function(question) {
   _qtype = parts[2];
   // Convert the short notation to the long form e.g. SA to SHORTANSWER.
   if (_qtype.length < 5) {
-    getQuestionTypes().map((l) => {
+    getQuestionTypes().forEach(l => {
       for (const a of l.abbr) {
         if (a === _qtype) {
           _qtype = l.type;
@@ -755,7 +755,12 @@ const _parseSubquestion = function(question) {
   answers.forEach(function(answer) {
     const options = /^(%(-?[.0-9]+)%|(=?))((\\.|[^#])*)#?(.*)/.exec(answer);
     if (options && options[4]) {
-      const frac = options[3] ? (options[3] === '=' ? '=' : 100) : options[2] || 0;
+      let frac = 0;
+      if (options[3]) {
+        frac = options[3] === '=' ? '=' : 100;
+      } else if (options[2]) {
+        frac = options[2];
+      }
       if (_qtype === 'NUMERICAL' || _qtype === 'NM') {
         const tolerance = /^([^:]*):?(.*)/.exec(options[4])[2] || 0;
         _answerdata.push({
@@ -970,6 +975,7 @@ const resolveSubquestion = function() {
     if (!isNull(elm.classList) && elm.classList.contains(markerClass)) {
       return elm;
     }
+    return false;
   });
   return false;
 };
