@@ -43,6 +43,10 @@ input.tiny_cloze_marks {
     margin-top: .5rem;
 }
 
+.tiny_cloze_answers .form-group .icon_smallicon {
+    margin-right: 0.25rem;
+}
+
 .tiny_cloze_answers li:first-child .tiny_cloze_up {
     display: none;
 }
