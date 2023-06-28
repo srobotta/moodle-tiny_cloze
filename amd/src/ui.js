@@ -881,6 +881,7 @@ const _cancel = function(e) {
     span.remove();
   }
   _modal.hide();
+  _editor.focus();
 };
 
 /**
