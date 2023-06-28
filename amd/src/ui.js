@@ -266,7 +266,7 @@ const getStr = async() => {
     'title',
   ].map((l, i) => {
     STR[l] = res[i];
-    return '';
+    return ''; // Make the linter happy.
   });
 };
 const getQuestionTypes = function() {
@@ -634,7 +634,7 @@ const _setDialogueContent = function(qtype, nomodalevents) {
     _modal.registerCloseOnCancel();
     $root.on(ModalEvents.cancel, _cancel);
 
-    if (!qtype) { // For the question list we need the choice handler only and we are done.
+    if (!qtype) { // For the question list we need the choice handler only, and we are done.
       $root.on(ModalEvents.save, _choiceHandler);
       return;
     } // Handler to add the question string to the editor content.
@@ -702,22 +702,22 @@ const _choiceHandler = function(e) {
   if (qtype) {
     _qtype = qtype.value;
   }
-  _answerdata = [
-    {
-      id: crypto.randomUUID(),
-      answer: '',
-      feedback: '',
-      fraction: 100,
-      fractionOptions: getFractionOptions('100'),
-      tolerance: 0
-    }
-  ];
+  const one = _qtype.indexOf('SHORTANSWER') !== -1 || _qtype === 'NUMERICAL';
+  const blankAnswer = {
+    id: crypto.randomUUID(),
+    answer: '',
+    feedback: '',
+    fraction: 100,
+    fractionOptions: getFractionOptions(one ? '=' : ''),
+    tolerance: 0
+  };
+  _answerdata = one ? [blankAnswer] : [blankAnswer, blankAnswer, blankAnswer];
   _modal.destroy();
   // Our choice is stored in _qtype. We need to create the modal dialogue with the form now.
   _createModal().then(() => {
     _setDialogueContent(_qtype);
     _form.querySelector('.' + CSS.ANSWER).focus();
-    return '';
+    return ''; // Make the linter happy.
   }).catch();
 };
 
