@@ -12,15 +12,16 @@ A plugin for the Moodle Tiny editor to callow easier creation of Cloze questions
 see https://docs.moodle.org/402/en/Embedded_Answers_(Cloze)_question_type. Inspired by the Atto Cloze editor. https://docs.moodle.org/402/en/Atto_editor.
 
 This is an editor plugin to provide an interface for creating and
-modifying embedded answer (cloze) questions. To install, add to the TinyMCE
+modifying embedded answer (Cloze) questions. To install, add to the TinyMCE
 editor plugins directory and visit notifications to update database. This
 directory must be named 'cloze' in lib/editor/tiny/plugins.
 
-The button should appear in the editor only while editing questions. Click
-the button while editing a question, select the question type and a form
-will appear form entering answers. Finally insert into the question text.
+The button should appear in the editor only while editing embedded answer (Cloze) questions.
+When you position the cursor in the editor at the desired place and click on the button inside the editor toolbar, a popup window will let you choose any of the available question types.
+Selecting any question type, you will see a plain language description of what that question type does.
+Finally clicking "Insert question" adds the resulting Cloze question syntax into the question text at the cursor position.
 
-This requires Moodle 4.1 or later as that shipped with a new version of the tiny editor and the Atto editor is due to be phased out in a future version of Moodle
+This requires Moodle 4.1 or later as that shipped with a new version of the Tiny editor and the Atto editor is due to be phased out in a future version of Moodle.
 
 Created collaboratively at MoodleMootDACH 23 Zurich.
 
