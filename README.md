@@ -8,8 +8,8 @@ CI](https://github.com/srobotta/moodle-tiny_cloze/workflows/Moodle%20Plugin%20CI
 [![GitHub contributors](https://img.shields.io/github/contributors/srobotta/moodle-tiny_cloze)](https://github.com/srobotta/moodle-tiny_cloze/graphs/contributors)
 
 
-A plugin for the Moodle Tiny editor to callow easier creation of Cloze questions
-see https://docs.moodle.org/402/en/Embedded_Answers_(Cloze)_question_type. Inspired by the Atto Cloze editor. https://docs.moodle.org/402/en/Atto_editor.
+A plugin for the Moodle Tiny editor to allow easier creation of Cloze questions
+see https://docs.moodle.org/en/Embedded_Answers_(Cloze)_question_type. Inspired by the Atto Cloze editor https://docs.moodle.org/en/Cloze_editor_for_Atto.
 
 This is an editor plugin to provide an interface for creating and
 modifying embedded answer (Cloze) questions. To install, add to the TinyMCE
