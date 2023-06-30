@@ -24,22 +24,33 @@
 
 namespace tiny_cloze;
 
-use context;
 use editor_tiny\plugin;
 use editor_tiny\plugin_with_buttons;
 use editor_tiny\plugin_with_menuitems;
 
+/**
+ * The capabilities of the plugin, in this case there is one toolbar button and one menu item.
+ */
 class plugininfo extends plugin implements plugin_with_buttons, plugin_with_menuitems {
 
+    /**
+     * Get the internal name of the toolbar button.
+     * @return string[]
+     */
     public static function get_available_buttons(): array {
         return [
-            'tiny_cloze/plugin',
+            'tiny_cloze',
         ];
     }
 
+    /**
+     * Get the internal name of the menu item.
+     * @return string[]
+     */
     public static function get_available_menuitems(): array {
         return [
-            'tiny_cloze/plugin',
+            'tiny_cloze',
         ];
     }
+
 }

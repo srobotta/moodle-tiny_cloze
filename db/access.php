@@ -18,7 +18,7 @@
  * Capabilities for the tiny_cloze plugin.
  *
  * @package    tiny_cloze
- * @copyright  @copyright 2023 MoodleDACH
+ * @copyright  2023 MoodleDACH
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 

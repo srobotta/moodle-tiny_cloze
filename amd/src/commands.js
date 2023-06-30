@@ -14,7 +14,7 @@
 // along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
- * Commands helper for the Moodle tiny_cloze2 plugin.
+ * Commands helper for the Moodle tiny_cloze plugin.
  *
  * @module      tiny_cloze/commands
  * @copyright   2023 MoodleDACH
@@ -26,10 +26,9 @@ import {get_string as getString} from 'core/str';
 import {
     component,
     clozeeditButtonName,
-    examplemenuMenuItemName,
     icon,
 } from './common';
-import {displayDialogue} from './ui';
+import {displayDialogue, resolveSubquestion, onInit, onProcess, onBlur} from './ui';
 
 /**
  * Get the setup function for the buttons.
@@ -49,6 +48,15 @@ export const getSetup = async() => {
     ]);
 
     return (editor) => {
+        // Check whether we are editing a question.
+        const body = document.querySelector('body#page-question-type-multianswer form, ' +
+          'body#page-question-type-multianswerwiris form');
+        // And if the editor is used on the question text.
+        if (!body || editor.id.indexOf('questiontext') === -1) {
+            return;
+        }
+        // Only if both conditions are valid, then continue setting up the plugin.
+
         // Register the Moodle SVG as an icon suitable for use as a TinyMCE toolbar button.
         editor.ui.registry.addIcon(icon, buttonImage.html);
 
@@ -57,14 +65,23 @@ export const getSetup = async() => {
             icon,
             tooltip: clozeButtonText,
             onAction: () => displayDialogue(editor),
+            onSetup: (api) => {
+                editor.on('click', () => {
+                     api.setActive(resolveSubquestion() !== false);
+                });
+              }
         });
 
-        // Add the examplemenu Menu Item.
-        // This allows it to be added to a standard menu, or a context menu.
-        editor.ui.registry.addMenuItem(examplemenuMenuItemName, {
+        // Register the menu item.
+        editor.ui.registry.addMenuItem(clozeeditButtonName, {
             icon,
             text: clozeButtonText,
             onAction: () => displayDialogue(editor),
         });
+
+        editor.on('init', () => onInit(editor));
+        editor.on('PreProcess', format => onProcess(format, 'PreProcess'));
+        editor.on('PostProcess', format => onProcess(format, 'PostProcess'));
+        editor.on('blur', () => onBlur());
     };
 };
