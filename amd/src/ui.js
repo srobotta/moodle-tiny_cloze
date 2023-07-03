@@ -40,6 +40,14 @@ const indexOfNode = (list, node) => {
   }
   return -1;
 };
+const getUuid = function() {
+  if (!isNull(crypto.randomUUID)) {
+    return crypto.randomUUID();
+  }
+  return 'ed-cloze-' + Math.floor(Math.random() * 100000).toString();
+};
+
+// This is a specific helper function to return the options html for the fraction select element.
 const getFractionOptions = s => {
   let html = '<option value="">' + STR.incorrect + '</option><option value="="';
   if (s === '=') {
@@ -55,7 +63,6 @@ const getFractionOptions = s => {
   });
   return html;
 };
-
 // Marker class and the whole span element that is used to encapsulate the cloze question text.
 const markerClass = 'cloze-question-marker';
 const markerSpan = '<span contenteditable="false" class="' + markerClass + '" data-mce-contenteditable="false">';
@@ -615,7 +622,7 @@ const _setDialogueContent = function(qtype, nomodalevents) {
       CSS: CSS,
       STR: STR,
       answerdata: _answerdata,
-      elementid: Math.floor(Math.random() * 1000),
+      elementid: getUuid(),
       qtype: _qtype,
       name: getQuestionTypes().filter(q => _qtype === q.type)[0].name,
       marks: _marks,
@@ -704,7 +711,7 @@ const _choiceHandler = function(e) {
   }
   const one = _qtype.indexOf('SHORTANSWER') !== -1 || _qtype === 'NUMERICAL';
   const blankAnswer = {
-    id: Math.floor(Math.random() * 1000),
+    id: getUuid(),
     answer: '',
     feedback: '',
     fraction: 100,
@@ -764,7 +771,7 @@ const _parseSubquestion = function(question) {
       if (_qtype === 'NUMERICAL' || _qtype === 'NM') {
         const tolerance = /^([^:]*):?(.*)/.exec(options[4])[2] || 0;
         _answerdata.push({
-          id: Math.floor(Math.random() * 1000),
+          id: getUuid(),
           answer: strdecode(options[4].replace(/:.*/, '')),
           feedback: strdecode(options[6]),
           tolerance: tolerance,
@@ -775,7 +782,7 @@ const _parseSubquestion = function(question) {
       }
       _answerdata.push({
         answer: strdecode(options[4]),
-        id: Math.floor(Math.random() * 1000),
+        id: getUuid(),
         feedback: strdecode(options[6]),
         fraction: frac,
         fractionOptions: getFractionOptions(frac),
@@ -810,7 +817,7 @@ const _addAnswer = function(a) {
   }
   _getFormData();
   _answerdata.splice(index, 0, {
-    id: Math.floor(Math.random() * 1000),
+    id: getUuid(),
     answer: '',
     feedback: '',
     fraction: fraction,
@@ -949,7 +956,7 @@ const _getFormData = function() {
     }
     _answerdata.push({
       answer: answer,
-      id: Math.floor(Math.random() * 1000),
+      id: getUuid(),
       feedback: feedbacks.item(i).value,
       fraction: fractions.item(i).value,
       fractionOptions: getFractionOptions(fractions.item(i).value),
