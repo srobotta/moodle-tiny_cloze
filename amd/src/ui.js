@@ -615,7 +615,7 @@ const _setDialogueContent = function(qtype, nomodalevents) {
       CSS: CSS,
       STR: STR,
       answerdata: _answerdata,
-      elementid: crypto.randomUUID(),
+      elementid: Math.floor(Math.random() * 1000),
       qtype: _qtype,
       name: getQuestionTypes().filter(q => _qtype === q.type)[0].name,
       marks: _marks,
@@ -704,7 +704,7 @@ const _choiceHandler = function(e) {
   }
   const one = _qtype.indexOf('SHORTANSWER') !== -1 || _qtype === 'NUMERICAL';
   const blankAnswer = {
-    id: crypto.randomUUID(),
+    id: Math.floor(Math.random() * 1000),
     answer: '',
     feedback: '',
     fraction: 100,
@@ -764,7 +764,7 @@ const _parseSubquestion = function(question) {
       if (_qtype === 'NUMERICAL' || _qtype === 'NM') {
         const tolerance = /^([^:]*):?(.*)/.exec(options[4])[2] || 0;
         _answerdata.push({
-          id: crypto.randomUUID(),
+          id: Math.floor(Math.random() * 1000),
           answer: strdecode(options[4].replace(/:.*/, '')),
           feedback: strdecode(options[6]),
           tolerance: tolerance,
@@ -775,7 +775,7 @@ const _parseSubquestion = function(question) {
       }
       _answerdata.push({
         answer: strdecode(options[4]),
-        id: crypto.randomUUID(),
+        id: Math.floor(Math.random() * 1000),
         feedback: strdecode(options[6]),
         fraction: frac,
         fractionOptions: getFractionOptions(frac),
@@ -810,7 +810,7 @@ const _addAnswer = function(a) {
   }
   _getFormData();
   _answerdata.splice(index, 0, {
-    id: crypto.randomUUID(),
+    id: Math.floor(Math.random() * 1000),
     answer: '',
     feedback: '',
     fraction: fraction,
@@ -949,7 +949,7 @@ const _getFormData = function() {
     }
     _answerdata.push({
       answer: answer,
-      id: crypto.randomUUID(),
+      id: Math.floor(Math.random() * 1000),
       feedback: feedbacks.item(i).value,
       fraction: fractions.item(i).value,
       fractionOptions: getFractionOptions(fractions.item(i).value),
