@@ -92,7 +92,7 @@ changed question string on the existing question.
 
 ### Technical details
 
-Cloze questions come in a variety of question types. For some of the questions more
+Cloze questions come in a variety of question types. For some questions more
 than one notation can be used, e.g. MC and MULTICHOICE refer to the same question type.
 Whenever a question is edited that uses the abbreviation of the question type, upon
 saving the changes with the plugin, the question type will use the long form. That does
@@ -106,7 +106,8 @@ at https://docs.moodle.org/en/Multi-language_content_filter.
 ## History
 
 ### v1.0
-- First release
+- First official release.
+- Software maturity is set to RC.
 
 ### v0.1.0
-- Start working on the project.
+- Start working on the project at Moodle Moot DACH 23.
