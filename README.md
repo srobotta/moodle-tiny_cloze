@@ -7,7 +7,7 @@ CI](https://github.com/srobotta/moodle-tiny_cloze/workflows/Moodle%20Plugin%20CI
 [![License GPL-3.0](https://img.shields.io/github/license/srobotta/moodle-tiny_cloze?color=lightgrey)](https://github.com/srobotta/moodle-tiny_cloze/blob/main/LICENSE)
 [![GitHub contributors](https://img.shields.io/github/contributors/srobotta/moodle-tiny_cloze)](https://github.com/srobotta/moodle-tiny_cloze/graphs/contributors)
 
-Created collaboratively at MoodleMootDACH 23 Zurich.
+Created collaboratively at [MoodleMoot DACH 23 Zurich](https://moodlemootdach.org/).
 
 A plugin for the Moodle Tiny editor to allow easier creation of Cloze questions
 see https://docs.moodle.org/en/Embedded_Answers_(Cloze)_question_type.
@@ -16,11 +16,11 @@ Inspired by the Atto Cloze editor https://docs.moodle.org/en/Cloze_editor_for_At
 ## Overview
 
 This is an editor plugin to provide an interface for creating and
-modifying embedded answer (Cloze) questions. To install, add to the TinyMCE
-editor plugins directory and visit notifications to update database. This
-directory must be named `cloze` in `lib/editor/tiny/plugins`.
+modifying embedded answer (Cloze) questions. To install, add a new directory
+named `cloze` in `lib/editor/tiny/plugins`, unzip the content of this zip archive
+into the newly created directory and visit notifications to update database.
 
-This requires Moodle 4.1 or later as that shipped with a new version of the Tiny
+This plugin requires Moodle 4.1 or later as that ships with a new version of the Tiny
 editor and the Atto editor is due to be phased out in a future version of Moodle.
 
 ## Installation
@@ -82,10 +82,31 @@ to edit the answers of that question in the text.
 ![Screenshot editing selected question](screenshots/cloze_3_dialogue_edit.png)
 
 Here you see the predefined answers that come from the question string in the text.
-There is one correct and three incorrect answers (the last answer is out of sight and
-must be scrolled to view it). These possible answers are displayed as a selection
+There is one correct and four incorrect answers (the last two answers are out of sight
+and must be scrolled to view it). These possible answers are displayed as a selection
 inside the text. This particular screenshot also demonstrates how to use one question
 in different languages using the multilang2 filter.
 
 Once you are done with the changes, click the button "Insert question" to apply the
 changed question string on the existing question.
+
+### Technical details
+
+Cloze questions come in a variety of question types. For some of the questions more
+than one notation can be used, e.g. MC and MULTICHOICE refer to the same question type.
+Whenever a question is edited that uses the abbreviation of the question type, upon
+saving the changes with the plugin, the question type will use the long form. That does
+not change any of it's behaviour, but is just a convention.
+
+Multilang elements can be used in the reponses and in the feedback strings. However,
+you must use the Moodle annotation with the <span> elements. The multilang2 filter
+is not supported here. For more information please checkout the Moodle documentation
+at https://docs.moodle.org/en/Multi-language_content_filter.
+
+## History
+
+### v1.0
+- First release
+
+### v0.1.0
+- Start working on the project.
