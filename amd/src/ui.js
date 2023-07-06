@@ -444,7 +444,7 @@ const onInit = function(ed) {
   // Hide the new question marker from the user.
   ed.dom.addStyle('.' + markerClass + '.new { display:none;}');
   // Add the marker spans.
-  _addMakers();
+  _addMarkers();
   // And get the language strings.
   getStr();
 };
@@ -501,7 +501,7 @@ const displayDialogue = async function() {
  * textarea). Also, this makes it a lot easier to select the question, edit it in the dialogue and replace the result
  * in the existing text area.
  */
-const _addMakers = function() {
+const _addMarkers = function() {
 
   let content = _editor.getContent();
   let newContent = '';
@@ -558,30 +558,58 @@ const _addMakers = function() {
  */
 const _removeMarkers = function() {
   for (const span of _editor.dom.select('span.' + markerClass)) {
-    _editor.dom.setOuterHTML(span, span.innerHTML);
+    _editor.dom.setOuterHTML(span, span.classList.contains('new') ? '' : span.innerHTML);
   }
 };
 
 /**
- * Parsing the content and adding or removing the markers. This happens when the editor mode is switched from WYSIWYG
- * to source mode and vice versa. Also, when saving the content the markers must be removed. During blur the content
- * is also modified, here we have to add the markers again (the blurred flag was set before by the blur event).
+ * When the source code view dialogue is show, we must remove the spans around the cloze question strings
+ * from the editor content and add them again when the dialogue is closed.
+ * Since this event is also triggered when the editor data is saved, we use this function to remove the
+ * highlighting content at that time.
  * @param {object} content
- * @param {string} event
  */
-const onProcess = function(content, event) {
-  if (!isNull(content.save) && content.save === true) {
-    if (event === 'PostProcess') {
-      // When the blur event was triggered, the editor is still there, we need to reapply
-      // the previously removed styling. If this was a submit event, then do not reapply the
-      // styling to prevent that this is saved in the database.
-      if (_isBlurred) {
-        _addMakers();
-        _isBlurred = false;
-      }
-    } else if (!_modal) {
+const onBeforeGetContent = function(content) {
+  if (!isNull(content.source_view) && content.source_view === true) {
+    // If the user clicks on 'Cancel' or the close button on the html
+    // source code dialog view, make sure we re-add the visual styling.
+    var onClose = function() {
+      _editor.off('close', onClose);
+      _addMarkers();
+    };
+    _editor.on('CloseWindow', () => {
+      onClose();
+    });
+    // Remove markers only if modal is not called, otherwise we will lose our new question marker.
+    if (!_modal) {
       _removeMarkers();
     }
+  }
+};
+
+/**
+ * When the content is supposed to be saved (happens also when the editor window is blurred)
+ * then we need to remove or markers (e.g. <span> elements that encapsulate the cloze
+ * question strings).
+ * @param {object} content
+ */
+const onPreProcess = function(content) {
+  if (!isNull(content.save) && content.save === true && !_modal) {
+    // Remove markers only if modal is not called, otherwise we will lose our new question marker.
+    _removeMarkers();
+  }
+};
+
+/**
+ * When the blur event was triggered, the editor is still there, we need to reapply
+ * the previously removed styling. If this was a submit event, then do not reapply the
+ * styling to prevent that this is saved in the database.
+ * @param {object} content
+ */
+const onPostProcess = function(content) {
+  if (!isNull(content.save) && content.save === true && _isBlurred) {
+    _addMarkers();
+    _isBlurred = false;
   }
 };
 
@@ -887,8 +915,9 @@ const _cancel = function(e) {
   for (const span of _editor.dom.select('.' + markerClass + '.new')) {
     span.remove();
   }
-  _modal.hide();
+  _modal.destroy();
   _editor.focus();
+  _modal = null;
 };
 
 /**
@@ -992,6 +1021,8 @@ export {
   displayDialogue,
   resolveSubquestion,
   onInit,
-  onProcess,
+  onBeforeGetContent,
+  onPreProcess,
+  onPostProcess,
   onBlur
 };
