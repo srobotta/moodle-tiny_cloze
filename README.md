@@ -96,14 +96,17 @@ Cloze questions come in a variety of question types. For some questions more
 than one notation can be used, e.g. MC and MULTICHOICE refer to the same question type.
 Whenever a question is edited that uses the abbreviation of the question type, upon
 saving the changes with the plugin, the question type will use the long form. That does
-not change any of it's behaviour, but is just a convention.
+not change any of its behaviour, but is just a convention.
 
-Multilang elements can be used in the reponses and in the feedback strings. However,
+Multilang elements can be used in the responses and in the feedback strings. However,
 you must use the Moodle annotation with the <span> elements. The multilang2 filter
-is not supported here. For more information please checkout the Moodle documentation
+is not supported here. For more information please check out the Moodle documentation
 at https://docs.moodle.org/en/Multi-language_content_filter.
 
 ## History
+
+### v1.1
+- Fix source code view, special html was not always formatted correctly.
 
 ### v1.0
 - First official release.
