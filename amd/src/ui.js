@@ -283,10 +283,10 @@ const getStr = async() => {
   });
 };
 
-const getMainQuestionTypes = function () {
+const getMainQuestionTypes = function() {
   return [
     {
-      type: 'Multiple choice', // TODO STRINGS
+      type: 'Multiple choice',
       subtypes: [
         {
           'type': 'MULTICHOICE',
@@ -367,7 +367,7 @@ const getMainQuestionTypes = function () {
     },
     {
       type: 'NUMERICAL',
-      subtypes:[
+      subtypes: [
         {
           'type': 'NUMERICAL',
           'abbr': ['NM'],
@@ -378,7 +378,7 @@ const getMainQuestionTypes = function () {
     },
     {
       type: 'KURZ',
-      subtypes:[
+      subtypes: [
         {
           'type': 'SHORTANSWER',
           'abbr': ['SA', 'MW'],
@@ -733,7 +733,6 @@ const _setDialogueContent = function(qtype, nomodalevents) {
   });
   let contentText;
   if (!qtype) {
-    //TODO 
     contentText = Mustache.render(TEMPLATE.TYPE, {
       CSS: CSS,
       STR: STR,
