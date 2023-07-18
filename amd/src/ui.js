@@ -162,13 +162,19 @@ const TEMPLATE = {
       '<input name="qtype" id="qtype_qtype_{{type}}" value="{{type}}" type="radio" class="form-check-input">' +
       '<label for="qtype_qtype_{{type}}">' +
       '<span class="typename">{{type}}</span>' +
+      '{{#subtypes}}' +
+      '<input name="subqtype" id="qtype_qtype_{{subtypes}}" value="{{subtypes}}"' +
+      'type="radio" class="form-check-input {{CSS.SUMMARY}}">' +
+      '<label for="qtype_qtype_{{subtypes}}">' +
+      //  '<span class="typename">{{subtypes}}</span>' +
       '<span class="{{CSS.SUMMARY}}"><h6>{{name}}</h6><p>{{summary}}</p>' +
       '<ul>{{#options}}' +
       '<li>{{.}}</li>' +
       '{{/options}}</ul>' +
+      '{{/subtypes}}' +
       '</span>' +
       '</label></div>' +
-      '{{/types}}</div>' +
+      '{{/types}}' +
       '</form></div>',
     FOOTER: '<button type="button" class="btn btn-secondary" data-action="cancel">{{cancel}}</button>' +
       '<button type="button" class="btn btn-primary" data-action="save">{{submit}}</button>',
@@ -276,6 +282,122 @@ const getStr = async() => {
     return ''; // Make the linter happy.
   });
 };
+
+const getMainQuestionTypes = function() {
+  return [
+    {
+      type: 'Multiple choice',
+      subtypes: [
+        {
+          'type': 'MULTICHOICE',
+          'abbr': ['MC'],
+          'name': STR.multichoice,
+          'summary': STR.summary_multichoice,
+          'options': [STR.selectinline, STR.singleyes],
+        },
+        {
+          'type': 'MULTICHOICE_H',
+          'abbr': ['MCH'],
+          'name': STR.multichoice,
+          'summary': STR.summary_multichoice,
+          'options': [STR.horizontal, STR.singleyes],
+        },
+        {
+          'type': 'MULTICHOICE_V',
+          'abbr': ['MCV'],
+          'name': STR.multichoice,
+          'summary': STR.summary_multichoice,
+          'options': [STR.vertical, STR.singleyes],
+        },
+        {
+          'type': 'MULTICHOICE_S',
+          'abbr': ['MCS'],
+          'name': STR.multichoice,
+          'summary': STR.summary_multichoice,
+          'options': [STR.selectinline, STR.shuffle, STR.singleyes],
+        },
+        {
+          'type': 'MULTICHOICE_HS',
+          'abbr': ['MCHS'],
+          'name': STR.multichoice,
+          'summary': STR.summary_multichoice,
+          'options': [STR.horizontal, STR.shuffle, STR.singleyes],
+        },
+        {
+          'type': 'MULTICHOICE_VS',
+          'abbr': ['MCVS'],
+          'name': STR.multichoice,
+          'summary': STR.summary_multichoice,
+          'options': [STR.vertical, STR.shuffle, STR.singleyes],
+        },
+      ]
+    },
+    {
+      type: 'MULTIRESPONSE',
+      subtypes: [
+        {
+          'type': 'MULTIRESPONSE',
+          'abbr': ['MR'],
+          'name': STR.multiresponse,
+          'summary': STR.summary_multichoice,
+          'options': [STR.multi_vertical, STR.singleno],
+        },
+        {
+          'type': 'MULTIRESPONSE_H',
+          'abbr': ['MRH'],
+          'name': STR.multiresponse,
+          'summary': STR.summary_multichoice,
+          'options': [STR.multi_horizontal, STR.singleno],
+        },
+        {
+          'type': 'MULTIRESPONSE_S',
+          'abbr': ['MRS'],
+          'name': STR.multiresponse,
+          'summary': STR.summary_multichoice,
+          'options': [STR.multi_vertical, STR.shuffle, STR.singleno],
+        },
+        {
+          'type': 'MULTIRESPONSE_HS',
+          'abbr': ['MRHS'],
+          'name': STR.multiresponse,
+          'summary': STR.summary_multichoice,
+          'options': [STR.multi_horizontal, STR.shuffle, STR.singleno],
+        },
+      ]
+    },
+    {
+      type: 'NUMERICAL',
+      subtypes: [
+        {
+          'type': 'NUMERICAL',
+          'abbr': ['NM'],
+          'name': STR.numerical,
+          'summary': STR.summary_numerical,
+        },
+      ]
+    },
+    {
+      type: 'KURZ',
+      subtypes: [
+        {
+          'type': 'SHORTANSWER',
+          'abbr': ['SA', 'MW'],
+          'name': STR.shortanswer,
+          'summary': STR.summary_shortanswer,
+          'options': [STR.caseno],
+        },
+        {
+          'type': 'SHORTANSWER_C',
+          'abbr': ['SAC', 'MWC'],
+          'name': STR.shortanswer,
+          'summary': STR.summary_shortanswer,
+          'options': [STR.caseyes],
+        },
+      ],
+    },
+  ];
+};
+
 const getQuestionTypes = function() {
   return [
     {
@@ -643,7 +765,7 @@ const _setDialogueContent = function(qtype, nomodalevents) {
       CSS: CSS,
       STR: STR,
       qtype: _qtype,
-      types: getQuestionTypes()
+      types: getMainQuestionTypes()
     });
   } else {
     contentText = Mustache.render(TEMPLATE.FORM, {
@@ -652,7 +774,7 @@ const _setDialogueContent = function(qtype, nomodalevents) {
       answerdata: _answerdata,
       elementid: getUuid(),
       qtype: _qtype,
-      name: getQuestionTypes().filter(q => _qtype === q.type)[0].name,
+      name: getMainQuestionTypes().filter(q => _qtype === q.type)[0].name,
       marks: _marks,
       numerical: (_qtype === 'NUMERICAL' || _qtype === 'NM')
     });
