@@ -31,3 +31,7 @@ $string['insert'] = 'Insert question';
 $string['select'] = 'Select question type';
 $string['multichoice'] = 'Multiple choice - single response';
 $string['multiresponse'] = 'Multiple choice - multiple response';
+$string['shortanswerno'] = 'short no';
+$string['shortansweryes'] = 'short yes';
+$string['short_summary_nocase'] = 'short summary no';
+$string['short_summary_yescase'] = 'short summary yes';
