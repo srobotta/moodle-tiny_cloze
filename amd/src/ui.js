@@ -778,7 +778,7 @@ const _setDialogueContent = function(qtype, nomodalevents) {
       answerdata: _answerdata,
       elementid: getUuid(),
       qtype: _qtype,
-      name: getMainQuestionTypes().filter(q => _qtype === q.type)[0].name,
+      name: getQuestionTypes().filter(q => _qtype === q.type)?.[0].name,
       marks: _marks,
       numerical: (_qtype === 'NUMERICAL' || _qtype === 'NM')
     });
