@@ -66,7 +66,6 @@ const getFractionOptions = s => {
 // Marker class and the whole span element that is used to encapsulate the cloze question text.
 const markerClass = 'cloze-question-marker';
 const markerSpan = '<span contenteditable="false" class="' + markerClass + '" data-mce-contenteditable="false">';
-const markerNewPos = '{cloze_question_new_marker}';
 // Regex to recognize the question string in the text e.g. {1:NUMERICAL:...} or {:MULTICHOICE:...}
 // eslint-disable-next-line max-len
 const reQtype = /\{([0-9]*):(MULTICHOICE(_H|_V|_S|_HS|_VS)?|MULTIRESPONSE(_H|_S|_HS)?|NUMERICAL|SHORTANSWER(_C)?|SAC?|NM|MWC?|M[CR](V|H|VS|HS)?):(.*?)\}/g;
@@ -434,8 +433,6 @@ let _modal = null;
  */
 const onInit = function(ed) {
   _editor = ed; // The current editor instance.
-  // Hide the new question marker from the user.
-  ed.dom.addStyle('.' + markerClass + '.new { display:none;}');
   // Add the marker spans.
   _addMarkers();
   // And get the language strings.
@@ -478,10 +475,8 @@ const displayDialogue = async function() {
     _parseSubquestion(subquestion.innerHTML);
     _setDialogueContent(_qtype);
   } else {
-    // No subquestion found, no offset to remember, but we place a marker at the position where the question
-    // will be inserted later.
+    // No subquestion found, no offset to remember.
     _selectedOffset = -1;
-    _editor.insertContent(markerSpan.replace(markerClass, markerClass + ' new') + markerNewPos + '</span>');
     _setDialogueContent();
   }
 };
@@ -541,7 +536,6 @@ const _addMarkers = function() {
     }
     newContent += '</span>';
   } while (m);
-  newContent = newContent.replace(markerNewPos, markerSpan.replace(markerClass, markerClass + ' new') + markerNewPos + '</span>');
   _editor.setContent(newContent);
 };
 
@@ -923,12 +917,8 @@ const _setSubquestion = function(e) {
   if (_selectedOffset > -1) { // We have to replace one of the marker spans (the innerHTML contains the question string).
     _editor.dom.select('.' + markerClass)[_selectedOffset].innerHTML = question;
   } else {
-    // Find the new maker, add the question string and remove the new flag.
-    const newEl = _editor.dom.select('.' + markerClass + '.new');
-    if (newEl.length > 0) {
-      newEl[0].innerHTML = question;
-      newEl[0].classList.remove('new');
-    }
+    // Just add the question text with markup.
+    _editor.insertContent(markerSpan + question + '</span>');
   }
 };
 
