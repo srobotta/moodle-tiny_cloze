@@ -28,7 +28,7 @@ import {
     clozeeditButtonName,
     icon,
 } from './common';
-import {displayDialogue, resolveSubquestion, onInit, onBeforeGetContent, onPreProcess, onPostProcess, onBlur} from './ui';
+import {displayDialogue, resolveSubquestion, onInit, onBeforeGetContent, onSubmit} from './ui';
 
 /**
  * Get the setup function for the buttons.
@@ -81,8 +81,6 @@ export const getSetup = async() => {
 
         editor.on('init', () => onInit(editor));
         editor.on('BeforeGetContent', format => onBeforeGetContent(format));
-        editor.on('PreProcess', format => onPreProcess(format));
-        editor.on('PostProcess', format => onPostProcess(format));
-        editor.on('blur', () => onBlur());
+        editor.on('submit', () => onSubmit());
     };
 };

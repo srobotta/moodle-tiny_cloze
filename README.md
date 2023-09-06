@@ -105,6 +105,11 @@ at https://docs.moodle.org/en/Multi-language_content_filter.
 
 ## History
 
+### current master
+- Fix issue [Insert equation in question text](https://github.com/srobotta/moodle-tiny_cloze/issues/15).
+  Credits to that fix actually go to [Mario Wehr](https://github.com/mwehr) because of his
+  [contribution in this pull request](https://github.com/bfh/moodle-tiny_multilang2/pull/5)
+
 ### v1.1
 - Fix source code view, special html was not always formatted correctly.
 

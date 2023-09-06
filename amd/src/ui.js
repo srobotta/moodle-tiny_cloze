@@ -380,13 +380,6 @@ const getQuestionTypes = function() {
 let _editor = null;
 
 /**
- * Remember the blur event to reapply the marker <span>s because they get lost in the first place.
- * @type boolean
- * @private
- */
-let _isBlurred = false;
-
-/**
  * A reference to the currently open form.
  *
  * @param _form
@@ -588,36 +581,10 @@ const onBeforeGetContent = function(content) {
 };
 
 /**
- * When the content is supposed to be saved (happens also when the editor window is blurred)
- * then we need to remove or markers (e.g. <span> elements that encapsulate the cloze
- * question strings).
- * @param {object} content
+ * Fires when the form containing the editor is submitted.
  */
-const onPreProcess = function(content) {
-  if (!isNull(content.save) && content.save === true && !_modal) {
-    // Remove markers only if modal is not called, otherwise we will lose our new question marker.
-    _removeMarkers();
-  }
-};
-
-/**
- * When the blur event was triggered, the editor is still there, we need to reapply
- * the previously removed styling. If this was a submit event, then do not reapply the
- * styling to prevent that this is saved in the database.
- * @param {object} content
- */
-const onPostProcess = function(content) {
-  if (!isNull(content.save) && content.save === true && _isBlurred) {
-    _addMarkers();
-    _isBlurred = false;
-  }
-};
-
-/**
- * Notice when the editor content is blurred, because the focus left the editor window.
- */
-const onBlur = function() {
-  _isBlurred = true;
+const onSubmit = function() {
+  _removeMarkers();
 };
 
 /**
@@ -1022,7 +989,5 @@ export {
   resolveSubquestion,
   onInit,
   onBeforeGetContent,
-  onPreProcess,
-  onPostProcess,
-  onBlur
+  onSubmit,
 };
