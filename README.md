@@ -1,6 +1,7 @@
 Moodle Tiny editor Cloze question type button
 =============================================
 
+![Release](https://img.shields.io/badge/Release-1.2-blue.svg)
 [![Moodle Plugin 
 CI](https://github.com/srobotta/moodle-tiny_cloze/workflows/Moodle%20Plugin%20CI/badge.svg?branch=main)](https://github.com/srobotta/moodle-tiny_cloze/actions?query=workflow%3A%22Moodle+Plugin+CI%22+branch%3Amain)
 ![Supported](https://img.shields.io/badge/Moodle-4.1+-orange.svg)
@@ -85,7 +86,7 @@ Here you see the predefined answers that come from the question string in the te
 There is one correct and four incorrect answers (the last two answers are out of sight
 and must be scrolled to view it). These possible answers are displayed as a selection
 inside the text. This particular screenshot also demonstrates how to use one question
-in different languages using the multilang2 filter.
+in different languages using the [multilang2 filter][1].
 
 Once you are done with the changes, click the button "Insert question" to apply the
 changed question string on the existing question.
@@ -98,14 +99,14 @@ Whenever a question is edited that uses the abbreviation of the question type, u
 saving the changes with the plugin, the question type will use the long form. That does
 not change any of its behaviour, but is just a convention.
 
-Multilang elements can be used in the responses and in the feedback strings. However,
-you must use the Moodle annotation with the <span> elements. The multilang2 filter
+Multi language elements can be used in the responses and in the feedback strings. However,
+you must use the Moodle annotation with the <span> elements. The [multilang2 filter][1]
 is not supported here. For more information please check out the Moodle documentation
 at https://docs.moodle.org/en/Multi-language_content_filter.
 
 ## History
 
-### current master
+### v1.2
 - Fix issue [Insert equation in question text](https://github.com/srobotta/moodle-tiny_cloze/issues/15).
   Credits to that fix actually go to [Mario Wehr](https://github.com/mwehr) because of his
   [contribution in this pull request](https://github.com/bfh/moodle-tiny_multilang2/pull/5)
@@ -119,3 +120,5 @@ at https://docs.moodle.org/en/Multi-language_content_filter.
 
 ### v0.1.0
 - Start working on the project at Moodle Moot DACH 23.
+
+[1]: <https://github.com/iarenaza/moodle-filter_multilang2> "Mutlilang v2 Filter Plugin"
