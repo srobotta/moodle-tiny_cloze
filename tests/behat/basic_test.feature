@@ -1,5 +1,5 @@
 
-@editor @tiny  @tiny_cloze @javascript
+@editor @tiny @tiny_cloze @javascript
 Feature: Add interface to Cloze question type syntax
 
   Background:
