@@ -712,7 +712,9 @@ const _choiceHandler = function(e) {
     _setDialogueContent(_qtype);
     _form.querySelector('.' + CSS.ANSWER).focus();
     return ''; // Make the linter happy.
-  }).catch();
+  }).catch(() => {
+      return '';
+  });
 };
 
 /**
