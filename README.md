@@ -1,7 +1,7 @@
 Moodle Tiny editor Cloze question type button
 =============================================
 
-![Release](https://img.shields.io/badge/Release-1.2-blue.svg)
+![Release](https://img.shields.io/badge/Release-1.3-blue.svg)
 [![Moodle Plugin 
 CI](https://github.com/srobotta/moodle-tiny_cloze/workflows/Moodle%20Plugin%20CI/badge.svg?branch=main)](https://github.com/srobotta/moodle-tiny_cloze/actions?query=workflow%3A%22Moodle+Plugin+CI%22+branch%3Amain)
 ![Supported](https://img.shields.io/badge/Moodle-4.1+-orange.svg)
@@ -26,12 +26,9 @@ editor and the Atto editor is due to be phased out in a future version of Moodle
 
 ## Installation
 
- - Copy repository content in *moodleroot*/lib/editor/tiny/plugins. The following can be omitted:
-   - tests/ (if you're not going to test it with Behat)
-   - .gitmodules
-   - build.xml
-   - screenshots
- - Install the plugin from Moodle. 
+ - Create a new directory `cloze` in `<moodleroot>/lib/editor/tiny/plugins`.
+ - Copy repository content into the newly created directory.
+ - Install the plugin from Moodle.
 
 There are no settings for the plugin that can be set in the Moodle Site administration.
 
@@ -61,7 +58,7 @@ button to actually define the answers and grading information for that question 
 
 ![Screenshot with dialogue to edit numerical question](screenshots/cloze_6_dialogue_numeric.png)
 
-In this particular case a numerical question is defined. The correct answer (e.g of the
+In this particular case a numerical question is defined. The correct answer (e.g. of the
 question of the boiling point of water in Fahrenheit) would be 212. However, there
 is a tolerance of 10 Fahrenheit above or below the exact answer still to be graded with
 0.5 points. The mark (in this case 1 point) is defined at the very top.
@@ -105,6 +102,9 @@ is not supported here. For more information please check out the Moodle document
 at https://docs.moodle.org/en/Multi-language_content_filter.
 
 ## History
+
+### v1.3
+- Add new CI stack for latest release and adapt changes to work with Moodle 4.3.
 
 ### v1.2
 - Fix issue [Insert equation in question text](https://github.com/srobotta/moodle-tiny_cloze/issues/15).
