@@ -46,22 +46,33 @@ const getUuid = function() {
   }
   return 'ed-cloze-' + Math.floor(Math.random() * 100000).toString();
 };
-
+// Grade Selector value when custom percentage is selected.
+const selectCustomPercent = '__custom__';
 // This is a specific helper function to return the options html for the fraction select element.
 const getFractionOptions = s => {
-  let html = '<option value="">' + STR.incorrect + '</option><option value="="';
-  if (s === '=') {
-    html += ' selected="selected"';
-  }
-  html += '>' + STR.correct + '</option>';
+  const attrSel = ' selected="selected"';
+  let isSel = s === '=' ? attrSel : '';
+  let html = `<option value="">${STR.incorrect}</option><option value="="${isSel}>${STR.correct}</option>`;
   FRACTIONS.forEach(item => {
-    html += '<option value="' + item.value + '"';
-    if (item.value.toString() === s) {
-      html += ' selected="selected"';
-    }
-    html += '>' + item.value + '%</option>';
+    isSel = item.value.toString() === s ? attrSel : '';
+    html += `<option value="${item.value}"${isSel}>${item.value}%</option>`;
   });
+  isSel = s !== '' && html.indexOf(attrSel) === -1 ? attrSel : '';
+  html += `<option value="${selectCustomPercent}"${isSel}>${STR.custom_grade}</option>`;
   return html;
+};
+// Check if the value is a custom grade value (in order to show the input field).
+const isCustomGrade = s => {
+  if (s === '=' || s === '') {
+    return false;
+  }
+  let found = false;
+  FRACTIONS.forEach(item => {
+    if (item.value.toString() === s) {
+      found = true;
+    }
+  });
+  return !found;
 };
 // Marker class and the whole span element that is used to encapsulate the cloze question text.
 const markerClass = 'cloze-question-marker';
@@ -79,6 +90,7 @@ const CSS = {
   DELETE: 'tiny_cloze_delete',
   FEEDBACK: 'tiny_cloze_feedback',
   FRACTION: 'tiny_cloze_fraction',
+  FRAC_CUSTOM: 'tiny_cloze_frac_custom',
   LEFT: 'tiny_cloze_col0',
   LOWER: 'tiny_cloze_down',
   RIGHT: 'tiny_cloze_col1',
@@ -148,6 +160,10 @@ const TEMPLATE = {
       '{{{fractionOptions}}}' +
       '</select>' +
       '</div>' +
+      '<div class="{{CSS.RIGHT}} form-group{{^isCustomGrade}} hidden{{/isCustomGrade}}">' +
+      '<input id="{{id}}_grade_custom" type="text"{{#isCustomGrade}} value="{{fraction}}"{{/isCustomGrade}} ' +
+      'class="{{CSS.FRAC_CUSTOM}} form-control d-inline mx-2" style="width: 4rem;" />%' +
+      '</div>' +
       '</div></li>' +
       '{{/answerdata}}</ol></div>' +
       '</form>' +
@@ -175,27 +191,7 @@ const TEMPLATE = {
   const FRACTIONS = [
     {value: 100},
     {value: 50},
-    {value: 33.33333},
-    {value: 25},
-    {value: 20},
-    {value: 16.66667},
-    {value: 14.28571},
-    {value: 12.5},
-    {value: 11.11111},
-    {value: 10},
-    {value: 5},
     {value: 0},
-    {value: -5},
-    {value: -10},
-    {value: -11.11111},
-    {value: -12.5},
-    {value: -14.28571},
-    {value: -16.66667},
-    {value: -20},
-    {value: -25},
-    {value: -33.333},
-    {value: -50},
-    {value: -100},
   ];
 
 // Language strings used in the modal dialogue.
@@ -235,6 +231,7 @@ const getStr = async() => {
     getString('select', component),
     getString('insert', component),
     getString('pluginname', component),
+    getString('customgrade', component),
   ]);
   [
     'answer',
@@ -270,6 +267,7 @@ const getStr = async() => {
     'btn_select',
     'btn_insert',
     'title',
+    'custom_grade',
   ].map((l, i) => {
     STR[l] = res[i];
     return ''; // Make the linter happy.
@@ -589,7 +587,7 @@ const onSubmit = function() {
  * Set the dialogue content for the tool, attaching any required events. Either the modal dialogue displays
  * a list of the question types for the form for a particular question to edit. The set content is also
  * called when the form has changed (up or down move, deletion and adding a response). We must be aware of that
- * an event to the dialogue buttons must attached once only. Therefore when the form content is modified, only
+ * an event to the dialogue buttons must be attached once only. Therefore, when the form content is modified, only
  * the form events for the answers are set again, the general events are nor (nomodalevents is true then).
  *
  * @method _setDialogueContent
@@ -687,6 +685,16 @@ const _setDialogueContent = function(qtype, nomodalevents) {
       _addAnswer(p);
     }
   });
+  _form.querySelectorAll('.' + CSS.FRACTION).forEach((sel) => {
+    sel.addEventListener('change', e => {
+      const id = e.target.getAttribute('id');
+      if (e.target.value === selectCustomPercent) {
+        document.getElementById(id + '_custom').parentNode.classList.remove('hidden');
+      } else {
+        document.getElementById(id + '_custom').parentNode.classList.add('hidden');
+      }
+    });
+  });
 };
 
 /**
@@ -702,16 +710,20 @@ const _choiceHandler = function(e) {
   if (qtype) {
     _qtype = qtype.value;
   }
-  const one = _qtype.indexOf('SHORTANSWER') !== -1 || _qtype === 'NUMERICAL';
+  const max = (_qtype.indexOf('SHORTANSWER') !== -1 || _qtype === 'NUMERICAL') ? 1 : 3;
   const blankAnswer = {
     id: getUuid(),
     answer: '',
     feedback: '',
     fraction: 100,
-    fractionOptions: getFractionOptions(one ? '=' : ''),
-    tolerance: 0
+    fractionOptions: getFractionOptions(max === 1 ? '=' : ''),
+    tolerance: 0,
+    isCustomGrade: false,
   };
-  _answerdata = one ? [blankAnswer] : [blankAnswer, blankAnswer, blankAnswer];
+  _answerdata = [];
+  for (let x = 0; x < max; x++) {
+    _answerdata.push({...blankAnswer, id: getUuid()});
+  }
   _modal.destroy();
   // Our choice is stored in _qtype. We need to create the modal dialogue with the form now.
   _createModal().then(() => {
@@ -757,7 +769,7 @@ const _parseSubquestion = function(question) {
   answers.forEach(function(answer) {
     const options = /^(%(-?[.0-9]+)%|(=?))((\\.|[^#])*)#?(.*)/.exec(answer);
     if (options && options[4]) {
-      let frac = 0;
+      let frac = '';
       if (options[3]) {
         frac = options[3] === '=' ? '=' : 100;
       } else if (options[2]) {
@@ -772,6 +784,7 @@ const _parseSubquestion = function(question) {
           tolerance: tolerance,
           fraction: frac,
           fractionOptions: getFractionOptions(frac),
+          isCustomGrade: isCustomGrade(frac),
         });
         return;
       }
@@ -781,6 +794,7 @@ const _parseSubquestion = function(question) {
         feedback: strdecode(options[6]),
         fraction: frac,
         fractionOptions: getFractionOptions(frac),
+        isCustomGrade: isCustomGrade(frac),
       });
     }
   });
@@ -804,20 +818,24 @@ const _addAnswer = function(a) {
   let fraction = '';
   if (a.closest('li')) {
     fraction = a.closest('li').querySelector('.' + CSS.FRACTION).value;
+    if (fraction === selectCustomPercent) {
+      fraction = a.closest('li').querySelector('.' + CSS.FRAC_CUSTOM).value;
+    }
     index = indexOfNode(_form.querySelectorAll('li'), a.closest('li')) + 1;
   }
   let tolerance = 0;
   if (a.closest('li') && a.closest('li').querySelector('.' + CSS.TOLERANCE)) {
     tolerance = a.closest('li').querySelector('.' + CSS.TOLERANCE).value;
   }
-  _getFormData();
+  _processFormData();
   _answerdata.splice(index, 0, {
     id: getUuid(),
     answer: '',
     feedback: '',
     fraction: fraction,
     fractionOptions: getFractionOptions(fraction),
-    tolerance: tolerance
+    tolerance: tolerance,
+    isCustomGrade: isCustomGrade(fraction)
   });
   _setDialogueContent(_qtype, true);
   _form.querySelectorAll('.' + CSS.ANSWER).item(index).focus();
@@ -835,7 +853,7 @@ const _deleteAnswer = function(a) {
   if (index === -1) {
     index = indexOfNode(_form.querySelectorAll('li'), a.closest('li'));
   }
-  _getFormData();
+  _processFormData();
   _answerdata.splice(index, 1);
   _setDialogueContent(_qtype, true);
   const answers = _form.querySelectorAll('.' + CSS.ANSWER);
@@ -888,7 +906,8 @@ const _cancel = function(e) {
 };
 
 /**
- * Insert question string into editor content and reset and hide form.
+ * Insert question string into editor content and reset and hide form. If the form contains an error
+ * nothing happens.
  *
  * @method _setSubquestion
  * @param {Event} e Event from button click
@@ -896,7 +915,9 @@ const _cancel = function(e) {
  */
 const _setSubquestion = function(e) {
   e.preventDefault();
-  _getFormData();
+  if (!_processFormData(true)) {
+    return;
+  }
 
   // Build the parser function from the data, that is going to be placed into the editor content.
   let question = '{' + _marks + ':' + _qtype + ':';
@@ -930,32 +951,48 @@ const _setSubquestion = function(e) {
 
 /**
  * Read the form data, process it and store the result in the internal  _answerdata array.
+ * Also, is validation is enabled, the custom_grade field is in use and does not contain
+ * a number, then the field is marked as an error and the return value is false.
  *
- * @method _getFormData
+ * @method _processFormData
+ * @param {boolean} validate
+ * @return {boolean}
  * @private
  */
-const _getFormData = function() {
+const _processFormData = function(validate) {
   _answerdata = [];
   let answer;
+  let hasError = false;
   const answers = _form.querySelectorAll('.' + CSS.ANSWER);
   const feedbacks = _form.querySelectorAll('.' + CSS.FEEDBACK);
   const fractions = _form.querySelectorAll('.' + CSS.FRACTION);
+  const customGrades = _form.querySelectorAll('.' + CSS.FRAC_CUSTOM);
   const tolerances = _form.querySelectorAll('.' + CSS.TOLERANCE);
   for (let i = 0; i < answers.length; i++) {
+    customGrades.item(i).classList.remove('error');
     answer = answers.item(i).value;
     if (_qtype === 'NM' || _qtype === 'NUMERICAL') {
       answer = Number(answer);
     }
-    _answerdata.push({
+    const currentAnswer = {
       answer: answer,
       id: getUuid(),
       feedback: feedbacks.item(i).value,
-      fraction: fractions.item(i).value,
+      fraction: fractions.item(i).value === selectCustomPercent ? customGrades.item(i).value : fractions.item(i).value,
       fractionOptions: getFractionOptions(fractions.item(i).value),
-      tolerance: !isNull(tolerances.item(i)) ? tolerances.item(i).value : 0
-    });
+      tolerance: !isNull(tolerances.item(i)) ? tolerances.item(i).value : 0,
+      isCustomGrade: fractions.item(i).value === selectCustomPercent
+    };
+    if (validate && currentAnswer.isCustomGrade &&
+      (isNaN(currentAnswer.fraction) || currentAnswer.fraction < -100 || currentAnswer.fraction > 100
+        || currentAnswer.fraction.trim() === '')) {
+      hasError = true;
+      customGrades.item(i).classList.add('error');
+    }
+    _answerdata.push(currentAnswer);
     _marks = _form.querySelector('.' + CSS.MARKS).value;
   }
+  return !hasError;
 };
 
 /**

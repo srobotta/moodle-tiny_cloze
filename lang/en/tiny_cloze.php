@@ -26,6 +26,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $string['cloze:viewplugin'] = 'Helper to edit cloze questions';
+$string['customgrade'] = 'Custom';
 $string['helplinktext'] = 'Cloze question editor';
 $string['pluginname'] = 'Cloze question editor';
 $string['privacy:metadata'] = 'Cloze Editor does not store any personal data';

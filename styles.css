@@ -6,6 +6,10 @@
     width: unset;
 }
 
+.tiny_cloze .error {
+    border-color: red;
+}
+
 .tiny_cloze_answers {
     height: 375px;
     overflow-x: hidden;
