@@ -22,6 +22,7 @@
  */
 
 import ModalEvents from 'core/modal_events';
+import Modal from 'core/modal';
 import ModalFactory from 'core/modal_factory';
 import Mustache from 'core/mustache';
 import {get_string as getString} from 'core/str';
@@ -445,14 +446,19 @@ const onInit = function(ed) {
  */
 const _createModal = async function() {
   // Create the modal dialogue. Depending on whether we have a selected node or not, the content is different.
-  _modal = await ModalFactory.create({
+  const cfg = {
     title: STR.title,
     templateContext: {
       elementid: _editor.id
     },
     removeOnClose: true,
     large: true,
-  });
+  };
+  if (typeof Modal.create === 'function') {
+    _modal = await Modal.create(cfg);
+  } else {
+    _modal = await ModalFactory.create(cfg);
+  }
 };
 
 /**
