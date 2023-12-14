@@ -25,7 +25,7 @@ import ModalEvents from 'core/modal_events';
 import Modal from 'core/modal';
 import ModalFactory from 'core/modal_factory';
 import Mustache from 'core/mustache';
-import {get_string as getString} from 'core/str';
+import {get_strings as getStrings} from 'core/str';
 import {component} from './common';
 
 // Helper functions.
@@ -197,41 +197,41 @@ const TEMPLATE = {
 // Language strings used in the modal dialogue.
 let STR = {};
 const getStr = async() => {
-  const res = await Promise.all([
-    getString('answer', 'question'),
-    getString('chooseqtypetoadd', 'question'),
-    getString('defaultmark', 'question'),
-    getString('feedback', 'question'),
-    getString('correct', 'question'),
-    getString('incorrect', 'question'),
-    getString('addmoreanswerblanks', 'qtype_calculated'),
-    getString('delete', 'core'),
-    getString('up', 'core'),
-    getString('down', 'core'),
-    getString('tolerance', 'qtype_calculated'),
-    getString('grade', 'grades'),
-    getString('caseno', 'mod_quiz'),
-    getString('caseyes', 'mod_quiz'),
-    getString('answersingleno', 'qtype_multichoice'),
-    getString('answersingleyes', 'qtype_multichoice'),
-    getString('layoutselectinline', 'qtype_multianswer'),
-    getString('layouthorizontal', 'qtype_multianswer'),
-    getString('layoutvertical', 'qtype_multianswer'),
-    getString('shufflewithin', 'mod_quiz'),
-    getString('layoutmultiple_horizontal', 'qtype_multianswer'),
-    getString('layoutmultiple_vertical', 'qtype_multianswer'),
-    getString('pluginnamesummary', 'qtype_multichoice'),
-    getString('pluginnamesummary', 'qtype_shortanswer'),
-    getString('pluginnamesummary', 'qtype_numerical'),
-    getString('multichoice', component),
-    getString('multiresponse', component),
-    getString('numerical', 'mod_quiz'),
-    getString('shortanswer', 'mod_quiz'),
-    getString('cancel', 'core'),
-    getString('select', component),
-    getString('insert', component),
-    getString('pluginname', component),
-    getString('customgrade', component),
+  const res= await getStrings([
+      {key: 'answer', component: 'question'},
+      {key: 'chooseqtypetoadd', component: 'question'},
+      {key: 'defaultmark', component: 'question'},
+      {key: 'feedback', component: 'question'},
+      {key: 'correct', component: 'question'},
+      {key: 'incorrect', component: 'question'},
+      {key: 'addmoreanswerblanks', component: 'qtype_calculated'},
+      {key: 'delete', component: 'core'},
+      {key: 'up', component: 'core'},
+      {key: 'down', component: 'core'},
+      {key: 'tolerance', component: 'qtype_calculated'},
+      {key: 'grade', component: 'grades'},
+      {key: 'caseno', component: 'mod_quiz'},
+      {key: 'caseyes', component: 'mod_quiz'},
+      {key: 'answersingleno', component: 'qtype_multichoice'},
+      {key: 'answersingleyes', component: 'qtype_multichoice'},
+      {key: 'layoutselectinline', component: 'qtype_multianswer'},
+      {key: 'layouthorizontal', component: 'qtype_multianswer'},
+      {key: 'layoutvertical', component: 'qtype_multianswer'},
+      {key: 'shufflewithin', component: 'mod_quiz'},
+      {key: 'layoutmultiple_horizontal', component: 'qtype_multianswer'},
+      {key: 'layoutmultiple_vertical', component: 'qtype_multianswer'},
+      {key: 'pluginnamesummary', component: 'qtype_multichoice'},
+      {key: 'pluginnamesummary', component: 'qtype_shortanswer'},
+      {key: 'pluginnamesummary', component: 'qtype_numerical'},
+      {key: 'multichoice', component},
+      {key: 'multiresponse', component},
+      {key: 'numerical', component: 'mod_quiz'},
+      {key: 'shortanswer', component: 'mod_quiz'},
+      {key: 'cancel', component: 'core'},
+      {key: 'select', component},
+      {key: 'insert', component},
+      {key: 'pluginname', component},
+      {key: 'customgrade', component},
   ]);
   [
     'answer',
