@@ -127,16 +127,16 @@ const TEMPLATE = {
       '<div class="{{CSS.LEFT}} form-group">' +
       '<a class="{{CSS.ADD}}" title="{{STR.addmoreanswerblanks}}">' +
       '<img class="icon_smallicon" src="' +
-      M.util.image_url('t/add', 'core') + '"></a>' +
+      M.util.image_url('t/add', 'core') + '" alt="{{STR.addmoreanswerblanks}}"></a>' +
       '<a class="{{CSS.DELETE}}" title="{{STR.delete}}">' +
       '<img class="icon_smallicon" src="' +
-      M.util.image_url('t/delete', 'core') + '"></a>' +
+      M.util.image_url('t/delete', 'core') + '" alt="{{STR.delete}}"></a>' +
       '<a class="{{CSS.RAISE}}" title="{{STR.up}}">' +
       '<img class="icon_smallicon" src="' +
-      M.util.image_url('t/up', 'core') + '"></a>' +
+      M.util.image_url('t/up', 'core') + '" alt="{{STR.up}}"></a>' +
       '<a class="{{CSS.LOWER}}" title="{{STR.down}}">' +
       '<img class="icon_smallicon" src="' +
-      M.util.image_url('t/down', 'core') + '"></a>' +
+      M.util.image_url('t/down', 'core') + '" alt="{{STR.down}}"></a>' +
       '</div>' +
       '</div>' +
       '{{#numerical}}' +
