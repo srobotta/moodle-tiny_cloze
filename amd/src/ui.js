@@ -113,7 +113,7 @@ const TEMPLATE = {
       'class="{{CSS.MARKS}} form-control d-inline mx-1" />' +
       '<a class="{{CSS.ADD}}" title="{{STR.addmoreanswerblanks}}">' +
       '<img class="icon_smallicon" src="' +
-      M.util.image_url('t/add', 'core') + '"></a>' +
+      M.util.image_url('t/add', 'core') + '" alt="{{STR.addmoreanswerblanks}}"></a>' +
       '</div>' +
       '</div>' +
       '<div class="{{CSS.ANSWERS}} mb-3">' +
