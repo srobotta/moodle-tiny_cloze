@@ -32,8 +32,14 @@ Feature: Test the cloze question editor string compilation
     And I set the field with xpath "//form[@name='tiny_cloze_form']//li[3]//input[contains(@class, 'tiny_cloze_answer')]" to "mouse"
     And I set the field with xpath "//form[@name='tiny_cloze_form']//li[3]//input[contains(@class, 'tiny_cloze_feedback')]" to "That is totally wrong"
     When I click on "Insert question" "button"
-    And I click on the "View > Source code" menu item for the "Question text" TinyMCE editor
-    Then I should see "<p>{1:MULTICHOICE_H:=cat#That is correct~dog#That is not correct~mouse#That is\n  totally wrong}</p>" source code for the "Question text" TinyMCE editor
+    #From 4.3 onwards this works:
+    #And I click on the "View > Source code" menu item for the "Question text" TinyMCE editor
+    #Then I should see "<p>{1:MULTICHOICE_H:=cat#That is correct~dog#That is not correct~mouse#That is\n  totally wrong}</p>" source code for the "Question text" TinyMCE editor
+    And I click on "Save changes and continue editing" "button"
+    Then the field "Question text" matches multiline:
+    """
+    <p><span class="cloze-question-marker" contenteditable="false">{1:MULTICHOICE_H:=cat#That is correct~dog#That is not correct~mouse#That is totally wrong}</span></p>
+    """
 
   Scenario: Create a MULTICHOICE_H question with 4 answers and percent grades
     When I am on the "Course 1" "core_question > course question bank" page logged in as teacher
@@ -54,8 +60,13 @@ Feature: Test the cloze question editor string compilation
     And I set the field with xpath "//form[@name='tiny_cloze_form']//li[4]//input[contains(@class, 'tiny_cloze_answer')]" to "lion"
     And I set the field with xpath "//form[@name='tiny_cloze_form']//li[4]//select[contains(@class, 'tiny_cloze_fraction')]" to "0%"
     When I click on "Insert question" "button"
-    And I click on the "View > Source code" menu item for the "Question text" TinyMCE editor
-    Then I should see "<p>{1:MULTICHOICE_H:%0%cat~%50%dog~%100%mouse~%0%lion}</p>" source code for the "Question text" TinyMCE editor
+    #And I click on the "View > Source code" menu item for the "Question text" TinyMCE editor
+    #Then I should see "<p>{1:MULTICHOICE_H:%0%cat~%50%dog~%100%mouse~%0%lion}</p>" source code for the "Question text" TinyMCE editor
+    And I click on "Save changes and continue editing" "button"
+    Then the field "Question text" matches multiline:
+    """
+    <p><span class="cloze-question-marker" contenteditable="false">{1:MULTICHOICE_H:%0%cat~%50%dog~%100%mouse~%0%lion}</span></p>
+    """
 
   Scenario: Create a MULTICHOICE_V question with 3 answers and custom percent grades
     When I am on the "Course 1" "core_question > course question bank" page logged in as teacher
@@ -74,8 +85,13 @@ Feature: Test the cloze question editor string compilation
     And I set the field with xpath "//form[@name='tiny_cloze_form']//li[3]//input[contains(@class, 'tiny_cloze_answer')]" to "mouse"
     And I set the field with xpath "//form[@name='tiny_cloze_form']//li[3]//select[contains(@class, 'tiny_cloze_fraction')]" to "100%"
     When I click on "Insert question" "button"
-    And I click on the "View > Source code" menu item for the "Question text" TinyMCE editor
-    Then I should see "<p>{1:MULTICHOICE_V:%0%cat~%-22%dog~%100%mouse}</p>" source code for the "Question text" TinyMCE editor
+    #And I click on the "View > Source code" menu item for the "Question text" TinyMCE editor
+    #Then I should see "<p>{1:MULTICHOICE_V:%0%cat~%-22%dog~%100%mouse}</p>" source code for the "Question text" TinyMCE editor
+    And I click on "Save changes and continue editing" "button"
+    Then the field "Question text" matches multiline:
+    """
+    <p><span class="cloze-question-marker" contenteditable="false">{1:MULTICHOICE_V:%0%cat~%-22%dog~%100%mouse}</span></p>
+    """
 
   Scenario: Create a MULTICHOICE_HS question with 3 answers and changing order
     When I am on the "Course 1" "core_question > course question bank" page logged in as teacher
@@ -93,8 +109,13 @@ Feature: Test the cloze question editor string compilation
     And I click on "//form[@name='tiny_cloze_form']//li[3]//a[contains(@class, 'tiny_cloze_up')]" "xpath"
     And I click on "//form[@name='tiny_cloze_form']//li[1]//a[contains(@class, 'tiny_cloze_down')]" "xpath"
     When I click on "Insert question" "button"
-    And I click on the "View > Source code" menu item for the "Question text" TinyMCE editor
-    Then I should see "<p>{1:MULTICHOICE_HS:mouse~=cat~dog}</p>" source code for the "Question text" TinyMCE editor
+    #And I click on the "View > Source code" menu item for the "Question text" TinyMCE editor
+    #Then I should see "<p>{1:MULTICHOICE_HS:mouse~=cat~dog}</p>" source code for the "Question text" TinyMCE editor
+    And I click on "Save changes and continue editing" "button"
+    Then the field "Question text" matches multiline:
+    """
+    <p><span class="cloze-question-marker" contenteditable="false">{1:MULTICHOICE_HS:mouse~=cat~dog}</span></p>
+    """
 
   Scenario: Create a MULTIRESPONSE_S question with 3 answers and deleting an answer
     When I am on the "Course 1" "core_question > course question bank" page logged in as teacher
@@ -111,5 +132,10 @@ Feature: Test the cloze question editor string compilation
     And I set the field with xpath "//form[@name='tiny_cloze_form']//li[3]//input[contains(@class, 'tiny_cloze_answer')]" to "mouse"
     And I click on "//form[@name='tiny_cloze_form']//li[2]//a[contains(@class, 'tiny_cloze_delete')]" "xpath"
     When I click on "Insert question" "button"
-    And I click on the "View > Source code" menu item for the "Question text" TinyMCE editor
-    Then I should see "<p>{1:MULTICHOICE_HS:=cat~mouse}</p>" source code for the "Question text" TinyMCE editor
+    #And I click on the "View > Source code" menu item for the "Question text" TinyMCE editor
+    #Then I should see "<p>{1:MULTICHOICE_HS:=cat~mouse}</p>" source code for the "Question text" TinyMCE editor
+    And I click on "Save changes and continue editing" "button"
+    Then the field "Question text" matches multiline:
+    """
+    <p><span class="cloze-question-marker" contenteditable="false">{1:MULTICHOICE_HS:=cat~mouse}</span></p>
+    """
