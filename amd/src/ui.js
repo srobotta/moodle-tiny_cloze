@@ -232,7 +232,7 @@ const getStr = async() => {
     {key: 'insert', component},
     {key: 'pluginname', component},
     {key: 'customgrade', component},
-  ]).then(function(){
+  ]).then(function() {
     const args = Array.from(arguments);
     [
       'answer',
@@ -273,6 +273,9 @@ const getStr = async() => {
       STR[l] = args[0][i];
       return ''; // Make the linter happy.
     });
+    return ''; // Make the linter happy.
+  }).catch(() => {
+    return '';
   });
 };
 const getQuestionTypes = function() {
