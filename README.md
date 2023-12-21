@@ -1,7 +1,7 @@
 Moodle Tiny editor Cloze question type button
 =============================================
 
-![Release](https://img.shields.io/badge/Release-1.3-blue.svg)
+![Release](https://img.shields.io/badge/Release-1.4-blue.svg)
 [![Moodle Plugin 
 CI](https://github.com/srobotta/moodle-tiny_cloze/workflows/Moodle%20Plugin%20CI/badge.svg?branch=main)](https://github.com/srobotta/moodle-tiny_cloze/actions?query=workflow%3A%22Moodle+Plugin+CI%22+branch%3Amain)
 ![Supported](https://img.shields.io/badge/Moodle-4.1+-orange.svg)
@@ -102,6 +102,15 @@ is not supported here. For more information please check out the Moodle document
 at https://docs.moodle.org/en/Multi-language_content_filter.
 
 ## History
+
+### v1.4
+- Extend tests to cover functionality of the whole plugin.
+- Custom grade values for answers (this addresses [issue #16](https://github.com/srobotta/moodle-tiny_cloze/issues/16))
+- Add PHP 8.2 tests for the Moodle 4.3 test runs.
+- Streamline the process when the strings for the dialogue are fetched.
+- Add alt attributes for the icons.
+- Add new modal creation process from Moodle 4.3 but keep the old process for backward compatibility.
+- Add missing language string when capabilities are displayed.
 
 ### v1.3
 - Add new CI stack for latest release and adapt changes to work with Moodle 4.3.
