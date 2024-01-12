@@ -103,6 +103,10 @@ at https://docs.moodle.org/en/Multi-language_content_filter.
 
 ## History
 
+### Current main branch
+- Extend dialogue UI with error messages when input fields contain invalid
+values. This fixes [issue #18](https://github.com/srobotta/moodle-tiny_cloze/issues/18).
+
 ### v1.4
 - Extend tests to cover functionality of the whole plugin.
 - Custom grade values for answers (this addresses [issue #16](https://github.com/srobotta/moodle-tiny_cloze/issues/16))

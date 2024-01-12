@@ -115,6 +115,7 @@ const TEMPLATE = {
       '<img class="icon_smallicon" src="' +
       M.util.image_url('t/add', 'core') + '" alt="{{STR.addmoreanswerblanks}}"></a>' +
       '</div>' +
+      '<div class="msg-error hidden"></div>' +
       '</div>' +
       '<div class="{{CSS.ANSWERS}} mb-3">' +
       '<ol class="pl-3">{{#answerdata}}' +
@@ -232,6 +233,9 @@ const getStr = async() => {
     {key: 'insert', component},
     {key: 'pluginname', component},
     {key: 'customgrade', component},
+    {key: 'err_custom_rate', component},
+    {key: 'err_empty_answer', component},
+    {key: 'err_none_correct', component},
   ]).then(function() {
     const args = Array.from(arguments);
     [
@@ -269,6 +273,9 @@ const getStr = async() => {
       'btn_insert',
       'title',
       'custom_grade',
+      'err_custom_rate',
+      'err_empty_answer',
+      'err_none_correct',
     ].map((l, i) => {
       STR[l] = args[0][i];
       return ''; // Make the linter happy.
@@ -920,10 +927,18 @@ const _cancel = function(e) {
  */
 const _setSubquestion = function(e) {
   e.preventDefault();
-  if (!_processFormData(true)) {
+  // Check if there are any errors and if so, fill the error container with the
+  // messages and return without going any further and closing the dialogue.
+  const errMsg = _form.querySelector('.msg-error');
+  const formErrors = _processFormData(true);
+  if (formErrors.length > 0) {
+    const unique = formErrors.filter((value, index, array) => array.indexOf(value) === index);
+    errMsg.innerHTML = '<ul><li>' + unique.join('</li><li>') + '</li></ul>';
+    errMsg.classList.remove('hidden');
     return;
+  } else {
+    errMsg.classList.add('hidden');
   }
-
   // Build the parser function from the data, that is going to be placed into the editor content.
   let question = '{' + _marks + ':' + _qtype + ':';
 
@@ -961,19 +976,21 @@ const _setSubquestion = function(e) {
  *
  * @method _processFormData
  * @param {boolean} validate
- * @return {boolean}
+ * @return {Array}
  * @private
  */
 const _processFormData = function(validate) {
   _answerdata = [];
   let answer;
-  let hasError = false;
+  let hasErrors = [];
+  let foundCorrect = false;
   const answers = _form.querySelectorAll('.' + CSS.ANSWER);
   const feedbacks = _form.querySelectorAll('.' + CSS.FEEDBACK);
   const fractions = _form.querySelectorAll('.' + CSS.FRACTION);
   const customGrades = _form.querySelectorAll('.' + CSS.FRAC_CUSTOM);
   const tolerances = _form.querySelectorAll('.' + CSS.TOLERANCE);
   for (let i = 0; i < answers.length; i++) {
+    answers.item(i).classList.remove('error');
     customGrades.item(i).classList.remove('error');
     answer = answers.item(i).value;
     if (_qtype === 'NM' || _qtype === 'NUMERICAL') {
@@ -988,16 +1005,30 @@ const _processFormData = function(validate) {
       tolerance: !isNull(tolerances.item(i)) ? tolerances.item(i).value : 0,
       isCustomGrade: fractions.item(i).value === selectCustomPercent
     };
-    if (validate && currentAnswer.isCustomGrade &&
-      (isNaN(currentAnswer.fraction) || currentAnswer.fraction < -100 || currentAnswer.fraction > 100
-        || currentAnswer.fraction.trim() === '')) {
-      hasError = true;
-      customGrades.item(i).classList.add('error');
+    if (validate) {
+      if (currentAnswer.isCustomGrade &&
+        (isNaN(currentAnswer.fraction) || currentAnswer.fraction < -100 || currentAnswer.fraction > 100
+          || currentAnswer.fraction.trim() === '')
+      ) {
+        hasErrors.push(STR.err_custom_rate);
+        customGrades.item(i).classList.add('error');
+      }
+      // Check for non-empty value in the original input.
+      if (answers.item(i).value.trim() === '') {
+        answers.item(i).classList.add('error');
+        hasErrors.push(STR.err_empty_answer);
+      }
+      if (currentAnswer.fraction === '100' || currentAnswer.fraction === '=') {
+        foundCorrect = true;
+      }
     }
     _answerdata.push(currentAnswer);
     _marks = _form.querySelector('.' + CSS.MARKS).value;
   }
-  return !hasError;
+  if (validate && !foundCorrect) {
+    hasErrors.push(STR.err_none_correct);
+  }
+  return hasErrors;
 };
 
 /**
