@@ -106,6 +106,8 @@ at https://docs.moodle.org/en/Multi-language_content_filter.
 ### Current main branch
 - Extend dialogue UI with error messages when input fields contain invalid
 values. This fixes [issue #18](https://github.com/srobotta/moodle-tiny_cloze/issues/18).
+- Improve handling when adding an answer slot with autofill and focus.
+- Prevent providing non-numerical values for answer and tolerance in numeric questions.
 
 ### v1.4
 - Extend tests to cover functionality of the whole plugin.
