@@ -58,14 +58,23 @@ Feature: Test the cloze question dialgoue with error messages when not all field
     When I click on "Insert question" "button"
     Then I should see "Empty answer."
 
-    When I set the field with xpath "//form[@name='tiny_cloze_form']//li[1]//input[contains(@class, 'tiny_cloze_answer')]" to "0"
+    When I set the field with xpath "//form[@name='tiny_cloze_form']//li[1]//input[contains(@class, 'tiny_cloze_answer')]" to "adr"
+    And I click on "Insert question" "button"
+    Then I should see "Value must be numeric."
+
+    When I set the field with xpath "//form[@name='tiny_cloze_form']//li[1]//input[contains(@class, 'tiny_cloze_answer')]" to "0.45"
+    And I set the field with xpath "//form[@name='tiny_cloze_form']//li[1]//input[contains(@class, 'tiny_cloze_tolerance')]" to "adr"
+    And I click on "Insert question" "button"
+    Then I should see "Value must be numeric."
+
+    When I set the field with xpath "//form[@name='tiny_cloze_form']//li[1]//input[contains(@class, 'tiny_cloze_tolerance')]" to "0"
     And I click on "Insert question" "button"
     #And I click on the "View > Source code" menu item for the "Question text" TinyMCE editor
-    #Then I should see "<p>{1:NUMERICAL:=0:0}</p>" source code for the "Question text" TinyMCE editor
+    #Then I should see "<p>{1:NUMERICAL:=0.45:0}</p>" source code for the "Question text" TinyMCE editor
     And I click on "Save changes and continue editing" "button"
     Then the field "Question text" matches multiline:
     """
-    <p><span class="cloze-question-marker" contenteditable="false">{1:NUMERICAL:=0:0}</span></p>
+    <p><span class="cloze-question-marker" contenteditable="false">{1:NUMERICAL:=0.45:0}</span></p>
     """
 
   Scenario: Create a MULTIRESPONSE question with errors

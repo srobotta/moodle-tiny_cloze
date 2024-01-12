@@ -30,6 +30,7 @@ $string['customgrade'] = 'Custom';
 $string['err_custom_rate'] = 'Invalid value for custom percent rate.';
 $string['err_empty_answer'] = 'Empty answer.';
 $string['err_none_correct'] = 'No correct answer found.';
+$string['err_not_numeric'] = 'Value must be numeric.';
 $string['helplinktext'] = 'Cloze question editor';
 $string['pluginname'] = 'Cloze question editor';
 $string['privacy:metadata'] = 'Cloze Editor does not store any personal data';

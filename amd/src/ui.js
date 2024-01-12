@@ -236,6 +236,7 @@ const getStr = async() => {
     {key: 'err_custom_rate', component},
     {key: 'err_empty_answer', component},
     {key: 'err_none_correct', component},
+    {key: 'err_not_numeric', component},
   ]).then(function() {
     const args = Array.from(arguments);
     [
@@ -276,6 +277,7 @@ const getStr = async() => {
       'err_custom_rate',
       'err_empty_answer',
       'err_none_correct',
+      'err_not_numeric',
     ].map((l, i) => {
       STR[l] = args[0][i];
       return ''; // Make the linter happy.
@@ -946,7 +948,7 @@ const _setSubquestion = function(e) {
     question += _answerdata[i].fraction && !isNaN(_answerdata[i].fraction)
       ? '%' + _answerdata[i].fraction + '%' : _answerdata[i].fraction;
     question += strencode(_answerdata[i].answer);
-    if (_answerdata[i].tolerance) {
+    if (_qtype === 'NM' || _qtype === 'NUMERICAL') {
       question += ':' + _answerdata[i].tolerance;
     }
     if (_answerdata[i].feedback) {
@@ -982,6 +984,7 @@ const _setSubquestion = function(e) {
 const _processFormData = function(validate) {
   _answerdata = [];
   let answer;
+  let tolerance = 0;
   let hasErrors = [];
   let foundCorrect = false;
   const answers = _form.querySelectorAll('.' + CSS.ANSWER);
@@ -995,6 +998,18 @@ const _processFormData = function(validate) {
     answer = answers.item(i).value;
     if (_qtype === 'NM' || _qtype === 'NUMERICAL') {
       answer = Number(answer);
+      tolerance = Number(tolerances.item(i).value);
+      tolerances.item(i).classList.remove('error');
+      if (validate) {
+        if (isNaN(answer)) {
+          answers.item(i).classList.add('error');
+          hasErrors.push(STR.err_not_numeric);
+        }
+        if (isNaN(tolerance)) {
+          tolerances.item(i).classList.add('error');
+          hasErrors.push(STR.err_not_numeric);
+        }
+      }
     }
     const currentAnswer = {
       answer: answer,
@@ -1002,7 +1017,7 @@ const _processFormData = function(validate) {
       feedback: feedbacks.item(i).value,
       fraction: fractions.item(i).value === selectCustomPercent ? customGrades.item(i).value : fractions.item(i).value,
       fractionOptions: getFractionOptions(fractions.item(i).value),
-      tolerance: !isNull(tolerances.item(i)) ? tolerances.item(i).value : 0,
+      tolerance: tolerance,
       isCustomGrade: fractions.item(i).value === selectCustomPercent
     };
     if (validate) {
