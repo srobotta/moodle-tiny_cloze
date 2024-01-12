@@ -25,7 +25,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'tiny_cloze';
-$plugin->release = '1.4';
-$plugin->version = 2023122100;
+$plugin->release = '1.5';
+$plugin->version = 2024011200;
 $plugin->requires = 2022112800;
 $plugin->maturity = MATURITY_RC;

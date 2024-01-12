@@ -1,7 +1,7 @@
 Moodle Tiny editor Cloze question type button
 =============================================
 
-![Release](https://img.shields.io/badge/Release-1.4-blue.svg)
+![Release](https://img.shields.io/badge/Release-1.5-blue.svg)
 [![Moodle Plugin 
 CI](https://github.com/srobotta/moodle-tiny_cloze/workflows/Moodle%20Plugin%20CI/badge.svg?branch=main)](https://github.com/srobotta/moodle-tiny_cloze/actions?query=workflow%3A%22Moodle+Plugin+CI%22+branch%3Amain)
 ![Supported](https://img.shields.io/badge/Moodle-4.1+-orange.svg)
@@ -103,7 +103,7 @@ at https://docs.moodle.org/en/Multi-language_content_filter.
 
 ## History
 
-### Current main branch
+### v1.5
 - Extend dialogue UI with error messages when input fields contain invalid
 values. This fixes [issue #18](https://github.com/srobotta/moodle-tiny_cloze/issues/18).
 - Improve handling when adding an answer slot with autofill and focus.
