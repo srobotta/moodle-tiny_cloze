@@ -822,28 +822,28 @@ const _parseSubquestion = function(question) {
 const _addAnswer = function(a) {
   let index = indexOfNode(_form.querySelectorAll('.' + CSS.ADD), a);
   if (index === -1) {
-    index = indexOfNode(_form.querySelectorAll('.' + CSS.ANSWER + ', .' + CSS.FEEDBACK), a);
-    if (index !== -1) {
-      index = Math.floor(index / 2) + 1;
-    }
+    index = 0;
   }
   let fraction = '';
+  let answer = '';
+  let feedback = '';
+  let tolerance = 0;
   if (a.closest('li')) {
     fraction = a.closest('li').querySelector('.' + CSS.FRACTION).value;
     if (fraction === selectCustomPercent) {
       fraction = a.closest('li').querySelector('.' + CSS.FRAC_CUSTOM).value;
     }
-    index = indexOfNode(_form.querySelectorAll('li'), a.closest('li')) + 1;
-  }
-  let tolerance = 0;
-  if (a.closest('li') && a.closest('li').querySelector('.' + CSS.TOLERANCE)) {
-    tolerance = a.closest('li').querySelector('.' + CSS.TOLERANCE).value;
+    answer = a.closest('li').querySelector('.' + CSS.ANSWER).value;
+    feedback = a.closest('li').querySelector('.' + CSS.FEEDBACK).value;
+    if (a.closest('li').querySelector('.' + CSS.TOLERANCE)) {
+      tolerance = a.closest('li').querySelector('.' + CSS.TOLERANCE).value;
+    }
   }
   _processFormData();
   _answerdata.splice(index, 0, {
     id: getUuid(),
-    answer: '',
-    feedback: '',
+    answer: answer,
+    feedback: feedback,
     fraction: fraction,
     fractionOptions: getFractionOptions(fraction),
     tolerance: tolerance,
