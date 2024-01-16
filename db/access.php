@@ -31,5 +31,5 @@
          'archetypes' => [
              'editingteacher' => CAP_ALLOW,
          ],
-     ]
+     ],
  ];
