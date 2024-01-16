@@ -28,4 +28,4 @@ $plugin->component = 'tiny_cloze';
 $plugin->release = '1.5';
 $plugin->version = 2024011200;
 $plugin->requires = 2022112800;
-$plugin->maturity = MATURITY_RC;
+$plugin->maturity = MATURITY_STABLE;
