@@ -1,7 +1,7 @@
 Moodle Tiny editor Cloze question type button
 =============================================
 
-![Release](https://img.shields.io/badge/Release-1.5-blue.svg)
+![Release](https://img.shields.io/badge/Release-1.6-blue.svg)
 [![Moodle Plugin 
 CI](https://github.com/srobotta/moodle-tiny_cloze/workflows/Moodle%20Plugin%20CI/badge.svg?branch=main)](https://github.com/srobotta/moodle-tiny_cloze/actions?query=workflow%3A%22Moodle+Plugin+CI%22+branch%3Amain)
 ![Supported](https://img.shields.io/badge/Moodle-4.1+-orange.svg)
@@ -102,6 +102,9 @@ is not supported here. For more information please check out the Moodle document
 at https://docs.moodle.org/en/Multi-language_content_filter.
 
 ## History
+
+### v1.6
+- Add Support for Moodle 4.4 and PHP 8.3.
 
 ### v1.5
 - Extend dialogue UI with error messages when input fields contain invalid
