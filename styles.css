@@ -1,9 +1,14 @@
-.tiny_cloze img {
-    cursor: pointer;
+@media (min-width: 992px) {
+    .tiny_cloze .form-control {
+        width: 500px;
+    }
+    .tiny_cloze_col0 .form-group {
+        width: 550px;
+    }
 }
 
-.tiny_cloze .form-control {
-    width: unset;
+.tiny_cloze img {
+    cursor: pointer;
 }
 
 .tiny_cloze .error {
@@ -15,7 +20,6 @@
 }
 
 .tiny_cloze_answers {
-    height: 375px;
     overflow-x: hidden;
 }
 
