@@ -26,17 +26,22 @@ Feature: Test the cloze question dialgoue with error messages when not all field
     And I click on "Select question type" "button"
     When I click on "Insert question" "button"
     Then I should see "Empty answer."
-    And I should see "No correct answer found."
+    And I should not see "No correct answer found."
 
-    When I set the field with xpath "//form[@name='tiny_cloze_form']//li[1]//select[contains(@class, 'tiny_cloze_fraction')]" to "Correct"
+    When I set the field with xpath "//form[@name='tiny_cloze_form']//li[1]//select[contains(@class, 'tiny_cloze_fraction')]" to "Incorrect"
+    And I set the field with xpath "//form[@name='tiny_cloze_form']//li[2]//select[contains(@class, 'tiny_cloze_fraction')]" to "Incorrect"
+    And I set the field with xpath "//form[@name='tiny_cloze_form']//li[3]//select[contains(@class, 'tiny_cloze_fraction')]" to "Incorrect"
+    And I click on "//form[@name='tiny_cloze_form']//li[2]//a[@class='tiny_cloze_delete']" "xpath"
     And I click on "Insert question" "button"
 
     Then I should see "Empty answer."
-    And I should not see "No correct answer found."
+    And I should see "No correct answer found."
 
     When I set the field with xpath "//form[@name='tiny_cloze_form']//li[1]//input[contains(@class, 'tiny_cloze_answer')]" to "dog"
     And I set the field with xpath "//form[@name='tiny_cloze_form']//li[2]//input[contains(@class, 'tiny_cloze_answer')]" to "cat"
+    And I click on "//form[@name='tiny_cloze_form']//li[2]//a[@class='tiny_cloze_add']" "xpath"
     And I set the field with xpath "//form[@name='tiny_cloze_form']//li[3]//input[contains(@class, 'tiny_cloze_answer')]" to "mouse"
+    And I set the field with xpath "//form[@name='tiny_cloze_form']//li[1]//select[contains(@class, 'tiny_cloze_fraction')]" to "Correct"
     And I click on "Insert question" "button"
     #And I click on the "View > Source code" menu item for the "Question text" TinyMCE editor
     #Then I should see "<p>{1:MULTICHOICE_VS:=dog~cat~mouse}</p>" source code for the "Question text" TinyMCE editor
@@ -89,17 +94,17 @@ Feature: Test the cloze question dialgoue with error messages when not all field
     And I set the field with xpath "//form[@name='tiny_cloze_form']//li[2]//select[contains(@class, 'tiny_cloze_fraction')]" to "Custom"
     When I click on "Insert question" "button"
     Then I should see "Empty answer."
-    And I should see "No correct answer found."
+    And I should not see "No correct answer found."
     And I should see "Invalid value for custom percent rate."
 
     When I set the field with xpath "//form[@name='tiny_cloze_form']//li[2]//input[contains(@class, 'tiny_cloze_frac_custom')]" to "-101"
     And I click on "Insert question" "button"
     Then I should see "Empty answer."
-    And I should see "No correct answer found."
+    And I should not see "No correct answer found."
     And I should see "Invalid value for custom percent rate."
 
     When I set the field with xpath "//form[@name='tiny_cloze_form']//li[2]//input[contains(@class, 'tiny_cloze_frac_custom')]" to "-100"
     And I click on "Insert question" "button"
     Then I should see "Empty answer."
-    And I should see "No correct answer found."
+    And I should not see "No correct answer found."
     And I should not see "Invalid value for custom percent rate."
