@@ -107,7 +107,7 @@ Feature: Test the cloze question editor string compilation after creating the qu
     And I set the field with xpath "//form[@name='tiny_cloze_form']//li[2]//input[contains(@class, 'tiny_cloze_answer')]" to "dog"
     And I set the field with xpath "//form[@name='tiny_cloze_form']//li[2]//select[contains(@class, 'tiny_cloze_fraction')]" to "Incorrect"
     And I set the field with xpath "//form[@name='tiny_cloze_form']//li[3]//input[contains(@class, 'tiny_cloze_answer')]" to "mouse"
-And I set the field with xpath "//form[@name='tiny_cloze_form']//li[3]//select[contains(@class, 'tiny_cloze_fraction')]" to "Incorrect"
+    And I set the field with xpath "//form[@name='tiny_cloze_form']//li[3]//select[contains(@class, 'tiny_cloze_fraction')]" to "Incorrect"
     And I click on "//form[@name='tiny_cloze_form']//li[3]//a[contains(@class, 'tiny_cloze_up')]" "xpath"
     And I click on "//form[@name='tiny_cloze_form']//li[1]//a[contains(@class, 'tiny_cloze_down')]" "xpath"
     When I click on "Insert question" "button"
