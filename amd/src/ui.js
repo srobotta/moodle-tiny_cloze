@@ -397,7 +397,7 @@ const getQuestionTypes = function() {
 /**
  * The editor instance that is injected via the onInit() function.
  *
- * @type tinymce.Editor
+ * @type {tinymce.Editor}
  * @private
  */
 let _editor = null;
@@ -406,7 +406,7 @@ let _editor = null;
  * A reference to the currently open form.
  *
  * @param _form
- * @type Node
+ * @type {Node}
  * @private
  */
 let _form = null;
@@ -415,7 +415,7 @@ let _form = null;
  * An array containing the current answers options
  *
  * @param _answerdata
- * @type Array
+ * @type {Array}
  * @private
  */
 let _answerdata = [];
@@ -424,7 +424,7 @@ let _answerdata = [];
  * The sub question type to be edited
  *
  * @param _qtype
- * @type String
+ * @type {string|null}
  * @private
  */
 let _qtype = null;
@@ -440,19 +440,20 @@ let _selectedOffset = -1;
  * The maximum marks for the sub question
  *
  * @param _marks
- * @type Integer
+ * @type {Integer}
  * @private
  */
 let _marks = 1;
 
 /**
  * The modal dialogue to be displayed when designing the cloze question types.
- * @type Modal|null
+ * @type {Modal|null}
  */
 let _modal = null;
 
 /**
  * If its a normal selection of text, use it for the first answer field.
+ * @type {string|null}
  */
 let _firstAnswer = null;
 
