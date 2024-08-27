@@ -103,91 +103,103 @@ const CSS = {
   TYPE: 'tiny_cloze_qtype'
 };
 const TEMPLATE = {
-    FORM: '<div class="tiny_cloze">' +
-      '<p>{{name}} ({{qtype}})</p>' +
-      '<form name="tiny_cloze_form">' +
-      '<div class="row ml-0">' +
-      '<div class="form-group">' +
-      '<label for="{{elementid}}_mark">{{STR.defaultmark}}</label>' +
-      '<input id="{{elementid}}_mark" type="text" value="{{marks}}" ' +
-      'class="{{CSS.MARKS}} form-control d-inline mx-1" />' +
-      '<a class="{{CSS.ADD}}" title="{{STR.addmoreanswerblanks}}">' +
-      '<img class="icon_smallicon" src="' +
-      M.util.image_url('t/add', 'core') + '" alt="{{STR.addmoreanswerblanks}}"></a>' +
-      '</div>' +
-      '<div class="msg-error hidden"></div>' +
-      '</div>' +
-      '<div class="{{CSS.ANSWERS}} mb-3">' +
-      '<ol class="pl-3">{{#answerdata}}' +
-      '<li class="mt-3"><div class="row ml-0">' +
-      '<div class="{{CSS.LEFT}} form-group">' +
-      '<label for="{{id}}_answer">{{STR.answer}}</label>' +
-      '<input id="{{id}}_answer" type="text" value="{{answer}}" ' +
-      'class="{{CSS.ANSWER}} form-control d-inline mx-2" />' +
-      '</div>' +
-      '<div class="{{CSS.LEFT}} form-group">' +
-      '<a class="{{CSS.ADD}}" title="{{STR.addmoreanswerblanks}}">' +
-      '<img class="icon_smallicon" src="' +
-      M.util.image_url('t/add', 'core') + '" alt="{{STR.addmoreanswerblanks}}"></a>' +
-      '<a class="{{CSS.DELETE}}" title="{{STR.delete}}">' +
-      '<img class="icon_smallicon" src="' +
-      M.util.image_url('t/delete', 'core') + '" alt="{{STR.delete}}"></a>' +
-      '<a class="{{CSS.RAISE}}" title="{{STR.up}}">' +
-      '<img class="icon_smallicon" src="' +
-      M.util.image_url('t/up', 'core') + '" alt="{{STR.up}}"></a>' +
-      '<a class="{{CSS.LOWER}}" title="{{STR.down}}">' +
-      '<img class="icon_smallicon" src="' +
-      M.util.image_url('t/down', 'core') + '" alt="{{STR.down}}"></a>' +
-      '</div>' +
-      '</div>' +
-      '{{#numerical}}' +
-      '<div class="row">' +
-      '<div class="{{CSS.RIGHT}} form-group">' +
-      '<label for="{{id}}_tolerance">{{{STR.tolerance}}}</label>' +
-      '<input id="{{id}}_tolerance" type="text" value="{{tolerance}}" ' +
-      'class="{{CSS.TOLERANCE}} form-control d-inline mx-2" />' +
-      '</div>' +
-      '</div>' +
-      '{{/numerical}}' +
-      '<div class="row">' +
-      '<div class="{{CSS.RIGHT}} form-group">' +
-      '<label for="{{id}}_feedback">{{STR.feedback}}</label>' +
-      '<input id="{{id}}_feedback" type="text" value="{{feedback}}" ' +
-      'class="{{CSS.FEEDBACK}} form-control d-inline mx-2" />' +
-      '</div>' +
-      '<div class="{{CSS.RIGHT}} form-group">' +
-      '<label id="{{id}}_grade">{{STR.grade}}</label>' +
-      '<select id="{{id}}_grade" class="{{CSS.FRACTION}} custom-select mx-2">' +
-      '{{{fractionOptions}}}' +
-      '</select>' +
-      '</div>' +
-      '<div class="{{CSS.RIGHT}} form-group{{^isCustomGrade}} hidden{{/isCustomGrade}}">' +
-      '<input id="{{id}}_grade_custom" type="text"{{#isCustomGrade}} value="{{fraction}}"{{/isCustomGrade}} ' +
-      'class="{{CSS.FRAC_CUSTOM}} form-control d-inline mx-2" style="width: 4rem;" />%' +
-      '</div>' +
-      '</div></li>' +
-      '{{/answerdata}}</ol></div>' +
-      '</form>' +
-      '</div>',
-    TYPE: '<div class="tiny_cloze mt-0 mx-2 mb-2">' +
-      '<p>{{STR.chooseqtypetoadd}}</p>' +
-      '<form name="tiny_cloze_form">' +
-      '<div class="{{CSS.TYPE}} form-check">' +
-      '{{#types}}' +
-      '<div class="option">' +
-      '<input name="qtype" id="qtype_qtype_{{type}}" value="{{type}}" type="radio" class="form-check-input">' +
-      '<label for="qtype_qtype_{{type}}">' +
-      '<span class="typename">{{type}}</span>' +
-      '<span class="{{CSS.SUMMARY}}"><h6>{{name}}</h6><p>{{summary}}</p>' +
-      '<ul>{{#options}}' +
-      '<li>{{.}}</li>' +
-      '{{/options}}</ul>' +
-      '</span>' +
-      '</label></div>' +
-      '{{/types}}</div>' +
-      '</form></div>',
-    FOOTER: '<button type="button" class="btn btn-secondary" data-action="cancel">{{cancel}}</button>' +
-      '<button type="button" class="btn btn-primary" data-action="save">{{submit}}</button>',
+    FORM: `<div class="tiny_cloze">
+      <p>{{name}} ({{qtype}})</p>
+      <form name="tiny_cloze_form">
+        <div class="row ml-0">
+          <div class="form-group">
+            <label for="{{elementid}}_mark">{{STR.defaultmark}}</label>
+            <input id="{{elementid}}_mark" type="text" value="{{marks}}"
+                   class="{{CSS.MARKS}} form-control d-inline mx-1" />
+            <a class="{{CSS.ADD}}" title="{{STR.addmoreanswerblanks}}"><img
+            class="icon_smallicon" src="${M.util.image_url('t/add', 'core')}"
+            alt="{{STR.addmoreanswerblanks}}"></a>
+          </div>
+          <div class="msg-error hidden"></div>
+        </div>
+        <div class="{{CSS.ANSWERS}} mb-3">
+          <ol class="pl-3">
+            {{#answerdata}}
+            <li class="mt-3">
+              <div class="row ml-0">
+                <div class="{{CSS.LEFT}} form-group">
+                  <label for="{{id}}_answer">{{STR.answer}}</label>
+                  <input id="{{id}}_answer" type="text" value="{{answer}}"
+                         class="{{CSS.ANSWER}} form-control d-inline mx-2" />
+                </div>
+                <div class="{{CSS.LEFT}} form-group">
+                  <a class="{{CSS.ADD}}" title="{{STR.addmoreanswerblanks}}"><img
+                  class="icon_smallicon" src="${M.util.image_url('t/add', 'core')}"
+                  alt="{{STR.addmoreanswerblanks}}"></a>
+                  <a class="{{CSS.DELETE}}" title="{{STR.delete}}"><img
+                  class="icon_smallicon" src="${M.util.image_url('t/delete', 'core')}"
+                  alt="{{STR.delete}}"></a>
+                  <a class="{{CSS.RAISE}}" title="{{STR.up}}"><img
+                  class="icon_smallicon" src="${M.util.image_url('t/up', 'core')}"
+                  alt="{{STR.up}}"></a>
+                  <a class="{{CSS.LOWER}}" title="{{STR.down}}"><img
+                  class="icon_smallicon" src="${M.util.image_url('t/down', 'core')}"
+                  alt="{{STR.down}}"></a>
+                </div>
+              </div>
+              {{#numerical}}
+                <div class="row">
+                  <div class="{{CSS.RIGHT}} form-group">
+                    <label for="{{id}}_tolerance">{{{STR.tolerance}}}</label>
+                    <input id="{{id}}_tolerance" type="text" value="{{tolerance}}"
+                           class="{{CSS.TOLERANCE}} form-control d-inline mx-2" />
+                  </div>
+                </div>
+              {{/numerical}}
+              <div class="row">
+                <div class="{{CSS.RIGHT}} form-group">
+                  <label for="{{id}}_feedback">{{STR.feedback}}</label>
+                  <input id="{{id}}_feedback" type="text" value="{{feedback}}"
+                  class="{{CSS.FEEDBACK}} form-control d-inline mx-2" />
+                </div>
+                <div class="{{CSS.RIGHT}} form-group">
+                  <label id="{{id}}_grade">{{STR.grade}}</label>
+                  <select id="{{id}}_grade" class="{{CSS.FRACTION}} custom-select mx-2">
+                    {{{fractionOptions}}}
+                  </select>
+                </div>
+                <div class="{{CSS.RIGHT}} form-group{{^isCustomGrade}} hidden{{/isCustomGrade}}">
+                  <input id="{{id}}_grade_custom" type="text"{{#isCustomGrade}} value="{{fraction}}"{{/isCustomGrade}}
+                         class="{{CSS.FRAC_CUSTOM}} form-control d-inline mx-2" style="width: 4rem;" />%
+                </div>
+              </div>
+            </li>
+            {{/answerdata}}
+          </ol>
+        </div>
+      </form></div>`,
+    TYPE: `<div class="tiny_cloze mt-0 mx-2 mb-2">
+      <p>{{STR.chooseqtypetoadd}}</p>
+      <form name="tiny_cloze_form">
+        <div class="{{CSS.TYPE}} form-check">
+          {{#types}}
+            <div class="option">
+              <input name="qtype" id="qtype_qtype_{{type}}" value="{{type}}" type="radio" class="form-check-input">
+              <label for="qtype_qtype_{{type}}">
+                <span class="typename">{{type}}</span>
+                <span class="{{CSS.SUMMARY}}">
+                  <h6>{{name}}</h6>
+                  <p>{{summary}}</p>
+                  <ul>
+                    {{#options}}
+                      <li>{{.}}</li>
+                    {{/options}}
+                  </ul>
+                </span>
+              </label>
+            </div>
+          {{/types}}
+        </div>
+      </form></div>`,
+    FOOTER: `<button type="button" class="btn btn-secondary"
+        data-action="cancel">{{cancel}}</button>
+        <button type="button" class="btn btn-primary"
+        data-action="save">{{submit}}</button>`,
   };
   const FRACTIONS = [
     {value: 100},
