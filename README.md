@@ -103,6 +103,14 @@ at https://docs.moodle.org/en/Multi-language_content_filter.
 
 ## History
 
+### Current Master
+- When creating blanks for possible answers, the default grade is now "Correct" instead
+of the previous "Incorrect".
+- When a text is selected, the content is taken for the first answer field. This restores
+a behaviour that the original cloze plugin for Atto contained.
+- Wider input fields for answer and feedback in modal dialogue
+(thanks to [Joseph Rézeau](https://github.com/rezeau))
+
 ### v1.6
 - Add Support for Moodle 4.4 and PHP 8.3.
 
