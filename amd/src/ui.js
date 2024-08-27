@@ -440,6 +440,11 @@ let _marks = 1;
 let _modal = null;
 
 /**
+ * If its a normal selection of text, use it for the first answer field.
+ */
+let _firstAnswer = null;
+
+/**
  * Inject the editor instance and add markers to the cloze question texts.
  * @param {tinymce.Editor} ed
  */
@@ -486,12 +491,14 @@ const displayDialogue = async function() {
   // Resolve whether cursor is in a subquestion.
   var subquestion = resolveSubquestion();
   if (subquestion) {
+    _firstAnswer = null;
     // Subquestion found, remember which node of the marker nodes is selected.
     _selectedOffset = indexOfNode(_editor.dom.select('.' + markerClass), subquestion);
     _parseSubquestion(subquestion.innerHTML);
     _setDialogueContent(_qtype);
   } else {
     // No subquestion found, no offset to remember.
+    _firstAnswer = _editor.selection.getContent();
     _selectedOffset = -1;
     _setDialogueContent();
   }
@@ -737,6 +744,9 @@ const _choiceHandler = function(e) {
   _answerdata = [];
   for (let x = 0; x < max; x++) {
     _answerdata.push({...blankAnswer, id: getUuid()});
+  }
+  if (_firstAnswer) {
+    _answerdata[0].answer = _firstAnswer;
   }
   _modal.destroy();
   // Our choice is stored in _qtype. We need to create the modal dialogue with the form now.
