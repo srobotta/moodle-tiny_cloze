@@ -737,7 +737,7 @@ const _choiceHandler = function(e) {
     answer: '',
     feedback: '',
     fraction: 100,
-    fractionOptions: getFractionOptions(max === 1 ? '=' : ''),
+    fractionOptions: getFractionOptions('='),
     tolerance: 0,
     isCustomGrade: false,
   };
