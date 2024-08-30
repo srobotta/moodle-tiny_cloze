@@ -732,13 +732,15 @@ const _choiceHandler = function(e) {
   if (qtype) {
     _qtype = qtype.value;
   }
+  // For numerical and short answer questions we offer one response field only. All other
+  // question types have three empty response fields.
   const max = (_qtype.indexOf('SHORTANSWER') !== -1 || _qtype === 'NUMERICAL') ? 1 : 3;
   const blankAnswer = {
     id: getUuid(),
     answer: '',
     feedback: '',
     fraction: 100,
-    fractionOptions: getFractionOptions('='),
+    fractionOptions: getFractionOptions(''),
     tolerance: 0,
     isCustomGrade: false,
   };
@@ -746,6 +748,9 @@ const _choiceHandler = function(e) {
   for (let x = 0; x < max; x++) {
     _answerdata.push({...blankAnswer, id: getUuid()});
   }
+  // The first response field gets the default grade correct.
+  _answerdata[0].fractionOptions = getFractionOptions('=');
+  // In case the user seleced some text, this is used as the first answer.
   if (_firstAnswer) {
     _answerdata[0].answer = _firstAnswer;
   }
