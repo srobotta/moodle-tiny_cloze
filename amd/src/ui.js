@@ -984,7 +984,7 @@ const _setSubquestion = function(e) {
 
 /**
  * Read the form data, process it and store the result in the internal  _answerdata array.
- * Also, is validation is enabled, the custom_grade field is in use and does not contain
+ * Also, if validation is enabled, the custom_grade field is in use and does not contain
  * a number, then the field is marked as an error and the return value is false.
  *
  * @method _processFormData
@@ -1007,6 +1007,7 @@ const _processFormData = function(validate) {
     answers.item(i).classList.remove('error');
     customGrades.item(i).classList.remove('error');
     answer = answers.item(i).value;
+    // For numerical questions we need to check if the answer and tolerance is a number.
     if (_qtype === 'NM' || _qtype === 'NUMERICAL') {
       answer = Number(answer);
       tolerance = Number(tolerances.item(i).value);
@@ -1032,6 +1033,7 @@ const _processFormData = function(validate) {
       isCustomGrade: fractions.item(i).value === selectCustomPercent
     };
     if (validate) {
+      // When custom grades are used, the value must be a number between -100 and 100 (percent).
       if (currentAnswer.isCustomGrade &&
         (isNaN(currentAnswer.fraction) || currentAnswer.fraction < -100 || currentAnswer.fraction > 100
           || currentAnswer.fraction.trim() === '')
@@ -1039,20 +1041,42 @@ const _processFormData = function(validate) {
         hasErrors.push(STR.err_custom_rate);
         customGrades.item(i).classList.add('error');
       }
-      // Check for non-empty value in the original input.
-      if (answers.item(i).value.trim() === '') {
-        answers.item(i).classList.add('error');
-        hasErrors.push(STR.err_empty_answer);
-      }
-      if (currentAnswer.fraction === '100' || currentAnswer.fraction === '=') {
+      // We found a correct answer, when grade is marked as 100 or "=" and the answer is not empty.
+      if ((currentAnswer.fraction === '100' || currentAnswer.fraction === '=') && answers.item(i).value.trim() !== '') {
         foundCorrect = true;
       }
     }
     _answerdata.push(currentAnswer);
     _marks = _form.querySelector('.' + CSS.MARKS).value;
   }
-  if (validate && !foundCorrect) {
-    hasErrors.push(STR.err_none_correct);
+  if (validate) {
+    if (!foundCorrect) { // No correct answer found.
+      let focusFirst = false;
+      let noneCorrect = true; // The grade has a value that marks the answer as not correct.
+      for (let i = 0; i < answers.length; i++) {
+        // Check for non-empty value in the original input and mark them with an error.
+        if (answers.item(i).value.trim() === '') {
+          answers.item(i).classList.add('error');
+          if (!focusFirst) {
+            hasErrors.push(STR.err_empty_answer);
+            answers.item(i).focus();
+            focusFirst = true;
+          }
+        }
+        if (_answerdata[i].fraction === '100' || _answerdata[i].fraction === '=') {
+          noneCorrect = false;
+        }
+      }
+      if (noneCorrect) {
+        hasErrors.push(STR.err_none_correct);
+      }
+    } else { // There is at least one correct answer, we remove all empty answers.
+      for (let i = 0; i < _answerdata.length; i++) {
+        if (answers.item(i).value.trim() === '') {
+          _answerdata.splice(i, 1);
+        }
+      }
+    }
   }
   return hasErrors;
 };

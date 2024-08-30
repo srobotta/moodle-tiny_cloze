@@ -103,6 +103,10 @@ at https://docs.moodle.org/en/Multi-language_content_filter.
 
 ## History
 
+### Current Master
+- Empty response field are automatically ignored when the question otherwise can be created
+from the remaining filled response fields.
+
 ### v1.7
 - When creating blanks for possible answers, the default grade is now "Correct" instead
 of the previous "Incorrect".

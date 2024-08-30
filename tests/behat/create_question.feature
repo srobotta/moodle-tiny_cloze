@@ -195,3 +195,23 @@ Feature: Test the cloze question editor string compilation after creating the qu
     """
     <p><span class="cloze-question-marker" contenteditable="false">{2:SHORTANSWER:=William~=Bill}</span></p>
     """
+
+  Scenario: Create a MULTICHOICE question with 2 correct answers and the empty field will be ignored automatically
+    When I am on the "Course 1" "core_question > course question bank" page logged in as teacher
+    And I press "Create a new question ..."
+    And I set the field "Embedded answers (Cloze)" to "1"
+    And I click on "Add" "button" in the "Choose a question type to add" "dialogue"
+    And I set the field "Question name" to "multianswer-001"
+    And I click on "Cloze question editor" "button"
+    And I set the field "MULTICHOICE" to "1"
+    And I click on "Select question type" "button"
+    And I set the field with xpath "//form[@name='tiny_cloze_form']//li[1]//input[contains(@class, 'tiny_cloze_answer')]" to "William"
+    And I set the field with xpath "//form[@name='tiny_cloze_form']//li[3]//input[contains(@class, 'tiny_cloze_answer')]" to "Bill"
+    When I click on "Insert question" "button"
+    #And I click on the "View > Source code" menu item for the "Question text" TinyMCE editor
+    #Then I should see "<p>{2:SHORTANSWER:=William~=Bill}</p>" source code for the "Question text" TinyMCE editor
+    And I click on "Save changes and continue editing" "button"
+    Then the field "Question text" matches multiline:
+    """
+    <p><span class="cloze-question-marker" contenteditable="false">{1:MULTICHOICE:=William~=Bill}</span></p>
+    """
