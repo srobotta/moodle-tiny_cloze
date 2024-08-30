@@ -1054,34 +1054,52 @@ const _processFormData = function(validate) {
     _answerdata.push(currentAnswer);
     _marks = _form.querySelector('.' + CSS.MARKS).value;
   }
-  if (validate) {
-    if (!foundCorrect) { // No correct answer found.
-      let focusFirst = false;
-      let noneCorrect = true; // The grade has a value that marks the answer as not correct.
-      for (let i = 0; i < answers.length; i++) {
-        // Check for non-empty value in the original input and mark them with an error.
-        if (answers.item(i).value.trim() === '') {
-          answers.item(i).classList.add('error');
-          if (!focusFirst) {
-            hasErrors.push(STR.err_empty_answer);
-            answers.item(i).focus();
-            focusFirst = true;
-          }
-        }
-        if (_answerdata[i].fraction === '100' || _answerdata[i].fraction === '=') {
-          noneCorrect = false;
-        }
-      }
-      if (noneCorrect) {
-        hasErrors.push(STR.err_none_correct);
-      }
-    } else { // There is at least one correct answer, we remove all empty answers.
-      for (let i = 0; i < _answerdata.length; i++) {
-        if (answers.item(i).value.trim() === '') {
-          _answerdata.splice(i, 1);
-        }
+  if (!validate) {
+    return hasErrors;
+  }
+  return hasErrors.concat(_applyErrorsOnAnswers(answers, foundCorrect));
+};
+
+/**
+ * Iterate over all answer data, check for empty answers and incorrect grades. Apply the
+ * error class to the appropriate fields and return an array with error messages that are
+ * displayed on top of the response fiels.
+ * If there are correct answers, then eliminate all empty answers.
+ *
+ * @method _applyErrorsOnAnswers
+ * @param {NodeList} answers
+ * @param {Boolean} foundCorrectAnswer
+ * @return {Array}
+ * @private
+ */
+const _applyErrorsOnAnswers = function(answers, foundCorrectAnswer) {
+  if (foundCorrectAnswer) {
+    for (let i = 0; i < _answerdata.length; i++) {
+      if (answers.item(i).value.trim() === '') {
+        _answerdata.splice(i, 1);
       }
     }
+    return [];
+  }
+  let hasErrors = [];
+  let focusFirst = false;
+  let noneCorrect = true; // The grade has a value that marks the answer as not correct.
+  for (let i = 0; i < answers.length; i++) {
+    // Check for non-empty value in the original input and mark them with an error.
+    if (answers.item(i).value.trim() === '') {
+      answers.item(i).classList.add('error');
+      if (!focusFirst) {
+        hasErrors.push(STR.err_empty_answer);
+        answers.item(i).focus();
+        focusFirst = true;
+      }
+    }
+    if (_answerdata[i].fraction === '100' || _answerdata[i].fraction === '=') {
+      noneCorrect = false;
+    }
+  }
+  if (noneCorrect) {
+    hasErrors.push(STR.err_none_correct);
   }
   return hasErrors;
 };
