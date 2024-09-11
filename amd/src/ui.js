@@ -950,8 +950,7 @@ const _setSubquestion = function(e) {
   const errMsg = _form.querySelector('.msg-error');
   const formErrors = _processFormData(true);
   if (formErrors.length > 0) {
-    const unique = formErrors.filter((value, index, array) => array.indexOf(value) === index);
-    errMsg.innerHTML = '<ul><li>' + unique.join('</li><li>') + '</li></ul>';
+    errMsg.innerHTML = '<ul><li>' + formErrors.join('</li><li>') + '</li></ul>';
     errMsg.classList.remove('hidden');
     return;
   } else {
@@ -960,7 +959,11 @@ const _setSubquestion = function(e) {
   // Build the parser function from the data, that is going to be placed into the editor content.
   let question = '{' + _marks + ':' + _qtype + ':';
 
+  // Filter all empty responses
   for (let i = 0; i < _answerdata.length; i++) {
+    if (_answerdata[i].raw === '') {
+      continue;
+    }
     question += _answerdata[i].fraction && !isNaN(_answerdata[i].fraction)
       ? '%' + _answerdata[i].fraction + '%' : _answerdata[i].fraction;
     question += strencode(_answerdata[i].answer);
@@ -973,6 +976,9 @@ const _setSubquestion = function(e) {
     if (i < _answerdata.length - 1) {
       question += '~';
     }
+  }
+  if (question.slice(-1) === '~') {
+    question = question.substring(0, question.length - 1);
   }
   question += '}';
 
@@ -988,9 +994,13 @@ const _setSubquestion = function(e) {
 };
 
 /**
- * Read the form data, process it and store the result in the internal  _answerdata array.
- * Also, if validation is enabled, the custom_grade field is in use and does not contain
- * a number, then the field is marked as an error and the return value is false.
+ * Read the form data, process it and store the result in the internal _answerdata array.
+ * Also, if validation is enabled, the fields are checked for invalid values e.g.
+ * - answer field is empty (if a correct answer is contained, empty fields are eliminated).
+ * - custom_grade field whenin use and does not contain a number.
+ * - no field is marked as a correct answer.
+ * - tolerance field must be in percentage of min -100 and max 100.
+ * Any field with an error is maked and the first field containing an error gets the focus.
  *
  * @method _processFormData
  * @param {boolean} validate
@@ -999,109 +1009,167 @@ const _setSubquestion = function(e) {
  */
 const _processFormData = function(validate) {
   _answerdata = [];
-  let answer;
-  let tolerance = 0;
-  let hasErrors = [];
-  let foundCorrect = false;
+  let globalErrors = [];
   const answers = _form.querySelectorAll('.' + CSS.ANSWER);
   const feedbacks = _form.querySelectorAll('.' + CSS.FEEDBACK);
   const fractions = _form.querySelectorAll('.' + CSS.FRACTION);
   const customGrades = _form.querySelectorAll('.' + CSS.FRAC_CUSTOM);
   const tolerances = _form.querySelectorAll('.' + CSS.TOLERANCE);
+  // Remove any error classes.
   for (let i = 0; i < answers.length; i++) {
     answers.item(i).classList.remove('error');
     customGrades.item(i).classList.remove('error');
-    answer = answers.item(i).value;
-    // For numerical questions we need to check if the answer and tolerance is a number.
-    if (_qtype === 'NM' || _qtype === 'NUMERICAL') {
-      answer = Number(answer);
-      tolerance = Number(tolerances.item(i).value);
-      tolerances.item(i).classList.remove('error');
-      if (validate) {
-        if (isNaN(answer)) {
-          answers.item(i).classList.add('error');
-          hasErrors.push(STR.err_not_numeric);
-        }
-        if (isNaN(tolerance)) {
-          tolerances.item(i).classList.add('error');
-          hasErrors.push(STR.err_not_numeric);
-        }
-      }
-    }
     const currentAnswer = {
-      answer: answer,
+      raw: answers.item(i).value.trim(),
+      answer: answers.item(i).value.trim(),
       id: getUuid(),
       feedback: feedbacks.item(i).value,
       fraction: fractions.item(i).value === selectCustomPercent ? customGrades.item(i).value : fractions.item(i).value,
       fractionOptions: getFractionOptions(fractions.item(i).value),
-      tolerance: tolerance,
+      tolerance: tolerances.length > 0 ? tolerances.item(i).value : 0,
       isCustomGrade: fractions.item(i).value === selectCustomPercent
     };
-    if (validate) {
-      // When custom grades are used, the value must be a number between -100 and 100 (percent).
-      if (currentAnswer.isCustomGrade &&
-        (isNaN(currentAnswer.fraction) || currentAnswer.fraction < -100 || currentAnswer.fraction > 100
-          || currentAnswer.fraction.trim() === '')
-      ) {
-        hasErrors.push(STR.err_custom_rate);
-        customGrades.item(i).classList.add('error');
-      }
-      // We found a correct answer, when grade is marked as 100 or "=" and the answer is not empty.
-      if ((currentAnswer.fraction === '100' || currentAnswer.fraction === '=') && answers.item(i).value.trim() !== '') {
-        foundCorrect = true;
-      }
+    if (_qtype === 'NM' || _qtype === 'NUMERICAL') {
+      tolerances.item(i).classList.remove('error');
+      // In numeric questions convert answer and tolerance to numeric values (this filters non numeric values).
+      currentAnswer.answer = Number(currentAnswer.answer);
+      currentAnswer.tolerance = Number(currentAnswer.tolerance);
     }
     _answerdata.push(currentAnswer);
-    _marks = _form.querySelector('.' + CSS.MARKS).value;
   }
-  if (!validate) {
-    return hasErrors;
+  _marks = _form.querySelector('.' + CSS.MARKS).value;
+
+  if (validate) {
+    const {hasCorrectAnswer, errors} = _validateAnswers();
+    for (let i = 0; i < _answerdata.length; i++) {
+      for (const err of _answerdata[i].hasErrors) {
+        if (hasCorrectAnswer && (err === 'empty_answer' || err === 'correct_but_empty')) {
+          break;
+        }
+        if (err === 'answer_not_numeric' || err === 'empty_answer' || err === 'correct_but_empty') {
+          answers.item(i).classList.add('error');
+        } else if (err === 'tolerance_not_numeric') {
+          tolerances.item(i).classList.add('error');
+        } else if (err === 'error_custom_rate') {
+          customGrades.item(i).classList.add('error');
+        }
+      }
+    }
+    globalErrors = _translateGlobalErrors(hasCorrectAnswer, errors);
+    // If we have errors, we focus the first field that contains an error.
+    if (globalErrors.length > 0) {
+      _form.querySelector('input.error').focus();
+    }
   }
-  return hasErrors.concat(_applyErrorsOnAnswers(answers, foundCorrect));
+  return globalErrors;
 };
 
 /**
- * Iterate over all answer data, check for empty answers and incorrect grades. Apply the
- * error class to the appropriate fields and return an array with error messages that are
- * displayed on top of the response fiels.
- * If there are correct answers, then eliminate all empty answers.
+ * Validates the answer array. Checks for each question if the data from the form is
+ * incomplete or has other errors. These are flagged accordingly in the array element.
+ * The retruned object contains the properties:
+ * - hasCorrectAnswer {boolean} is true if there is at least one correct answer.
+ * - errors {Array} list of strings that contain an error code that is globaly used for error messages.
  *
- * @method _applyErrorsOnAnswers
- * @param {NodeList} answers
- * @param {Boolean} foundCorrectAnswer
  * @return {Array}
  * @private
  */
-const _applyErrorsOnAnswers = function(answers, foundCorrectAnswer) {
-  if (foundCorrectAnswer) {
-    for (let i = 0; i < _answerdata.length; i++) {
-      if (answers.item(i).value.trim() === '') {
-        _answerdata.splice(i, 1);
+const _validateAnswers = function() {
+  let errors = [];
+  let hasCorrect = false;
+  for (let i = 0; i < _answerdata.length; i++) {
+    _answerdata[i].hasErrors = [];
+    // Check if we have an empty answer string.
+    if (_answerdata[i].raw === '') {
+      _answerdata[i].hasErrors.push('empty_answer');
+    }
+    // When there are numeric questions, check that the answer and tolerance is a valid number.
+    if (_qtype === 'NM' || _qtype === 'NUMERICAL') {
+      if (isNaN(_answerdata[i].answer) && _answerdata[i].raw !== '') {
+        _answerdata[i].hasErrors.push('answer_not_numeric');
+      }
+      if (isNaN(_answerdata[i].tolerance)) {
+        _answerdata[i].hasErrors.push('tolerance_not_numeric');
       }
     }
-    return [];
-  }
-  let hasErrors = [];
-  let focusFirst = false;
-  let noneCorrect = true; // The grade has a value that marks the answer as not correct.
-  for (let i = 0; i < answers.length; i++) {
-    // Check for non-empty value in the original input and mark them with an error.
-    if (answers.item(i).value.trim() === '') {
-      answers.item(i).classList.add('error');
-      if (!focusFirst) {
-        hasErrors.push(STR.err_empty_answer);
-        answers.item(i).focus();
-        focusFirst = true;
-      }
+    // Check the custom grade, that must be a percentage number between -100 and 100.
+    if (_answerdata[i].isCustomGrade &&
+      (isNaN(_answerdata[i].fraction) || _answerdata[i].fraction < -100 || _answerdata[i].fraction > 100
+        || _answerdata[i].fraction.trim() === '')
+    ) {
+      _answerdata[i].hasErrors.push('error_custom_rate');
     }
+    // We found a correct answer, when grade is marked as 100 or "=" and the answer is not empty.
     if (_answerdata[i].fraction === '100' || _answerdata[i].fraction === '=') {
-      noneCorrect = false;
+      if (_answerdata[i].raw !== '') {
+        _answerdata[i].isCorrect = true;
+        hasCorrect = true;
+      } else {
+        _answerdata[i].hasErrors.push('correct_but_empty');
+      }
     }
+    errors = errors.concat(_answerdata[i].hasErrors);
   }
-  if (noneCorrect) {
-    hasErrors.push(STR.err_none_correct);
+
+  return {
+    hasCorrectAnswer: hasCorrect,
+    errors: _combineGlobalErrors(hasCorrect, errors),
+  };
+};
+
+/**
+ * Translate the errors into a readable string for a list that is used on top of the
+ * input fields, to indicate what part of the data is incorrect.
+ *
+ * @param {Boolean} hasCorrectAnswer
+ * @param {Array} errors
+ * @return {Array}
+ * @private
+ */
+const _translateGlobalErrors = function(hasCorrectAnswer, errors) {
+  const errTranslated = [];
+  // Translate the error strings into a string that can be displayed in the form.
+  const trMsg = {
+    emptyanswer: STR.err_empty_answer,
+    answernotnumeric: STR.err_not_numeric,
+    tolerancenotnumeric: STR.err_not_numeric,
+    errorcustomrate: STR.err_custom_rate,
+    nonecorrect: STR.err_none_correct,
+  };
+  for (const err of errors) {
+    // If there's at least one correct answer, we filter out all empty answers and therefore do not
+    // show the error message.
+    if (hasCorrectAnswer && err === 'empty_answer' || err === 'correct_but_empty') {
+      continue;
+    }
+    // Remove underscore (we do this only because of the js linter).
+    const key = err.replace(/_/g, '');
+    errTranslated.push(trMsg[key]);
   }
-  return hasErrors;
+  return errTranslated;
+};
+
+/**
+ * Combine the error list from the answers to a global list.
+ *
+ * @param {Boolean} hasCorrectAnswer
+ * @param {Array} errors
+ * @return {Array}
+ * @private
+ */
+const _combineGlobalErrors = function(hasCorrectAnswer, errors) {
+  // Unique errors for the global error list.
+  const errUnique = errors.filter((value, index, array) => array.indexOf(value) === index);
+  // If we have a correct answer, do not show the empty answer error, because empty responses are filtered.
+  if (hasCorrectAnswer) {
+    const i = errUnique.indexOf('empty_answer');
+    if (i > -1) {
+      errUnique.splice(i, 1);
+    }
+  } else if (!errUnique.includes('correct_but_empty')) {
+    errUnique.push('none_correct');
+  }
+  return errUnique;
 };
 
 /**
