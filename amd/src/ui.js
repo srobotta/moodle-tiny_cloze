@@ -79,7 +79,7 @@ const markerClass = 'cloze-question-marker';
 const markerSpan = '<span contenteditable="false" class="' + markerClass + '" data-mce-contenteditable="false">';
 // Regex to recognize the question string in the text e.g. {1:NUMERICAL:...} or {:MULTICHOICE:...}
 // eslint-disable-next-line max-len
-const reQtype = /\{([0-9]*):(MULTICHOICE(_H|_V|_S|_HS|_VS)?|MULTIRESPONSE(_H|_S|_HS)?|NUMERICAL|SHORTANSWER(_C)?|SAC?|NM|MWC?|M[CR](V|H|VS|HS)?):(.*?)\}/g;
+const reQtype = /\{([0-9]*):(MULTICHOICE(_H|_V|_S|_HS|_VS)?|MULTIRESPONSE(_H|_S|_HS)?|NUMERICAL|SHORTANSWER(_C)?|SAC?|NM|MWC?|M[CR](V|H|VS|HS)?):(.*?)(?<!\\)\}/g;
 
 // CSS classes that are used in the modal dialogue.
 const CSS = {
