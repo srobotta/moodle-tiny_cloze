@@ -110,7 +110,7 @@ const TEMPLATE = {
     '<div class="form-group">' +
     '<label for="{{elementid}}_mark">{{STR.defaultmark}}</label>' +
     '<input id="{{elementid}}_mark" type="text" value="{{marks}}" ' +
-    'class="{{CSS.MARKS}} form-control d-inline mx-1" />' +
+    'class="{{CSS.MARKS}} form-control d-inline mx-2" />' +
     '<a class="{{CSS.ADD}}" title="{{STR.addmoreanswerblanks}}">' +
     '<img class="icon_smallicon" src="' +
     M.util.image_url('t/add', 'core') + '" alt="{{STR.addmoreanswerblanks}}"></a>' +
