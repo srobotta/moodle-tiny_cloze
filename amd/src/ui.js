@@ -647,6 +647,7 @@ const _setDialogueContent = function(qtype, nomodalevents) {
   _modal.show();
   const $root = _modal.getRoot();
   _form = $root.get(0).querySelector('form');
+  _toggleDeleteIcon();
 
   if (!nomodalevents) {
     _modal.registerEventListeners();
@@ -717,6 +718,23 @@ const _setDialogueContent = function(qtype, nomodalevents) {
       }
     });
   });
+};
+
+/**
+ * If there is one answer field, hide the delete icon. Otherwise show them
+ * all to allow deletion of any answer.
+ *
+ * @private
+ */
+const _toggleDeleteIcon = function() {
+  const deleteIcons = _form.querySelectorAll('.' + CSS.DELETE);
+  if (deleteIcons.length === 1) {
+    deleteIcons[0].classList.add('hidden');
+    return;
+  }
+  for (let i = 0; i < deleteIcons.length; i++) {
+    deleteIcons[i].classList.remove('hidden');
+  }
 };
 
 /**
@@ -868,6 +886,7 @@ const _addAnswer = function(a) {
     isCustomGrade: isCustomGrade(fraction)
   });
   _setDialogueContent(_qtype, true);
+  _toggleDeleteIcon();
   _form.querySelectorAll('.' + CSS.ANSWER).item(index).focus();
 };
 
@@ -889,6 +908,7 @@ const _deleteAnswer = function(a) {
   const answers = _form.querySelectorAll('.' + CSS.ANSWER);
   index = Math.min(index, answers.length - 1);
   answers.item(index).focus();
+  _toggleDeleteIcon();
 };
 
 /**
