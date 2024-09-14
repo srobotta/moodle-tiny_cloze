@@ -45,3 +45,33 @@ Feature: Test basic ui features of the dialogue window
     Then I should see "Multiple choice - single response (MULTICHOICE_H)"
 
     And I click on "Cancel" "button" in the "Cloze question editor" "dialogue"
+
+  Scenario: Trash icon should be visible if several anser options are available and disappear if there is only one option available
+    When I am on the "Course 1" "core_question > course question bank" page logged in as teacher
+    And I press "Create a new question ..."
+    And I set the field "Embedded answers (Cloze)" to "1"
+    And I click on "Add" "button" in the "Choose a question type to add" "dialogue"
+    And I set the field "Question name" to "multianswer-001"
+    And I click on "Cloze question editor" "button"
+    And I set the field "NUMERICAL" to "1"
+    And I click on "Select question type" "button"
+    Then ".tiny_cloze_delete img" "css_element" should not be visible
+
+    When I click on "//form[@name='tiny_cloze_form']//li[1]//a[contains(@class, 'tiny_cloze_add')]" "xpath"
+    Then ".tiny_cloze_delete img" "css_element" should be visible
+
+    When I click on "//form[@name='tiny_cloze_form']//li[1]//a[contains(@class, 'tiny_cloze_delete')]" "xpath"
+    Then ".tiny_cloze_delete img" "css_element" should not be visible
+
+    When I click on "Cancel" "button" in the "Cloze question editor" "dialogue"
+    And I click on "Cloze question editor" "button"
+    And I set the field "MULTICHOICE_H" to "1"
+    And I click on "Select question type" "button"
+    Then ".tiny_cloze_delete img" "css_element" should be visible
+    
+    When I click on "//form[@name='tiny_cloze_form']//li[3]//a[contains(@class, 'tiny_cloze_delete')]" "xpath"
+    Then ".tiny_cloze_delete img" "css_element" should be visible
+
+    When I click on "//form[@name='tiny_cloze_form']//li[1]//a[contains(@class, 'tiny_cloze_delete')]" "xpath"
+    Then ".tiny_cloze_delete img" "css_element" should not be visible
+
