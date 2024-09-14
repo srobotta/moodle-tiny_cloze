@@ -68,10 +68,9 @@ Feature: Test basic ui features of the dialogue window
     And I set the field "MULTICHOICE_H" to "1"
     And I click on "Select question type" "button"
     Then ".tiny_cloze_delete img" "css_element" should be visible
-    
+
     When I click on "//form[@name='tiny_cloze_form']//li[3]//a[contains(@class, 'tiny_cloze_delete')]" "xpath"
     Then ".tiny_cloze_delete img" "css_element" should be visible
 
     When I click on "//form[@name='tiny_cloze_form']//li[1]//a[contains(@class, 'tiny_cloze_delete')]" "xpath"
     Then ".tiny_cloze_delete img" "css_element" should not be visible
-

@@ -77,3 +77,24 @@ Feature: Test the cloze question editor string parser that a selected question s
     And the field with xpath "//form[@name='tiny_cloze_form']//li[2]//input[contains(@class, 'tiny_cloze_answer')]" matches value "Bill"
     And the field with xpath "//form[@name='tiny_cloze_form']//li[2]//select[contains(@class, 'tiny_cloze_frac')]" matches value "Correct"
     And the field with xpath "//form[@name='tiny_cloze_form']//li[2]//input[contains(@class, 'tiny_cloze_feedback')]" matches value "This is the short form but correct"
+
+  Scenario: Load MULTICHOICE_V question with latex notation
+    When I am on the "Course 1" "core_question > course question bank" page logged in as teacher
+    And I press "Create a new question ..."
+    And I set the field "Embedded answers (Cloze)" to "1"
+    And I click on "Add" "button" in the "Choose a question type to add" "dialogue"
+    And I set the field "Question name" to "multianswer-001"
+    And I set the field "Question text" to multiline:
+    """
+    <p><span class="cloze-question-marker" contenteditable="false">{1:MULTICHOICE_V:=\(\frac{1\}{2\}\)~\(\frac{2\}{3\}\)~\(\frac{3\}{4\}\)}</span></p>
+    """
+    And I select the "span" element in position "0" of the "Question text" TinyMCE editor
+    When I click on "Cloze question editor" "button"
+    Then I should see "Multiple choice - single response (MULTICHOICE_V)"
+    And the field "Default mark" matches value "1"
+    And the field with xpath "//form[@name='tiny_cloze_form']//li[1]//input[contains(@class, 'tiny_cloze_answer')]" matches value "\(\frac{1}{2}\)"
+    And the field with xpath "//form[@name='tiny_cloze_form']//li[1]//select[contains(@class, 'tiny_cloze_frac')]" matches value "Correct"
+    And the field with xpath "//form[@name='tiny_cloze_form']//li[2]//input[contains(@class, 'tiny_cloze_answer')]" matches value "\(\frac{2}{3}\)"
+    And the field with xpath "//form[@name='tiny_cloze_form']//li[2]//select[contains(@class, 'tiny_cloze_frac')]" matches value "Incorrect"
+    And the field with xpath "//form[@name='tiny_cloze_form']//li[3]//input[contains(@class, 'tiny_cloze_answer')]" matches value "\(\frac{3}{4}\)"
+    And the field with xpath "//form[@name='tiny_cloze_form']//li[3]//select[contains(@class, 'tiny_cloze_frac')]" matches value "Incorrect"
