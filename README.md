@@ -103,6 +103,12 @@ at https://docs.moodle.org/en/Multi-language_content_filter.
 
 ## History
 
+### Current main branch
+- Fix bug that escaped closing curly brakets where not recognized [issue #21](https://github.com/srobotta/moodle-tiny_cloze/issues/21).
+- On double click on a cloze question opens the dialogue automatically.
+- Delete icon disappears when there is one answer option left only.
+- Style adaptations on the dalogue that will be necessary with upcoming Moodle 4.5. 
+
 ### v1.8
 - Empty response field are automatically ignored when the question otherwise can be created
 from the remaining filled response fields.
