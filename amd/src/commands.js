@@ -28,7 +28,7 @@ import {
     clozeeditButtonName,
     icon,
 } from './common';
-import {displayDialogue, resolveSubquestion, onInit, onBeforeGetContent, onSubmit} from './ui';
+import {displayDialogue, displayDialogueForEdit, resolveSubquestion, onInit, onBeforeGetContent, onSubmit} from './ui';
 
 /**
  * Get the setup function for the buttons.
@@ -64,7 +64,7 @@ export const getSetup = async() => {
         editor.ui.registry.addToggleButton(clozeeditButtonName, {
             icon,
             tooltip: clozeButtonText,
-            onAction: () => displayDialogue(editor),
+            onAction: () => displayDialogue(),
             onSetup: (api) => {
                 editor.on('click', () => {
                      api.setActive(resolveSubquestion() !== false);
@@ -76,11 +76,12 @@ export const getSetup = async() => {
         editor.ui.registry.addMenuItem(clozeeditButtonName, {
             icon,
             text: clozeButtonText,
-            onAction: () => displayDialogue(editor),
+            onAction: () => displayDialogue(),
         });
 
         editor.on('init', () => onInit(editor));
         editor.on('BeforeGetContent', format => onBeforeGetContent(format));
         editor.on('submit', () => onSubmit());
+        editor.on('dblclick', (e) => displayDialogueForEdit(e.target));
     };
 };

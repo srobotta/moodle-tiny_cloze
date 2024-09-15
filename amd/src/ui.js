@@ -484,13 +484,13 @@ const _createModal = async function() {
  * of possible questions is show.
  *
  * @method displayDialogue
- * @private
+ * @public
  */
 const displayDialogue = async function() {
   await _createModal();
 
   // Resolve whether cursor is in a subquestion.
-  var subquestion = resolveSubquestion();
+  const subquestion = resolveSubquestion();
   if (subquestion) {
     _firstAnswer = null;
     // Subquestion found, remember which node of the marker nodes is selected.
@@ -506,12 +506,33 @@ const displayDialogue = async function() {
 };
 
 /**
+ * On double click, check that we are on a question and display the dialogue with the question to edit.
+ * @method displayDialogueForEdit
+ * @param {Node} target
+ * @public
+ */
+const displayDialogueForEdit = async function(target) {
+
+  const subquestion = resolveSubquestion(target);
+  if (!subquestion) {
+    return;
+  }
+  await _createModal();
+  _selectedOffset = indexOfNode(_editor.dom.select('.' + markerClass), subquestion);
+  _parseSubquestion(subquestion.innerHTML);
+  _setDialogueContent(_qtype);
+};
+
+/**
  * Search for cloze questions based on a regular expression. All the matching snippets at least contain the cloze
  * question definition. Although Moodle does not support encapsulated other functions within curly brackets, we
  * still try to find the correct closing bracket. The so extracted cloze question is surrounded by a marker span
  * element, that contains attributes so that the content inside the span cannot be modified by the editor (in the
  * textarea). Also, this makes it a lot easier to select the question, edit it in the dialogue and replace the result
  * in the existing text area.
+ *
+ * @method _addMarkers
+ * @private
  */
 const _addMarkers = function() {
 
@@ -578,7 +599,10 @@ const _removeMarkers = function() {
  * from the editor content and add them again when the dialogue is closed.
  * Since this event is also triggered when the editor data is saved, we use this function to remove the
  * highlighting content at that time.
+ *
+ * @method onBeforeGetContent
  * @param {object} content
+ * @public
  */
 const onBeforeGetContent = function(content) {
   if (!isNull(content.source_view) && content.source_view === true) {
@@ -600,6 +624,9 @@ const onBeforeGetContent = function(content) {
 
 /**
  * Fires when the form containing the editor is submitted.
+ *
+ * @method onSubmit
+ * @public
  */
 const onSubmit = function() {
   _removeMarkers();
@@ -1197,10 +1224,11 @@ const _combineGlobalErrors = function(hasCorrectAnswer, errors) {
  * true.
  *
  * @method resolveSubquestion
+ * @param {Node|null} element The element to check if it is a subquestion.
  * @return {Mixed} The selected node of with the subquestion if found, false otherwise.
  */
-const resolveSubquestion = function() {
-  let span = _editor.selection.getStart();
+const resolveSubquestion = function(element) {
+  let span = element || _editor.selection.getStart();
   if (!isNull(span.classList) && span.classList.contains(markerClass)) {
     return span;
   }
@@ -1216,6 +1244,7 @@ const resolveSubquestion = function() {
 
 export {
   displayDialogue,
+  displayDialogueForEdit,
   resolveSubquestion,
   onInit,
   onBeforeGetContent,
