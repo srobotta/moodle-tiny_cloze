@@ -27,6 +27,7 @@ import ModalFactory from 'core/modal_factory';
 import Mustache from 'core/mustache';
 import {get_strings as getStrings} from 'core/str';
 import {component} from './common';
+import {hasQtypeMultianswerrgx} from './options';
 
 // Helper functions.
 const isNull = a => a === null || a === undefined;
@@ -77,9 +78,6 @@ const isCustomGrade = s => {
 // Marker class and the whole span element that is used to encapsulate the cloze question text.
 const markerClass = 'cloze-question-marker';
 const markerSpan = '<span contenteditable="false" class="' + markerClass + '" data-mce-contenteditable="false">';
-// Regex to recognize the question string in the text e.g. {1:NUMERICAL:...} or {:MULTICHOICE:...}
-// eslint-disable-next-line max-len
-const reQtype = /\{([0-9]*):(MULTICHOICE(_H|_V|_S|_HS|_VS)?|MULTIRESPONSE(_H|_S|_HS)?|NUMERICAL|SHORTANSWER(_C)?|SAC?|NM|MWC?|M[CR](V|H|VS|HS)?):(.*?)(?<!\\)\}/g;
 
 // CSS classes that are used in the modal dialogue.
 const CSS = {
@@ -189,16 +187,110 @@ const TEMPLATE = {
   FOOTER: '<button type="button" class="btn btn-secondary" data-action="cancel">{{cancel}}</button>' +
     '<button type="button" class="btn btn-primary" data-action="save">{{submit}}</button>',
 };
-  const FRACTIONS = [
-    {value: 100},
-    {value: 50},
-    {value: 0},
-  ];
+const FRACTIONS = [
+  {value: 100},
+  {value: 50},
+  {value: 0},
+];
 
 // Language strings used in the modal dialogue.
 const STR = {};
-const getStr = async() => {
-  getStrings([
+
+/**
+ * The editor instance that is injected via the onInit() function.
+ *
+ * @type {tinymce.Editor}
+ * @private
+ */
+let _editor = null;
+
+/**
+ * A reference to the currently open form.
+ *
+ * @param _form
+ * @type {Node}
+ * @private
+ */
+let _form = null;
+
+/**
+ * An array containing the current answers options
+ *
+ * @param _answerdata
+ * @type {Array}
+ * @private
+ */
+let _answerdata = [];
+
+/**
+ * The sub question type to be edited
+ *
+ * @param _qtype
+ * @type {string|null}
+ * @private
+ */
+let _qtype = null;
+
+/**
+ * Remember the pos of the selected node.
+ * @type {number}
+ * @private
+ */
+let _selectedOffset = -1;
+
+/**
+ * The maximum marks for the sub question
+ *
+ * @param _marks
+ * @type {Integer}
+ * @private
+ */
+let _marks = 1;
+
+/**
+ * The modal dialogue to be displayed when designing the cloze question types.
+ * @type {Modal|null}
+ */
+let _modal = null;
+
+/**
+ * If its a normal selection of text, use it for the first answer field.
+ * @type {string|null}
+ */
+let _firstAnswer = null;
+
+/**
+ * Inject the editor instance and add markers to the cloze question texts.
+ * @param {tinymce.Editor} ed
+ */
+const onInit = function(ed) {
+  _editor = ed; // The current editor instance.
+  // Add the marker spans.
+  _addMarkers();
+  // And get the language strings.
+  _getStr(ed);
+};
+
+/**
+ * Regex to recognize the question string in the text e.g. {1:NUMERICAL:...} or {:MULTICHOICE:...}
+ * @param {tinymce.Editor} editor
+ * @return {RegExp}
+ * @private
+ */
+const _getRegexQtype = (editor) => {
+  // eslint-disable-next-line max-len
+  const baseQtypes = 'MULTICHOICE(_H|_V|_S|_HS|_VS)?|MULTIRESPONSE(_H|_S|_HS)?|NUMERICAL|SHORTANSWER(_C)?|SAC?|NM|MWC?|M[CR](V|H|VS|HS)?';
+  const extQtypes = hasQtypeMultianswerrgx(editor) ? '|REGEXP(_C)?|RXC?' : '';
+  return new RegExp('\\{([0-9]*):(' + baseQtypes + extQtypes + '):(.*?)(?<!\\\\)\\}', 'g');
+};
+
+/**
+ * Load strings for the modal dialogue from the language packs.
+ * @param {tinymce.Editor} editor
+ * @private
+ */
+const _getStr = async(editor) => {
+  let strToFetch = [
     {key: 'answer', component: 'question'},
     {key: 'chooseqtypetoadd', component: 'question'},
     {key: 'defaultmark', component: 'question'},
@@ -237,48 +329,56 @@ const getStr = async() => {
     {key: 'err_empty_answer', component},
     {key: 'err_none_correct', component},
     {key: 'err_not_numeric', component},
-  ]).then(function() {
+  ];
+  let langKeys = [
+    'answer',
+    'chooseqtypetoadd',
+    'defaultmark',
+    'feedback',
+    'correct',
+    'incorrect',
+    'addmoreanswerblanks',
+    'delete',
+    'up',
+    'down',
+    'tolerance',
+    'grade',
+    'caseno',
+    'caseyes',
+    'singleno',
+    'singleyes',
+    'selectinline',
+    'horizontal',
+    'vertical',
+    'shuffle',
+    'multi_horizontal',
+    'multi_vertical',
+    'summary_multichoice',
+    'summary_shortanswer',
+    'summary_numerical',
+    'multichoice',
+    'multiresponse',
+    'numerical',
+    'shortanswer',
+    'btn_cancel',
+    'btn_select',
+    'btn_insert',
+    'title',
+    'custom_grade',
+    'err_custom_rate',
+    'err_empty_answer',
+    'err_none_correct',
+    'err_not_numeric',
+  ];
+  if (hasQtypeMultianswerrgx(editor)) {
+    strToFetch.push({key: 'regexp', component: 'qtype_regexp'});
+    strToFetch.push({key: 'pluginnamesummary', component: 'qtype_regexp'});
+    langKeys.push('regexp');
+    langKeys.push('summary_regexp');
+  }
+  getStrings(strToFetch).then(function() {
     const args = Array.from(arguments);
-    [
-      'answer',
-      'chooseqtypetoadd',
-      'defaultmark',
-      'feedback',
-      'correct',
-      'incorrect',
-      'addmoreanswerblanks',
-      'delete',
-      'up',
-      'down',
-      'tolerance',
-      'grade',
-      'caseno',
-      'caseyes',
-      'singleno',
-      'singleyes',
-      'selectinline',
-      'horizontal',
-      'vertical',
-      'shuffle',
-      'multi_horizontal',
-      'multi_vertical',
-      'summary_multichoice',
-      'summary_shortanswer',
-      'summary_numerical',
-      'multichoice',
-      'multiresponse',
-      'numerical',
-      'shortanswer',
-      'btn_cancel',
-      'btn_select',
-      'btn_insert',
-      'title',
-      'custom_grade',
-      'err_custom_rate',
-      'err_empty_answer',
-      'err_none_correct',
-      'err_not_numeric',
-    ].map((l, i) => {
+    langKeys.map((l, i) => {
       STR[l] = args[0][i];
       return ''; // Make the linter happy.
     });
@@ -287,8 +387,14 @@ const getStr = async() => {
     return '';
   });
 };
-const getQuestionTypes = function() {
-  return [
+
+/**
+ * Return the question types that are available for the cloze question.
+ * @returns {Array}
+ * @private
+ */
+const _getQuestionTypes = function() {
+  let qtypes = [
     {
       'type': 'MULTICHOICE',
       'abbr': ['MC'],
@@ -380,81 +486,22 @@ const getQuestionTypes = function() {
       'options': [STR.caseyes],
     },
   ];
-};
-
-/**
- * The editor instance that is injected via the onInit() function.
- *
- * @type {tinymce.Editor}
- * @private
- */
-let _editor = null;
-
-/**
- * A reference to the currently open form.
- *
- * @param _form
- * @type {Node}
- * @private
- */
-let _form = null;
-
-/**
- * An array containing the current answers options
- *
- * @param _answerdata
- * @type {Array}
- * @private
- */
-let _answerdata = [];
-
-/**
- * The sub question type to be edited
- *
- * @param _qtype
- * @type {string|null}
- * @private
- */
-let _qtype = null;
-
-/**
- * Remember the pos of the selected node.
- * @type {number}
- * @private
- */
-let _selectedOffset = -1;
-
-/**
- * The maximum marks for the sub question
- *
- * @param _marks
- * @type {Integer}
- * @private
- */
-let _marks = 1;
-
-/**
- * The modal dialogue to be displayed when designing the cloze question types.
- * @type {Modal|null}
- */
-let _modal = null;
-
-/**
- * If its a normal selection of text, use it for the first answer field.
- * @type {string|null}
- */
-let _firstAnswer = null;
-
-/**
- * Inject the editor instance and add markers to the cloze question texts.
- * @param {tinymce.Editor} ed
- */
-const onInit = function(ed) {
-  _editor = ed; // The current editor instance.
-  // Add the marker spans.
-  _addMarkers();
-  // And get the language strings.
-  getStr();
+  if (hasQtypeMultianswerrgx(_editor)) {
+    qtypes.splice(11, 0, {
+      'type': 'REGEXP',
+      'abbr': ['RX'],
+      'name': STR.regexp,
+      'summary': STR.summary_regexp,
+      'options': [STR.caseno],
+    }, {
+      'type': 'REGEXP_C',
+      'abbr': ['RXC'],
+      'name': STR.regexp,
+      'summary': STR.summary_regexp,
+      'options': [STR.caseyes],
+    });
+  }
+  return qtypes;
 };
 
 /**
@@ -546,7 +593,7 @@ const _addMarkers = function() {
 
   let m;
   do {
-    m = content.match(reQtype);
+    m = content.match((_getRegexQtype(_editor)));
     if (!m) { // No match of a cloze question, then we are done.
       newContent += content;
       break;
@@ -655,7 +702,7 @@ const _setDialogueContent = function(qtype, nomodalevents) {
       CSS: CSS,
       STR: STR,
       qtype: _qtype,
-      types: getQuestionTypes()
+      types: _getQuestionTypes()
     });
   } else {
     contentText = Mustache.render(TEMPLATE.FORM, {
@@ -664,7 +711,7 @@ const _setDialogueContent = function(qtype, nomodalevents) {
       answerdata: _answerdata,
       elementid: getUuid(),
       qtype: _qtype,
-      name: getQuestionTypes().filter(q => _qtype === q.type)[0].name,
+      name: _getQuestionTypes().filter(q => _qtype === q.type)[0].name,
       marks: _marks,
       numerical: (_qtype === 'NUMERICAL' || _qtype === 'NM')
     });
@@ -777,9 +824,9 @@ const _choiceHandler = function(e) {
   if (qtype) {
     _qtype = qtype.value;
   }
-  // For numerical and short answer questions we offer one response field only. All other
-  // question types have three empty response fields.
-  const max = (_qtype.indexOf('SHORTANSWER') !== -1 || _qtype === 'NUMERICAL') ? 1 : 3;
+  // For numerical and short answer questions (and when installed regexp) we offer one response field only.
+  // All other question types have three empty response fields.
+  const max = (_qtype.indexOf('SHORTANSWER') !== -1 || _qtype === 'NUMERICAL' || _qtype.indexOf('REGEXP') !== -1) ? 1 : 3;
   const blankAnswer = {
     id: getUuid(),
     answer: '',
@@ -819,8 +866,9 @@ const _choiceHandler = function(e) {
  */
 const _parseSubquestion = function(question) {
   _answerdata = []; // Flush answers to have an empty dialogue if something goes wrong parsing the question string.
-  const parts = reQtype.exec(question);
-  reQtype.lastIndex = 0; // Reset lastIndex so that the next match starts from the beginning of the question string.
+  const regexQtype = _getRegexQtype(_editor);
+  const parts = regexQtype.exec(question);
+  regexQtype.lastIndex = 0; // Reset lastIndex so that the next match starts from the beginning of the question string.
   if (!parts) {
     return;
   }
@@ -828,7 +876,7 @@ const _parseSubquestion = function(question) {
   _qtype = parts[2];
   // Convert the short notation to the long form e.g. SA to SHORTANSWER.
   if (_qtype.length < 5) {
-    getQuestionTypes().forEach(l => {
+    _getQuestionTypes().forEach(l => {
       for (const a of l.abbr) {
         if (a === _qtype) {
           _qtype = l.type;
@@ -837,7 +885,8 @@ const _parseSubquestion = function(question) {
       }
     });
   }
-  const answers = parts[7].match(/(\\.|[^~])*/g);
+  // Depending on the regex the position of the answers is different.
+  const answers = parts[hasQtypeMultianswerrgx(_editor) ? 8 : 7].match(/(\\.|[^~])*/g);
   if (!answers) {
     return;
   }
