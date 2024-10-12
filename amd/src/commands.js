@@ -28,7 +28,15 @@ import {
     clozeeditButtonName,
     icon,
 } from './common';
-import {displayDialogue, displayDialogueForEdit, resolveSubquestion, onInit, onBeforeGetContent, onSubmit} from './ui';
+import {
+    displayDialogue,
+    displayDialogueForEdit,
+    resolveSubquestion,
+    onInit,
+    onBeforeGetContent,
+    onSubmit
+} from './ui';
+import {disableQtypeMultianswerrgx} from './options';
 
 /**
  * Get the setup function for the buttons.
@@ -49,15 +57,19 @@ export const getSetup = async() => {
 
     return (editor) => {
         // Check whether we are editing a question.
-        const body = document.querySelector('body#page-question-type-multianswer form, ' +
-          'body#page-question-type-multianswerwiris form,' +
-          'body#page-question-type-multianswerrgx form'
+        const body = document.querySelector('body#page-question-type-multianswer, ' +
+          'body#page-question-type-multianswerwiris,' +
+          'body#page-question-type-multianswerrgx'
         );
         // And if the editor is used on the question text.
         if (!body || editor.id.indexOf('questiontext') === -1) {
             return;
         }
-        // Only if both conditions are valid, then continue setting up the plugin.
+        // Only if all conditions are valid, then continue setting up the plugin.
+        // However, if we have not a body#page-question-type-multianswerrgx then disable the regex types.
+        if (body.id.indexOf('multianswerrgx') === -1) {
+            disableQtypeMultianswerrgx(editor);
+        }
 
         // Register the Moodle SVG as an icon suitable for use as a TinyMCE toolbar button.
         editor.ui.registry.addIcon(icon, buttonImage.html);

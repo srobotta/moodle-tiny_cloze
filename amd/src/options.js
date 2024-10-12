@@ -39,3 +39,4 @@ export const register = (editor) => {
 };
 
 export const hasQtypeMultianswerrgx = (editor) => editor.options.get(multianswerrgx);
+export const disableQtypeMultianswerrgx = (editor) => editor.options.set(multianswerrgx, false);
