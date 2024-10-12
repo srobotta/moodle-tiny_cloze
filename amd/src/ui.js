@@ -28,6 +28,7 @@ import Mustache from 'core/mustache';
 import {get_strings as getStrings} from 'core/str';
 import {component} from './common';
 import {hasQtypeMultianswerrgx} from './options';
+const rgxExists = document.querySelector('body#page-question-type-multianswerrgx form') !== null;
 
 // Helper functions.
 const isNull = a => a === null || a === undefined;
@@ -280,7 +281,10 @@ const onInit = function(ed) {
 const _getRegexQtype = (editor) => {
   // eslint-disable-next-line max-len
   const baseQtypes = 'MULTICHOICE(_H|_V|_S|_HS|_VS)?|MULTIRESPONSE(_H|_S|_HS)?|NUMERICAL|SHORTANSWER(_C)?|SAC?|NM|MWC?|M[CR](V|H|VS|HS)?';
-  const extQtypes = hasQtypeMultianswerrgx(editor) ? '|REGEXP(_C)?|RXC?' : '';
+  let extQtypes;
+  if (rgxExists) {
+    extQtypes = hasQtypeMultianswerrgx(editor) ? '|REGEXP(_C)?|RXC?' : '';
+  }
   return new RegExp('\\{([0-9]*):(' + baseQtypes + extQtypes + '):(.*?)(?<!\\\\)\\}', 'g');
 };
 
@@ -370,7 +374,7 @@ const _getStr = async(editor) => {
     'err_none_correct',
     'err_not_numeric',
   ];
-  if (hasQtypeMultianswerrgx(editor)) {
+  if (rgxExists && hasQtypeMultianswerrgx(editor)) {
     strToFetch.push({key: 'regexp', component: 'qtype_regexp'});
     strToFetch.push({key: 'pluginnamesummary', component: 'qtype_regexp'});
     langKeys.push('regexp');
@@ -486,7 +490,7 @@ const _getQuestionTypes = function() {
       'options': [STR.caseyes],
     },
   ];
-  if (hasQtypeMultianswerrgx(_editor)) {
+  if (rgxExists && hasQtypeMultianswerrgx(_editor)) {
     qtypes.splice(11, 0, {
       'type': 'REGEXP',
       'abbr': ['RX'],
@@ -886,7 +890,10 @@ const _parseSubquestion = function(question) {
     });
   }
   // Depending on the regex the position of the answers is different.
-  const answers = parts[hasQtypeMultianswerrgx(_editor) ? 8 : 7].match(/(\\.|[^~])*/g);
+  let answers;
+  if (rgxExists) {
+    answers = parts[hasQtypeMultianswerrgx(_editor) ? 8 : 7].match(/(\\.|[^~])*/g);
+  }
   if (!answers) {
     return;
   }
