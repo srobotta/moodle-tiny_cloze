@@ -268,7 +268,7 @@ const onInit = function(ed) {
   // Add the marker spans.
   _addMarkers();
   // And get the language strings.
-  _getStr(ed);
+  _getStr();
 };
 
 /**
@@ -286,10 +286,9 @@ const _getRegexQtype = (editor) => {
 
 /**
  * Load strings for the modal dialogue from the language packs.
- * @param {tinymce.Editor} editor
  * @private
  */
-const _getStr = async(editor) => {
+const _getStr = async() => {
   let strToFetch = [
     {key: 'answer', component: 'question'},
     {key: 'chooseqtypetoadd', component: 'question'},
@@ -370,7 +369,7 @@ const _getStr = async(editor) => {
     'err_none_correct',
     'err_not_numeric',
   ];
-  if (hasQtypeMultianswerrgx(editor)) {
+  if (hasQtypeMultianswerrgx(_editor)) {
     strToFetch.push({key: 'regexp', component: 'qtype_regexp'});
     strToFetch.push({key: 'pluginnamesummary', component: 'qtype_regexp'});
     langKeys.push('regexp');
