@@ -79,18 +79,26 @@ class plugininfo extends plugin implements plugin_with_buttons, plugin_with_menu
 
         // When on the test site, check that the simulation config for an existing regex question type is set.
         if (\behat_util::is_test_site()) {
-            return ['multianswerrgx' => (bool)get_config('tiny_cloze', 'simulate_multianswerrgx')];
+            return [
+                'testsite' => true,
+                'multianswerrgx' => (bool)get_config('tiny_cloze', 'simulate_multianswerrgx'),
+            ];
         }
 
+        $config = [
+            'testsite' => false,
+            'multianswerrgx' => false,
+        ];
         try {
             // Check if the multianswerrgx question type is available.
             $instance = question_bank::get_qtype('multianswerrgx');
-            return ['multianswerrgx' => is_object($instance)];
+            $config['multianswerrgx'] = is_object($instance);
+            return $config;
         } catch (\exception $e) {
             // The multianswerrgx question type is not available.
-            return ['multianswerrgx' => false];
+            return $config;
         }
-        return ['multianswerrgx' => false];
+        return $config;
     }
 
 }

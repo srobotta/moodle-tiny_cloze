@@ -25,6 +25,7 @@ import {getPluginOptionName} from 'editor_tiny/options';
 import {pluginName} from './common';
 
 const multianswerrgx = getPluginOptionName(pluginName, 'multianswerrgx');
+const testsite = getPluginOptionName(pluginName, 'testsite');
 
 /**
  * Register the options for the Tiny Cloze question plugin.
@@ -36,7 +37,28 @@ export const register = (editor) => {
         processor: 'boolean',
         "default": false,
     });
+    editor.options.register(testsite, {
+        processor: 'boolean',
+        "default": false,
+    });
 };
 
+/**
+ * Is the Qtype Multianswerrgx plugin enabled?
+ * @param {tinymce.Editor} editor
+ * @return {boolean}
+ */
 export const hasQtypeMultianswerrgx = (editor) => editor.options.get(multianswerrgx);
-export const disableQtypeMultianswerrgx = (editor) => editor.options.set(multianswerrgx, false);
+
+/**
+ * Disable the Qtype Multianswerrgx plugin option. The specific question types
+ * of this plugin must not appear in the normal cloze question. However,
+ * if we are on a testsite, then do not change the behaviour.
+ *
+ * @param {tinymce.Editor} editor
+ */
+export const disableQtypeMultianswerrgx = (editor) => {
+    if (!editor.options.get(testsite)) {
+        editor.options.set(multianswerrgx, false);
+    }
+};
