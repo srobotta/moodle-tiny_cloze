@@ -446,6 +446,14 @@ let _modal = null;
 let _firstAnswer = null;
 
 /**
+ * When selecting a text portion that is used for the first answer field, remember
+ * any whitespace before and after the selection.
+ * 0 => no whitespace, 1 => whitespace before, 2 => whitespace after, 3 => whitespace before and after.
+ * @type {int}
+ */
+let _selectedPrefixAndSuffix = 0;
+
+/**
  * Inject the editor instance and add markers to the cloze question texts.
  * @param {tinymce.Editor} ed
  */
@@ -499,8 +507,16 @@ const displayDialogue = async function() {
     _setDialogueContent(_qtype);
   } else {
     // No subquestion found, no offset to remember.
-    _firstAnswer = _editor.selection.getContent();
     _selectedOffset = -1;
+    _firstAnswer = _editor.selection.getContent();
+    _selectedPrefixAndSuffix = 0;
+    if (_firstAnswer[0] === ' ') {
+      _selectedPrefixAndSuffix = 1;
+    }
+    if (_firstAnswer[_firstAnswer.length - 1] === ' ') {
+      _selectedPrefixAndSuffix += 2;
+    }
+    _firstAnswer = _firstAnswer.trim();
     _setDialogueContent();
   }
 };
@@ -1028,6 +1044,14 @@ const _setSubquestion = function(e) {
     question = question.substring(0, question.length - 1);
   }
   question += '}';
+  // eslint-disable-next-line no-bitwise
+  if (_selectedPrefixAndSuffix & 1) {
+    question = ' ' + question;
+  }
+  // eslint-disable-next-line no-bitwise
+  if (_selectedPrefixAndSuffix & 2) {
+    question += ' ';
+  }
 
   _modal.destroy();
   _modal = null;
