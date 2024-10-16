@@ -1,7 +1,7 @@
 Moodle Tiny editor Cloze question type button
 =============================================
 
-![Release](https://img.shields.io/badge/Release-1.8-blue.svg)
+![Release](https://img.shields.io/badge/Release-1.9-blue.svg)
 [![Moodle Plugin 
 CI](https://github.com/srobotta/moodle-tiny_cloze/workflows/Moodle%20Plugin%20CI/badge.svg?branch=main)](https://github.com/srobotta/moodle-tiny_cloze/actions?query=workflow%3A%22Moodle+Plugin+CI%22+branch%3Amain)
 ![Supported](https://img.shields.io/badge/Moodle-4.1+-orange.svg)
@@ -103,7 +103,13 @@ at https://docs.moodle.org/en/Multi-language_content_filter.
 
 ## History
 
-### Current main branch
+### v1.9
+- Fix issue that if a selected text contains trailing or leading whitespaces,
+  these are preserved around the cloze question string when inserted into the text.
+- Support for a new REGEX and REGEX_C type that might available through a new
+  plugin [moodle-qtype_multianswerrgx](https://github.com/rezeau/moodle-qtype_multianswerrgx)
+  by [Joseph Rézeau](https://github.com/rezeau).
+- Add CI of Moodle 4.5.
 - Fix bug that escaped closing curly brakets where not recognized [issue #21](https://github.com/srobotta/moodle-tiny_cloze/issues/21).
 - On double click on a cloze question opens the dialogue automatically.
 - Delete icon disappears when there is one answer option left only.
