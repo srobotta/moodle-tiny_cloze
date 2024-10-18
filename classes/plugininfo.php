@@ -89,6 +89,13 @@ class plugininfo extends plugin implements plugin_with_buttons, plugin_with_menu
             'testsite' => false,
             'multianswerrgx' => false,
         ];
+
+        // In Moodle 4.1 in /user/editadvanced.php the class question_bank is not found. So
+        // multianswerrgx is not supported with 4.1.
+        if (moodle_major_version() < 4.2) {
+            return $config;
+        }
+
         try {
             // Check if the multianswerrgx question type is available.
             $instance = question_bank::get_qtype('multianswerrgx');
