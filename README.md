@@ -101,6 +101,28 @@ you must use the Moodle annotation with the <span> elements. The [multilang2 fil
 is not supported here. For more information please check out the Moodle documentation
 at https://docs.moodle.org/en/Multi-language_content_filter.
 
+## Troubleshooting FAQ
+
+When the button ![edit cloze question icon](pix/icon.svg) does not appear in the toolbar and the menu "Insert" does not contain
+the item to edit a cloze question then please check the following:
+
+- Are you editing a cloze question type? Only for these questions the button appears.
+- Are you in the field question text? The button does not appear on the feedback field or
+other fields.
+- Do you work with the TinyMCE? This plugin is for the current TinyMCE and does not work
+with the TinyMCE legacy (this is the old TinyMCE that is not anymore available in newer
+Moodle versions).
+- Do you see any error messages in the Javascript console? Please hit F12 in your browser
+that should bring up the developer tools.
+![develpper tools window from Chromium](screenshots/developer-tools.png)
+In that window click the console tab and delete
+possible existing messages. Now reload the page (can be launched from inside the developer
+tools window via Ctrl + r)
+- Check that the Moodle dependencies are met. The plugin needs at least Moodle 4.1.
+
+If the problem persists then please [open a new issue on Github](https://github.com/srobotta/moodle-tiny_cloze/issues/new)
+or write a new comment on the [Moodle plugins directory](https://moodle.org/plugins/tiny_cloze).
+
 ## History
 
 ### v1.9
