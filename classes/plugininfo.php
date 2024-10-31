@@ -35,6 +35,7 @@ use question_bank;
 defined('MOODLE_INTERNAL') || die;
 
 require_once(__DIR__ . '/../../../../../behat/classes/util.php');
+require_once(__DIR__ . '/../../../../../../question/engine/bank.php');
 
 /**
  * The capabilities of the plugin, in this case there is one toolbar button and one menu item.
