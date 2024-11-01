@@ -1,7 +1,7 @@
 Moodle Tiny editor Cloze question type button
 =============================================
 
-![Release](https://img.shields.io/badge/Release-1.9-blue.svg)
+![Release](https://img.shields.io/badge/Release-1.10-blue.svg)
 [![Moodle Plugin 
 CI](https://github.com/srobotta/moodle-tiny_cloze/workflows/Moodle%20Plugin%20CI/badge.svg?branch=main)](https://github.com/srobotta/moodle-tiny_cloze/actions?query=workflow%3A%22Moodle+Plugin+CI%22+branch%3Amain)
 ![Supported](https://img.shields.io/badge/Moodle-4.1+-orange.svg)
@@ -124,6 +124,10 @@ If the problem persists then please [open a new issue on Github](https://github.
 or write a new comment on the [Moodle plugins directory](https://moodle.org/plugins/tiny_cloze).
 
 ## History
+
+### v1.10
+- Fix issue with Moodle 4.1 where class loading doesn't seem to work for the question_bank class.
+- Extend the README file by a Troubleshooting FAQ when the button is not displayed.
 
 ### v1.9
 - Fix issue that if a selected text contains trailing or leading whitespaces,
