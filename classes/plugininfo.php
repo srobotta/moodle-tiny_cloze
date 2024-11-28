@@ -76,6 +76,7 @@ class plugininfo extends plugin implements plugin_with_buttons, plugin_with_menu
         array $fpoptions,
         ?editor $editor = null
     ): array {
+        global $CFG;
 
         // When on the test site, check that the simulation config for an existing regex question type is set.
         if (\behat_util::is_test_site()) {
@@ -90,10 +91,9 @@ class plugininfo extends plugin implements plugin_with_buttons, plugin_with_menu
             'multianswerrgx' => false,
         ];
 
-        // In Moodle 4.1 in /user/editadvanced.php the class question_bank is not found. So
-        // multianswerrgx is not supported with 4.1.
-        if (moodle_major_version() < 4.2) {
-            return $config;
+        // The class question_bank is not found at times. Therefore check and include the file.
+        if (!class_exists('question_bank')) {
+            require_once($CFG->dirroot . '/question/engine/bank.php');
         }
 
         try {
