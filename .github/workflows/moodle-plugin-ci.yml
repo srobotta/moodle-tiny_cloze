@@ -175,6 +175,10 @@ jobs:
         if: ${{ always() }}
         run: moodle-plugin-ci phpunit --fail-on-warning
 
+      - name: JS Unit tests
+        if: ${{ always() }}
+        run: cd /home/runner/work/moodle-tiny_cloze/moodle-tiny_cloze/moodle/lib/editor/tiny/plugins/cloze/tests/js && npm install && npm test
+
       - name: Behat features
         if: ${{ always() }}
         run: moodle-plugin-ci behat --profile chrome --auto-rerun 0
