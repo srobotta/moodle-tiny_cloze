@@ -1,6 +1,37 @@
+// This file is part of Moodle - https://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+
+/**
+ * Helper functions for the tiny_cloze plugin for Moodle.
+ *
+ * @module      tiny_cloze
+ * @copyright   2025 Stephan Robotta <stephan.robotta@bfh.ch>
+ * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 const isNull = a => typeof a === 'undefined' || a === null;
 const strdecode = t => String(t).replace(/\\(#|\}|~)/g, '$1');
 const strencode = t => String(t).replace(/(#|\}|~)/g, '\\$1');
+
+/**
+ * Check at which position a given node is in the list.
+ *
+ * @param {Array} list
+ * @param {Node} node
+ * @returns {Number}
+ */
 const indexOfNode = (list, node) => {
   for (let i = 0; i < list.length; i++) {
     if (list[i] === node) {
@@ -9,15 +40,30 @@ const indexOfNode = (list, node) => {
   }
   return -1;
 };
+
+/**
+ * Get a unique identifier, used for every response field.
+ *
+ * @returns {string}
+ */
 const getUuid = function() {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
     return crypto.randomUUID();
   }
   return 'ed-cloze-' + Math.floor(Math.random() * 100000).toString().padStart(5, '0');
 };
+
 // Grade Selector value when custom percentage is selected.
 const selectCustomPercent = '__custom__';
-// This is a specific helper function to return the options html for the fraction select element.
+
+/**
+ * Helper function to return the options html for the fraction select element.
+ * The options are incorrect, correct, 100%, 50%, 0% and custom. The submitted
+ * value will be selected.
+ *
+ * @param {string} s
+ * @returns {string}
+ */
 const getFractionOptions = s => {
   const attrSel = ' selected="selected"';
   let isSel = s === '=' ? attrSel : '';
@@ -30,7 +76,13 @@ const getFractionOptions = s => {
   html += `<option value="${selectCustomPercent}"${isSel}>${STR.custom_grade}</option>`;
   return html;
 };
-// Check if the value is a custom grade value (in order to show the input field).
+
+/**
+ * Check if the value is a custom grade value (in order to show the input field).
+ *
+ * @param {string} s
+ * @returns {boolean}
+ */
 const isCustomGrade = s => {
   if (s === '=' || s === '') {
     return false;
@@ -66,6 +118,7 @@ const CSS = {
   TYPE: 'tiny_cloze_qtype'
 };
 
+// Values to indicate whether a response is correct or not. These appear in the selection.
 const FRACTIONS = [
   {value: 100},
   {value: 50},
@@ -77,9 +130,9 @@ const STR = {};
 
 /**
  * Return the question types that are available for the cloze question.
+ *
  * @param {boolean} withMultianswerrgx Whether to include the regular expression question types.
  * @returns {Array}
- * @private
  */
 const getQuestionTypes = function(withMultianswerrgx) {
   let qtypes = [
@@ -194,6 +247,7 @@ const getQuestionTypes = function(withMultianswerrgx) {
 
 /**
  * Return the CSS object (containing class names for the different icons and elements).
+ *
  * @returns {object}
  */
 const getCss = function() {
@@ -202,6 +256,7 @@ const getCss = function() {
 
 /**
  * Check if the node has the given class derived from the CSS object.
+ *
  * @param {Node} node
  * @param {string} className
  * @returns {boolean}
@@ -212,6 +267,7 @@ const hasClass = function(node, className) {
 
 /**
  * Get query selector for the given class name from the CSS object.
+ *
  * @param {string} className
  * @returns {string}
  */
@@ -221,6 +277,7 @@ const queryClass = function(className) {
 
 /**
  * Set string value in STR object.
+ *
  * @param {string} key
  * @param {string} val
  */
@@ -231,6 +288,7 @@ const setStr = function(key, val) {
 /**
  * Get value from STR object or return the key, if not found.
  * If key is '*', return the whole STR object.
+ *
  * @param {string} key
  * @returns {string|object}
  */
