@@ -1,5 +1,5 @@
-Moodle Tiny editor Cloze question type button
-=============================================
+Moodle Tiny Cloze question editor
+=================================
 
 ![Release](https://img.shields.io/badge/Release-1.11-blue.svg)
 [![Moodle Plugin 
@@ -13,6 +13,10 @@ Created collaboratively at [MoodleMoot DACH 23 Zurich](https://moodlemootdach.or
 A plugin for the Moodle Tiny editor to allow easier creation of Cloze questions
 see https://docs.moodle.org/en/Embedded_Answers_(Cloze)_question_type.
 Inspired by the Atto Cloze editor https://docs.moodle.org/en/Cloze_editor_for_Atto.
+
+In fall 2024 the cloze question editor plugin received the award for "Best Open-Source TinyMCE Plugin for Moodle"
+
+[![Best Open-Source TinyMCE Plugin for Moodle](tinymce-award-cloze-editor.png 'Best Open-Source TinyMCE Plugin for Moodle')](tinymce-award-cloze-editor.pdf)
 
 ## Overview
 
