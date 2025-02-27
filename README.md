@@ -16,7 +16,7 @@ Inspired by the Atto Cloze editor https://docs.moodle.org/en/Cloze_editor_for_At
 
 In fall 2024 the cloze question editor plugin received the award for "Best Open-Source TinyMCE Plugin for Moodle"
 
-[![Best Open-Source TinyMCE Plugin for Moodle](tinymce-award-cloze-editor.png 'Best Open-Source TinyMCE Plugin for Moodle')](tinymce-award-cloze-editor.pdf)
+[![Best Open-Source TinyMCE Plugin for Moodle](tinymce-award-cloze-editor.png 'Best Open-Source TinyMCE Plugin for Moodle')](https://www.tiny.cloud/blog/celebrating-moodle-innovation-tinymce-awards-winners-2024/)
 
 ## Overview
 
