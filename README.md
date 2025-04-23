@@ -1,9 +1,8 @@
 Moodle Tiny Cloze question editor
 =================================
 
-![Release](https://img.shields.io/badge/Release-1.11-blue.svg)
-[![Moodle Plugin 
-CI](https://github.com/srobotta/moodle-tiny_cloze/workflows/Moodle%20Plugin%20CI/badge.svg?branch=main)](https://github.com/srobotta/moodle-tiny_cloze/actions?query=workflow%3A%22Moodle+Plugin+CI%22+branch%3Amain)
+![Release](https://img.shields.io/badge/Release-1.12-blue.svg)
+[![Moodle Plugin CI](https://github.com/srobotta/moodle-tiny_cloze/actions/workflows/moodle-plugin-ci.yml/badge.svg)](https://github.com/srobotta/moodle-tiny_cloze/actions/workflows/moodle-plugin-ci.yml)
 ![Supported](https://img.shields.io/badge/Moodle-4.1+-orange.svg)
 [![License GPL-3.0](https://img.shields.io/github/license/srobotta/moodle-tiny_cloze?color=lightgrey)](https://github.com/srobotta/moodle-tiny_cloze/blob/main/LICENSE)
 [![GitHub contributors](https://img.shields.io/github/contributors/srobotta/moodle-tiny_cloze)](https://github.com/srobotta/moodle-tiny_cloze/graphs/contributors)
@@ -128,6 +127,10 @@ If the problem persists then please [open a new issue on Github](https://github.
 or write a new comment on the [Moodle plugins directory](https://moodle.org/plugins/tiny_cloze).
 
 ## History
+
+### v1.12
+- Add Moodle 5.0 Support.
+- Refactoring to add JavaScript unit test.
 
 ### v1.11
 - Fix [Issue 25](https://github.com/srobotta/moodle-tiny_cloze/issues/25) on error in essay
