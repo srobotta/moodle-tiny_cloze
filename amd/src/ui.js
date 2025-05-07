@@ -309,7 +309,7 @@ const _getStr = async() => {
     {key: 'up', component: 'core'},
     {key: 'down', component: 'core'},
     {key: 'tolerance', component: 'qtype_calculated'},
-    {key: 'grade', component: 'grades'},
+    {key: 'gradenoun', component: 'core'},
     {key: 'caseno', component: 'mod_quiz'},
     {key: 'caseyes', component: 'mod_quiz'},
     {key: 'answersingleno', component: 'qtype_multichoice'},
