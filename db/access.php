@@ -27,7 +27,7 @@ defined('MOODLE_INTERNAL') || die();
 $capabilities = [
     'tiny/cloze:use' => [
         'captype' => 'read',
-        'contextlevel' => CONTEXT_USER,
+        'contextlevel' => CONTEXT_MODULE,
         'archetypes' => [
             'editingteacher' => CAP_ALLOW,
         ],
