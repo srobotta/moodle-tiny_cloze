@@ -28,78 +28,19 @@ import Mustache from 'core/mustache';
 import {get_strings as getStrings} from 'core/str';
 import {component} from './common';
 import {hasQtypeMultianswerrgx} from './options';
+import {
+  CSS,
+  isNull, strdecode, strencode, indexOfNode,
+  getUuid, getFractionOptions, getQuestionTypes,
+  hasInvalidChars, isCustomGrade, setStr,
+  selectCustomPercent
+} from './cloze';
 
-// Helper functions.
-const isNull = a => a === null || a === undefined;
-const strdecode = t => String(t).replace(/\\(#|\}|~)/g, '$1');
-const strencode = t => String(t).replace(/(#|\}|~)/g, '\\$1');
-const indexOfNode = (list, node) => {
-  for (let i = 0; i < list.length; i++) {
-    if (list[i] === node) {
-      return i;
-    }
-  }
-  return -1;
-};
-const getUuid = function() {
-  if (!isNull(crypto.randomUUID)) {
-    return crypto.randomUUID();
-  }
-  return 'ed-cloze-' + Math.floor(Math.random() * 100000).toString();
-};
-// Grade Selector value when custom percentage is selected.
-const selectCustomPercent = '__custom__';
-// This is a specific helper function to return the options html for the fraction select element.
-const getFractionOptions = s => {
-  const attrSel = ' selected="selected"';
-  let isSel = s === '=' ? attrSel : '';
-  let html = `<option value="">${STR.incorrect}</option><option value="="${isSel}>${STR.correct}</option>`;
-  FRACTIONS.forEach(item => {
-    isSel = item.value.toString() === s ? attrSel : '';
-    html += `<option value="${item.value}"${isSel}>${item.value}%</option>`;
-  });
-  isSel = s !== '' && html.indexOf(attrSel) === -1 ? attrSel : '';
-  html += `<option value="${selectCustomPercent}"${isSel}>${STR.custom_grade}</option>`;
-  return html;
-};
-// Check if the value is a custom grade value (in order to show the input field).
-const isCustomGrade = s => {
-  if (s === '=' || s === '') {
-    return false;
-  }
-  let found = false;
-  FRACTIONS.forEach(item => {
-    if (item.value.toString() === s) {
-      found = true;
-    }
-  });
-  return !found;
-};
 // Marker class and the whole span element that is used to encapsulate the cloze question text.
 const markerClass = 'cloze-question-marker';
 const markerSpan = '<span contenteditable="false" class="' + markerClass + '" data-mce-contenteditable="false">';
 
-// CSS classes that are used in the modal dialogue.
-const CSS = {
-  ANSWER: 'tiny_cloze_answer',
-  ANSWERS: 'tiny_cloze_answers',
-  ADD: 'tiny_cloze_add',
-  CANCEL: 'tiny_cloze_cancel',
-  DELETE: 'tiny_cloze_delete',
-  FEEDBACK: 'tiny_cloze_feedback',
-  FRACTION: 'tiny_cloze_fraction',
-  FRAC_CUSTOM: 'tiny_cloze_frac_custom',
-  LEFT: 'tiny_cloze_col0',
-  LOWER: 'tiny_cloze_down',
-  RIGHT: 'tiny_cloze_col1',
-  MARKS: 'tiny_cloze_marks',
-  DUPLICATE: 'tiny_cloze_duplicate',
-  RAISE: 'tiny_cloze_up',
-  SUBMIT: 'tiny_cloze_submit',
-  SUMMARY: 'tiny_cloze_summary',
-  TOLERANCE: 'tiny_cloze_tolerance',
-  TYPE: 'tiny_cloze_qtype'
-};
+// Templates for the modal dialogue content.
 const TEMPLATE = {
   FORM: '<div class="tiny_cloze">' +
     '<p>{{name}} ({{qtype}})</p>' +
@@ -186,11 +127,6 @@ const TEMPLATE = {
   FOOTER: '<button type="button" class="btn btn-secondary" data-action="cancel">{{cancel}}</button>' +
     '<button type="button" class="btn btn-primary" data-action="save">{{submit}}</button>',
 };
-const FRACTIONS = [
-  {value: 100},
-  {value: 50},
-  {value: 0},
-];
 
 // Language strings used in the modal dialogue.
 const STR = {};
@@ -335,6 +271,7 @@ const _getStr = async() => {
     {key: 'err_empty_answer', component},
     {key: 'err_none_correct', component},
     {key: 'err_not_numeric', component},
+    {key: 'err_invalid_chars', component},
   ];
   let langKeys = [
     'answer',
@@ -375,6 +312,7 @@ const _getStr = async() => {
     'err_empty_answer',
     'err_none_correct',
     'err_not_numeric',
+    'err_invalid_chars',
   ];
   if (hasQtypeMultianswerrgx(_editor)) {
     strToFetch.push({key: 'regexp', component: 'qtype_regexp'});
@@ -385,6 +323,7 @@ const _getStr = async() => {
   getStrings(strToFetch).then(function() {
     const args = Array.from(arguments);
     langKeys.map((l, i) => {
+      setStr(l, args[0][i]);
       STR[l] = args[0][i];
       return ''; // Make the linter happy.
     });
@@ -392,122 +331,6 @@ const _getStr = async() => {
   }).catch(() => {
     return '';
   });
-};
-
-/**
- * Return the question types that are available for the cloze question.
- * @returns {Array}
- * @private
- */
-const _getQuestionTypes = function() {
-  let qtypes = [
-    {
-      'type': 'MULTICHOICE',
-      'abbr': ['MC'],
-      'name': STR.multichoice,
-      'summary': STR.summary_multichoice,
-      'options': [STR.selectinline, STR.singleyes],
-    },
-    {
-      'type': 'MULTICHOICE_H',
-      'abbr': ['MCH'],
-      'name': STR.multichoice,
-      'summary': STR.summary_multichoice,
-      'options': [STR.horizontal, STR.singleyes],
-    },
-    {
-      'type': 'MULTICHOICE_V',
-      'abbr': ['MCV'],
-      'name': STR.multichoice,
-      'summary': STR.summary_multichoice,
-      'options': [STR.vertical, STR.singleyes],
-    },
-    {
-      'type': 'MULTICHOICE_S',
-      'abbr': ['MCS'],
-      'name': STR.multichoice,
-      'summary': STR.summary_multichoice,
-      'options': [STR.selectinline, STR.shuffle, STR.singleyes],
-    },
-    {
-      'type': 'MULTICHOICE_HS',
-      'abbr': ['MCHS'],
-      'name': STR.multichoice,
-      'summary': STR.summary_multichoice,
-      'options': [STR.horizontal, STR.shuffle, STR.singleyes],
-    },
-    {
-      'type': 'MULTICHOICE_VS',
-      'abbr': ['MCVS'],
-      'name': STR.multichoice,
-      'summary': STR.summary_multichoice,
-      'options': [STR.vertical, STR.shuffle, STR.singleyes],
-    },
-    {
-      'type': 'MULTIRESPONSE',
-      'abbr': ['MR'],
-      'name': STR.multiresponse,
-      'summary': STR.summary_multichoice,
-      'options': [STR.multi_vertical, STR.singleno],
-    },
-    {
-      'type': 'MULTIRESPONSE_H',
-      'abbr': ['MRH'],
-      'name': STR.multiresponse,
-      'summary': STR.summary_multichoice,
-      'options': [STR.multi_horizontal, STR.singleno],
-    },
-    {
-      'type': 'MULTIRESPONSE_S',
-      'abbr': ['MRS'],
-      'name': STR.multiresponse,
-      'summary': STR.summary_multichoice,
-      'options': [STR.multi_vertical, STR.shuffle, STR.singleno],
-    },
-    {
-      'type': 'MULTIRESPONSE_HS',
-      'abbr': ['MRHS'],
-      'name': STR.multiresponse,
-      'summary': STR.summary_multichoice,
-      'options': [STR.multi_horizontal, STR.shuffle, STR.singleno],
-    },
-    {
-      'type': 'NUMERICAL',
-      'abbr': ['NM'],
-      'name': STR.numerical,
-      'summary': STR.summary_numerical,
-    },
-    {
-      'type': 'SHORTANSWER',
-      'abbr': ['SA', 'MW'],
-      'name': STR.shortanswer,
-      'summary': STR.summary_shortanswer,
-      'options': [STR.caseno],
-    },
-    {
-      'type': 'SHORTANSWER_C',
-      'abbr': ['SAC', 'MWC'],
-      'name': STR.shortanswer,
-      'summary': STR.summary_shortanswer,
-      'options': [STR.caseyes],
-    },
-  ];
-  if (hasQtypeMultianswerrgx(_editor)) {
-    qtypes.splice(11, 0, {
-      'type': 'REGEXP',
-      'abbr': ['RX'],
-      'name': STR.regexp,
-      'summary': STR.summary_regexp,
-      'options': [STR.caseno],
-    }, {
-      'type': 'REGEXP_C',
-      'abbr': ['RXC'],
-      'name': STR.regexp,
-      'summary': STR.summary_regexp,
-      'options': [STR.caseyes],
-    });
-  }
-  return qtypes;
 };
 
 /**
@@ -716,7 +539,7 @@ const _setDialogueContent = function(qtype, nomodalevents) {
       CSS: CSS,
       STR: STR,
       qtype: _qtype,
-      types: _getQuestionTypes()
+      types: getQuestionTypes(hasQtypeMultianswerrgx(_editor))
     });
   } else {
     contentText = Mustache.render(TEMPLATE.FORM, {
@@ -725,7 +548,7 @@ const _setDialogueContent = function(qtype, nomodalevents) {
       answerdata: _answerdata,
       elementid: getUuid(),
       qtype: _qtype,
-      name: _getQuestionTypes().filter(q => _qtype === q.type)[0].name,
+      name: getQuestionTypes(hasQtypeMultianswerrgx(_editor)).filter(q => _qtype === q.type)[0].name,
       marks: _marks,
       numerical: (_qtype === 'NUMERICAL' || _qtype === 'NM')
     });
@@ -890,7 +713,7 @@ const _parseSubquestion = function(question) {
   _qtype = parts[2];
   // Convert the short notation to the long form e.g. SA to SHORTANSWER.
   if (_qtype.length < 5) {
-    _getQuestionTypes().forEach(l => {
+    getQuestionTypes(hasQtypeMultianswerrgx(_editor)).forEach(l => {
       for (const a of l.abbr) {
         if (a === _qtype) {
           _qtype = l.type;
@@ -1161,10 +984,13 @@ const _processFormData = function(validate) {
     const {hasCorrectAnswer, errors} = _validateAnswers();
     for (let i = 0; i < _answerdata.length; i++) {
       for (const err of _answerdata[i].hasErrors) {
+        // Automatically remove empty answer fields for convenience if there is at least one correct answer.
         if (hasCorrectAnswer && (err === 'empty_answer' || err === 'correct_but_empty')) {
           break;
         }
-        if (err === 'answer_not_numeric' || err === 'empty_answer' || err === 'correct_but_empty') {
+        if (err === 'answer_not_numeric' || err === 'empty_answer'
+          || err === 'correct_but_empty' || err === 'answer_invalid_chars'
+        ) {
           answers.item(i).classList.add('error');
         } else if (err === 'tolerance_not_numeric') {
           tolerances.item(i).classList.add('error');
@@ -1210,6 +1036,10 @@ const _validateAnswers = function() {
         _answerdata[i].hasErrors.push('tolerance_not_numeric');
       }
     }
+    // Regex answers can use the . ^ $ * + { } \ / as a literal only (preceeded by a backslash).
+    if ((_qtype === 'REGEXP' || _qtype === 'REGEXP_C') && hasInvalidChars(_answerdata[i].raw)) {
+      _answerdata[i].hasErrors.push('answer_invalid_chars');
+    }
     // Check the custom grade, that must be a percentage number between -100 and 100.
     if (_answerdata[i].isCustomGrade &&
       (isNaN(_answerdata[i].fraction) || _answerdata[i].fraction < -100 || _answerdata[i].fraction > 100
@@ -1253,6 +1083,7 @@ const _translateGlobalErrors = function(hasCorrectAnswer, errors) {
     tolerancenotnumeric: STR.err_not_numeric,
     errorcustomrate: STR.err_custom_rate,
     nonecorrect: STR.err_none_correct,
+    answerinvalidchars: STR.err_invalid_chars,
   };
   for (const err of errors) {
     // If there's at least one correct answer, we filter out all empty answers and therefore do not

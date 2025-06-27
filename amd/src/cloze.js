@@ -21,9 +21,9 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-const isNull = a => typeof a === 'undefined' || a === null;
-const strdecode = t => String(t).replace(/\\(#|\}|~)/g, '$1');
-const strencode = t => String(t).replace(/(#|\}|~)/g, '\\$1');
+export const isNull = a => typeof a === 'undefined' || a === null;
+export const strdecode = t => String(t).replace(/\\(#|\}|~)/g, '$1');
+export const strencode = t => String(t).replace(/(#|\}|~)/g, '\\$1');
 
 /**
  * Check at which position a given node is in the list.
@@ -32,7 +32,7 @@ const strencode = t => String(t).replace(/(#|\}|~)/g, '\\$1');
  * @param {Node} node
  * @returns {Number}
  */
-const indexOfNode = (list, node) => {
+export const indexOfNode = (list, node) => {
   for (let i = 0; i < list.length; i++) {
     if (list[i] === node) {
       return i;
@@ -41,12 +41,25 @@ const indexOfNode = (list, node) => {
   return -1;
 };
 
+export const hasInvalidChars = (text) => {
+  // Remove pattern like \. or \$
+  const regex = /\\[.^$*+{}\\/]/g;
+  text = text.replace(regex, '');
+  for (const c of '.^$*+{}\\/'.split('')) {
+    // If the special char is not still in the string, it was not escaped by \
+    if (text.indexOf(c) > -1) {
+      return true;
+    }
+  }
+  return false;
+};
+
 /**
  * Get a unique identifier, used for every response field.
  *
  * @returns {string}
  */
-const getUuid = function() {
+export const getUuid = function() {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
     return crypto.randomUUID();
   }
@@ -54,7 +67,7 @@ const getUuid = function() {
 };
 
 // Grade Selector value when custom percentage is selected.
-const selectCustomPercent = '__custom__';
+export const selectCustomPercent = '__custom__';
 
 /**
  * Helper function to return the options html for the fraction select element.
@@ -64,7 +77,7 @@ const selectCustomPercent = '__custom__';
  * @param {string} s
  * @returns {string}
  */
-const getFractionOptions = s => {
+export const getFractionOptions = s => {
   const attrSel = ' selected="selected"';
   let isSel = s === '=' ? attrSel : '';
   let html = `<option value="">${STR.incorrect}</option><option value="="${isSel}>${STR.correct}</option>`;
@@ -83,7 +96,7 @@ const getFractionOptions = s => {
  * @param {string} s
  * @returns {boolean}
  */
-const isCustomGrade = s => {
+export const isCustomGrade = s => {
   if (s === '=' || s === '') {
     return false;
   }
@@ -97,7 +110,7 @@ const isCustomGrade = s => {
 };
 
 // CSS classes that are used in the modal dialogue.
-const CSS = {
+export const CSS = {
   ANSWER: 'tiny_cloze_answer',
   ANSWERS: 'tiny_cloze_answers',
   ADD: 'tiny_cloze_add',
@@ -134,7 +147,7 @@ const STR = {};
  * @param {boolean} withMultianswerrgx Whether to include the regular expression question types.
  * @returns {Array}
  */
-const getQuestionTypes = function(withMultianswerrgx) {
+export const getQuestionTypes = function(withMultianswerrgx) {
   let qtypes = [
     {
       'type': 'MULTICHOICE',
@@ -250,7 +263,7 @@ const getQuestionTypes = function(withMultianswerrgx) {
  *
  * @returns {object}
  */
-const getCss = function() {
+export const getCss = function() {
   return CSS;
 };
 
@@ -261,7 +274,7 @@ const getCss = function() {
  * @param {string} className
  * @returns {boolean}
  */
-const hasClass = function(node, className) {
+export const hasClass = function(node, className) {
   return node.classList.contains(CSS[className]);
 };
 
@@ -271,7 +284,7 @@ const hasClass = function(node, className) {
  * @param {string} className
  * @returns {string}
  */
-const queryClass = function(className) {
+export const queryClass = function(className) {
   return `.${CSS[className]}`;
 };
 
@@ -281,7 +294,7 @@ const queryClass = function(className) {
  * @param {string} key
  * @param {string} val
  */
-const setStr = function(key, val) {
+export const setStr = function(key, val) {
   STR[key] = val;
 };
 
@@ -292,26 +305,9 @@ const setStr = function(key, val) {
  * @param {string} key
  * @returns {string|object}
  */
-const getStr = function(key) {
+export const getStr = function(key) {
   if (key === '*') {
     return STR;
   }
   return STR[key] ?? key;
-};
-
-export {
-  isNull,
-  isCustomGrade,
-  indexOfNode,
-  getCss,
-  hasClass,
-  queryClass,
-  getUuid,
-  getFractionOptions,
-  selectCustomPercent,
-  strdecode,
-  strencode,
-  getQuestionTypes,
-  getStr,
-  setStr
 };
