@@ -100,12 +100,22 @@ class plugininfo extends plugin implements plugin_with_buttons, plugin_with_menu
             // Check if the multianswerrgx question type is available.
             $instance = question_bank::get_qtype('multianswerrgx');
             $config['multianswerrgx'] = is_object($instance);
-            return $config;
         } catch (\exception $e) {
             // The multianswerrgx question type is not available.
-            return $config;
+            debugging('Could not check for multianswerrgx qtype ' . $e->getMessage());
+        }
+        // Installed languages
+        $langs = get_string_manager()->get_list_of_translations();
+        asort($langs);
+        if (count($langs) > 1) {
+            $config['languages'] = [];
+            foreach ($langs as $iso => $label) {
+                $config['languages'][] = [
+                    'iso' => $iso,
+                    'label' => str_replace(["\xe2\x80\x8e", "\xe2\x80\x8f"], '', $label),
+                ];
+            }
         }
         return $config;
     }
-
 }

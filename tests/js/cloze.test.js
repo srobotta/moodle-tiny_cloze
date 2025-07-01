@@ -72,7 +72,7 @@ describe('Test function getQuestionTypes() without regex', function () {
   it('Check for # of questions', function () {
     assert.equal(questions.length, 13);
   });
-  if ('Check that sequence is correct', function () {
+  it('Check that sequence is correct', function () {
     assert.equal(questions[2].type, 'MULTICHOICE_V');
     assert.equal(questions[7].type, 'MULTIRESPONSE_H');
     assert.equal(questions[10].type, 'NUMERICAL');
@@ -85,7 +85,7 @@ describe('Test function getQuestionTypes() with regex', function () {
   it('Check for # of questions', function () {
     assert.equal(questions.length, 15);
   });
-  if ('Check that sequence is correct', function () {
+  it('Check that sequence is correct', function () {
     assert.equal(questions[2].type, 'MULTICHOICE_V');
     assert.equal(questions[7].type, 'MULTIRESPONSE_H');
     assert.equal(questions[10].type, 'NUMERICAL');
@@ -102,7 +102,7 @@ describe('Test function isCustomGrade()', function () {
     assert.equal(cloze.isCustomGrade('0'), false);
     assert.equal(cloze.isCustomGrade(''), false);
   });
-  if ('Test custom grades 80, 60, 40, 33', function () {
+  it('Test custom grades 80, 60, 40, 33', function () {
     assert.equal(cloze.isCustomGrade('80'), true);
     assert.equal(cloze.isCustomGrade('60'), true);
     assert.equal(cloze.isCustomGrade('40'), true);
@@ -121,13 +121,50 @@ describe('Test function hasInvalidChars()', function () {
     assert.equal(cloze.hasInvalidChars('__one__,__two__'), false);
     assert.equal(cloze.hasInvalidChars('path\\/to\\/file'), false);
   });
-  if ('Test invalid regex answers strings.', function () {
+  it('Test invalid regex answers strings.', function () {
     assert.equal(cloze.hasInvalidChars('2.000,00'), true);
     assert.equal(cloze.hasInvalidChars('{cf}'), true);
     assert.equal(cloze.hasInvalidChars('a + b'), true);
     assert.equal(cloze.hasInvalidChars('a*b'), true);
-    assert.equal(cloze.hasInvalidChars('a\sb'), true);
+    assert.equal(cloze.hasInvalidChars('a\\sb'), true);
     assert.equal(cloze.hasInvalidChars('bin/bash'), true);
   });
 });
 
+/*
+// Uncommented at the moment because the cloze.splitMultilangStr() uses
+// the DOMParser that is not available in the test scenario and I haven't
+// found out how inject and use the jsdom inside the function.
+describe('Test function splitMultilangStr()', function() {
+  it('Test empty strings.', function () {
+    assert.deepEqual(cloze.splitMultilangStr(''), {'all': ''});
+    assert.deepEqual(cloze.splitMultilangStr(' '), {'all': ' '});
+  });
+
+  it('Test strings with no language info.', function () {
+    assert.deepEqual(
+      cloze.splitMultilangStr('someting <b>bold</b>.'),
+      {'all': 'someting <b>bold</b>.'}
+    );
+    assert.deepEqual(
+      cloze.splitMultilangStr('here is some <span style="color: red">red</span> word.'),
+      {'all': 'here is some <span style="color: red">red</span> word.'}
+    );
+  });
+
+  it('Test string that have multi lang elements.', function() {
+    const str1 = '<span class="multilang" lang="en">English</span>'
+      + '<span lang="de" class="multilang">Deutsch</span>';
+    assert.deepEqual(
+      cloze.splitMultilangStr(str1),
+      {'EN': 'English', 'DE': 'Deutsch'}
+    );
+    const str2 = '<span class="multilang" lang="en">grater than</span>'
+      + '<span lang="de" class="multilang">größer als</span> 4';
+    assert.deepEqual(
+      cloze.splitMultilangStr(str2),
+      {'EN': 'greater than', 'DE': 'größer als'}
+    );
+  });
+});
+*/

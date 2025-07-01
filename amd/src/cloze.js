@@ -137,6 +137,11 @@ export const CSS = {
 
 // Templates for the modal dialogue content.
 export const TEMPLATE = {
+  INPUT_LANG: '<span title="{{title}}">' +
+    '{{#img}}<img class="icon_smallicon" src="{{img}}" alt="{title}"/>{{/img}}' +
+    '{{^img}}{{label}}{{/img}}' +
+    '</span>' +
+    '<input class="{{csstype}} form-control d-inline" name="{{name}}" type="text" value="{{value}}"/>',
   FORM: '<div class="tiny_cloze">' +
     '<p>{{name}} ({{qtype}})</p>' +
     '<form name="tiny_cloze_form">' +
@@ -152,8 +157,17 @@ export const TEMPLATE = {
     '<ol class="pl-3">{{#answerdata}}' +
     '<li class="mt-3"><div class="row form-group">' +
     '<div class="col-2"><label for="{{id}}_answer">{{STR.answer}}</label></div>' +
-    '<div class="col-8"><input id="{{id}}_answer" type="text" value="{{answer}}" ' +
-    'class="{{CSS.ANSWER}} form-control d-inline mx-2" /></div>' +
+    '<div class="col-8">' +
+    '{{^answer_by_language_html}}' +
+    '<input id="{{id}}_answer" type="text" value="{{answer}}" ' +
+    'class="{{CSS.ANSWER}} form-control d-inline mx-2" />' +
+    '{{/answer_by_language_html}}' +
+    '{{#answer_by_language_html}}' +
+    '<div class="{{id}}_answer_iso">' +
+    '{{{answer_by_language_html}}}' +
+    '</div>' +
+    '{{/answer_by_language_html}}' +
+    '</div>' +
     '<div class="col-2">' +
     '<a class="{{CSS.ADD}}" title="{{STR.addmoreanswerblanks}}">' +
     '<img class="icon_smallicon" src="{{SRC.ADD}}" alt="{{STR.addmoreanswerblanks}}"></a>' +
@@ -179,8 +193,15 @@ export const TEMPLATE = {
     '<div class="col-2">' +
     '<label for="{{id}}_feedback">{{STR.feedback}}</label>' +
     '</div><div class="col-8">' +
-    '<input id="{{id}}_feedback" type="text" value="{{feedback}}" ' +
+    '{{^feedback_by_language_html}}' +
+    '<input id="{{id}}feedback" type="text" value="{{feedback}}" ' +
     'class="{{CSS.FEEDBACK}} form-control d-inline mx-2" />' +
+    '{{/feedback_by_language_html}}' +
+    '{{#feedback_by_language_html}}' +
+    '<div class="{{id}}_feedback_iso">' +
+    '{{{feedback_by_language_html}}}' +
+    '</div>' +
+    '{{/feedback_by_language_html}}' +
     '</div></div>' +
     '<div class="row form-group">' +
     '<div class="col-2">' +
@@ -249,6 +270,7 @@ export const getQuestionTypes = function(withMultianswerrgx) {
       'name': STR.multichoice,
       'summary': STR.summary_multichoice,
       'options': [STR.horizontal, STR.singleyes],
+      'multilang': true,
     },
     {
       'type': 'MULTICHOICE_V',
@@ -256,6 +278,7 @@ export const getQuestionTypes = function(withMultianswerrgx) {
       'name': STR.multichoice,
       'summary': STR.summary_multichoice,
       'options': [STR.vertical, STR.singleyes],
+      'multilang': true,
     },
     {
       'type': 'MULTICHOICE_S',
@@ -263,6 +286,7 @@ export const getQuestionTypes = function(withMultianswerrgx) {
       'name': STR.multichoice,
       'summary': STR.summary_multichoice,
       'options': [STR.selectinline, STR.shuffle, STR.singleyes],
+      'multilang': true,
     },
     {
       'type': 'MULTICHOICE_HS',
@@ -270,6 +294,7 @@ export const getQuestionTypes = function(withMultianswerrgx) {
       'name': STR.multichoice,
       'summary': STR.summary_multichoice,
       'options': [STR.horizontal, STR.shuffle, STR.singleyes],
+      'multilang': true,
     },
     {
       'type': 'MULTICHOICE_VS',
@@ -277,6 +302,7 @@ export const getQuestionTypes = function(withMultianswerrgx) {
       'name': STR.multichoice,
       'summary': STR.summary_multichoice,
       'options': [STR.vertical, STR.shuffle, STR.singleyes],
+      'multilang': true,
     },
     {
       'type': 'MULTIRESPONSE',
@@ -284,6 +310,7 @@ export const getQuestionTypes = function(withMultianswerrgx) {
       'name': STR.multiresponse,
       'summary': STR.summary_multichoice,
       'options': [STR.multi_vertical, STR.singleno],
+      'multilang': true,
     },
     {
       'type': 'MULTIRESPONSE_H',
@@ -291,6 +318,7 @@ export const getQuestionTypes = function(withMultianswerrgx) {
       'name': STR.multiresponse,
       'summary': STR.summary_multichoice,
       'options': [STR.multi_horizontal, STR.singleno],
+      'multilang': true,
     },
     {
       'type': 'MULTIRESPONSE_S',
@@ -298,6 +326,7 @@ export const getQuestionTypes = function(withMultianswerrgx) {
       'name': STR.multiresponse,
       'summary': STR.summary_multichoice,
       'options': [STR.multi_vertical, STR.shuffle, STR.singleno],
+      'multilang': true,
     },
     {
       'type': 'MULTIRESPONSE_HS',
@@ -305,6 +334,7 @@ export const getQuestionTypes = function(withMultianswerrgx) {
       'name': STR.multiresponse,
       'summary': STR.summary_multichoice,
       'options': [STR.multi_horizontal, STR.shuffle, STR.singleno],
+      'multilang': true,
     },
     {
       'type': 'NUMERICAL',
@@ -398,3 +428,4 @@ export const getStr = function(key) {
   }
   return STR[key] ?? key;
 };
+

@@ -27,7 +27,7 @@ import ModalFactory from 'core/modal_factory';
 import Mustache from 'core/mustache';
 import {get_strings as getStrings} from 'core/str';
 import {component} from './common';
-import {hasQtypeMultianswerrgx} from './options';
+import {hasQtypeMultianswerrgx, getLanguages} from './options';
 import {
   CSS, TEMPLATE,
   markerClass, markerSpan,
@@ -451,7 +451,8 @@ const _setDialogueContent = function(qtype, nomodalevents) {
       types: getQuestionTypes(hasQtypeMultianswerrgx(_editor))
     });
   } else {
-    contentText = Mustache.render(TEMPLATE.FORM, {
+    const qtypeObj = getQuestionTypes(hasQtypeMultianswerrgx(_editor)).filter(q => _qtype === q.type)[0];
+    const contentData = {
       CSS: CSS,
       STR: STR,
       SRC: {
@@ -463,10 +464,15 @@ const _setDialogueContent = function(qtype, nomodalevents) {
       answerdata: _answerdata,
       elementid: getUuid(),
       qtype: _qtype,
-      name: getQuestionTypes(hasQtypeMultianswerrgx(_editor)).filter(q => _qtype === q.type)[0].name,
+      name: qtypeObj.name,
       marks: _marks,
-      numerical: (_qtype === 'NUMERICAL' || _qtype === 'NM')
-    });
+      numerical: (_qtype === 'NUMERICAL' || _qtype === 'NM'),
+    };
+    if (qtypeObj?.multilang) {
+      contentData.languages = getLanguages(_editor);
+      contentData.answerdata = _splitMultilangAnswer(_answerdata);
+    }
+    contentText = Mustache.render(TEMPLATE.FORM, contentData);
   }
   _modal.setBody(contentText);
   _modal.setFooter(footer);
@@ -607,6 +613,53 @@ const _choiceHandler = function(e) {
   }).catch(() => {
       return '';
   });
+};
+
+const _getHtmlForLanguageOptions = function(languages, options, id, type) {
+  let html = '';
+  languages.forEach(lang => {
+    html += Mustache.render(TEMPLATE.INPUT_LANG, {
+      img: lang.iso === 'ALL' ? M.util.image_url('i/language', 'core') : '',
+      label: lang.iso.toUpperCase(),
+      title: lang.label,
+      csstype: type === 'answer' ? CSS.ANSWER : CSS.FEEDBACK,
+      name: `${id}_${type}_${lang.iso}`,
+      value: options[lang.iso] ?? '',
+    });
+  });
+  return html;
+};
+
+const _splitMultilangAnswer = function(answerOptions) {
+  const languages = getLanguages(_editor);
+  languages.unshift({'iso': 'ALL', label: ''});
+  for (let i = 0; i < answerOptions.length; i++) {
+    answerOptions[i].answer_by_language_html = _getHtmlForLanguageOptions(
+      languages, _splitMultilangStr(answerOptions[i].answer), answerOptions[i].id, 'answer');
+    answerOptions[i].feedback_by_language_html = _getHtmlForLanguageOptions(
+      languages, _splitMultilangStr(answerOptions[i].feedback), answerOptions[i].id, 'feedback');
+  }
+  return answerOptions;
+};
+
+const _splitMultilangStr = function(str) {
+  // Start with this shortcut before actually parsing the string,
+  if (str.length === 0 || str.indexOf('</span>') === -1) {
+    return {'all': str};
+  }
+  // Parse the string as html to find all occurences of <span class="multilang"...
+  const dom = new DOMParser();
+  const rootNode = dom.parseFromString(str, 'text/html').body.firstElementChild;
+  const langStr = {};
+  rootNode.querySelectorAll('span.multilang').forEach(e => {
+    const iso = e.getAttribute('lang') ?? '';
+    if (iso.length > 0) {
+      langStr[iso.toUpperCase()] = e.innerHTML;
+    }
+  });
+  // The language parts are sepatated by iso code.
+  langStr['all'] = Object.keys(langStr).length > 0 ? '' : str;
+  return langStr;
 };
 
 /**

@@ -26,6 +26,7 @@ import {pluginName} from './common';
 
 const multianswerrgx = getPluginOptionName(pluginName, 'multianswerrgx');
 const testsite = getPluginOptionName(pluginName, 'testsite');
+const languages = getPluginOptionName(pluginName, 'languages');
 
 /**
  * Register the options for the Tiny Cloze question plugin.
@@ -40,6 +41,10 @@ export const register = (editor) => {
     editor.options.register(testsite, {
         processor: 'boolean',
         "default": false,
+    });
+    editor.options.register(languages, {
+        processor: 'Array',
+        "default": [],
     });
 };
 
@@ -62,3 +67,11 @@ export const disableQtypeMultianswerrgx = (editor) => {
         editor.options.set(multianswerrgx, false);
     }
 };
+
+/**
+ * Get the list of installed languages. The list is empty if there is one
+ * language installed only.
+ * @param {tinymce.Editor} editor
+ * @returns {Array}
+ */
+export const getLanguages = (editor) => editor.options.get(languages);
