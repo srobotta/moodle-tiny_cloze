@@ -41,6 +41,12 @@ export const indexOfNode = (list, node) => {
   return -1;
 };
 
+/**
+ * Checks for some chars "[.^$*+{}\/]", that these are escaped by a backslash. If that's not
+ * the case true is returned.
+ * @param {string} text
+ * @returns {boolean}
+ */
 export const hasInvalidChars = (text) => {
   // Remove pattern like \. or \$
   const regex = /\\[.^$*+{}\\/]/g;
@@ -52,6 +58,40 @@ export const hasInvalidChars = (text) => {
     }
   }
   return false;
+};
+
+/**
+ * Counts the ocurrences of opening and closing brackets and returns true when they mismatch.
+ * The function also checks that there are no overlapping sequences such as ([)].
+ * @param {string} text
+ * @returns {boolean}
+ */
+export const hasOddBracketCount = (text) => {
+  let stack = [];
+
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i];
+    const isEscaped = i > 0 && text[i - 1] === '\\';
+
+    if (!isEscaped) {
+      if (char === '(' || char === '[' || char === '{') {
+        stack.push(char);
+      } else if (char === ')' || char === ']' || char === '}') {
+        if (stack.length === 0) {
+          return true;
+        }
+        let open = stack.pop();
+        if (
+          open === '(' && char !== ')' ||
+          open === '[' && char !== ']' ||
+          open === '{' && char !== '}'
+        ) {
+          return true;
+        }
+      }
+    }
+  }
+  return stack.length > 0;
 };
 
 /**

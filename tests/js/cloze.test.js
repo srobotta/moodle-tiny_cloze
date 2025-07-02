@@ -121,13 +121,31 @@ describe('Test function hasInvalidChars()', function () {
     assert.equal(cloze.hasInvalidChars('__one__,__two__'), false);
     assert.equal(cloze.hasInvalidChars('path\\/to\\/file'), false);
   });
-  if ('Test invalid regex answers strings.', function () {
+  it('Test invalid regex answers strings.', function () {
     assert.equal(cloze.hasInvalidChars('2.000,00'), true);
     assert.equal(cloze.hasInvalidChars('{cf}'), true);
     assert.equal(cloze.hasInvalidChars('a + b'), true);
     assert.equal(cloze.hasInvalidChars('a*b'), true);
-    assert.equal(cloze.hasInvalidChars('a\sb'), true);
+    assert.equal(cloze.hasInvalidChars('a\\sb'), true);
     assert.equal(cloze.hasInvalidChars('bin/bash'), true);
   });
 });
 
+describe('Test function hasOddBracketCount()', function () {
+  it('Test valid bracket count in answer strings.', function () {
+    assert.equal(cloze.hasOddBracketCount('100\\(FF\\.'), false);
+    assert.equal(cloze.hasOddBracketCount('\\{cf\\}'), false);
+    assert.equal(cloze.hasOddBracketCount('(1|2){3,9}\\$'), false);
+    assert.equal(cloze.hasOddBracketCount('[uvx]{2,}'), false);
+    assert.equal(cloze.hasOddBracketCount(''), false);
+    assert.equal(cloze.hasOddBracketCount('[bcr]at'), false);
+    assert.equal(cloze.hasOddBracketCount('\\[text\\]'), false);
+  });
+  it('Test invalid bracket count in answers strings.', function () {
+    assert.equal(cloze.hasOddBracketCount('2.{00(fc)?00'), true);
+    assert.equal(cloze.hasOddBracketCount('cf}'), true);
+    assert.equal(cloze.hasOddBracketCount('[abc]2)b'), true);
+    assert.equal(cloze.hasOddBracketCount('[[[())]]]'), true);
+    assert.equal(cloze.hasOddBracketCount('{([)]}'), true);
+  });
+});
