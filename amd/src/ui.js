@@ -945,15 +945,6 @@ const _validateAnswers = function() {
     if (_answerdata[i].raw === '') {
       _answerdata[i].hasErrors.push('empty_answer');
     }
-    // When there are numeric questions, check that the answer and tolerance is a valid number.
-    if (_qtype === 'NM' || _qtype === 'NUMERICAL') {
-      if (isNaN(_answerdata[i].answer) && _answerdata[i].raw !== '') {
-        _answerdata[i].hasErrors.push('answer_not_numeric');
-      }
-      if (isNaN(_answerdata[i].tolerance)) {
-        _answerdata[i].hasErrors.push('tolerance_not_numeric');
-      }
-    }
     // We found a correct answer, when grade is marked as 100 or "=" and the answer is not empty.
     if (_answerdata[i].fraction === '100' || _answerdata[i].fraction === '=') {
       if (_answerdata[i].raw !== '') {
@@ -961,7 +952,6 @@ const _validateAnswers = function() {
         hasCorrect = true;
       } else {
         _answerdata[i].hasErrors.push('correct_but_empty');
-        continue;
       }
     }
     // Check the custom grade, that must be a percentage number between -100 and 100.
@@ -971,21 +961,14 @@ const _validateAnswers = function() {
     ) {
       _answerdata[i].hasErrors.push('error_custom_rate');
     }
-    // Regex explanation is here: https://docs.moodle.org/500/en/Regular_Expression_Short-Answer_question_type
-    if (_qtype === 'REGEXP' || _qtype === 'REGEXP_C') {
-      // If the answer is somehat correct (positive grade), then the regex can use
-      // the . ^ $ * + { } \ / as literals only (preceeded by a backslash).
-      if ((_answerdata[i].isCorrect || _answerdata[i].isCustomGrade && _answerdata[i].fraction > 0) &&
-        hasInvalidChars(_answerdata[i].raw)
-      ) {
-        _answerdata[i].hasErrors.push('answer_invalid_chars');
-      }
-      // Check that any used braket that is not used as a literal, has
-      // as many opening as well as closing brakets.
-      if (hasOddBracketCount(_answerdata[i].raw)) {
-        _answerdata[i].hasErrors.push('answer_odd_bracket_count');
-      }
+    // Special checks for a certain type.
+    if (_qtype === 'NM' || _qtype === 'NUMERICAL') {
+      _validateAnswersNumeric(i);
     }
+    if (_qtype === 'REGEXP' || _qtype === 'REGEXP_C') {
+      _validateAnswersRegexp(i);
+    }
+
     errors = errors.concat(_answerdata[i].hasErrors);
   }
 
@@ -993,6 +976,41 @@ const _validateAnswers = function() {
     hasCorrectAnswer: hasCorrect,
     errors: _combineGlobalErrors(hasCorrect, errors),
   };
+};
+
+/**
+ * Validate numeric answers.
+ * This type has an additional field tolerance that must be a number. Also
+ * the answer itself must be numeric.
+ * @param {int} i
+ */
+const _validateAnswersNumeric = function(i) {
+  if (isNaN(_answerdata[i].answer) && _answerdata[i].raw !== '') {
+    _answerdata[i].hasErrors.push('answer_not_numeric');
+  }
+  if (isNaN(_answerdata[i].tolerance)) {
+    _answerdata[i].hasErrors.push('tolerance_not_numeric');
+  }
+};
+
+/**
+ * Validate regex answers.
+ * Full documentation: https://docs.moodle.org/500/en/Regular_Expression_Short-Answer_question_type
+ * @param {int} i
+ */
+const _validateAnswersRegexp = function(i) {
+  // If the answer is somehat correct (positive grade), then the regex can use
+  // the . ^ $ * + { } \ / as literals only (preceeded by a backslash).
+  if ((_answerdata[i].isCorrect || _answerdata[i].isCustomGrade && _answerdata[i].fraction > 0) &&
+    hasInvalidChars(_answerdata[i].raw)
+  ) {
+    _answerdata[i].hasErrors.push('answer_invalid_chars');
+  }
+  // Check that any used braket that is not used as a literal, has
+  // as many opening as well as closing brakets.
+  if (hasOddBracketCount(_answerdata[i].raw)) {
+    _answerdata[i].hasErrors.push('answer_odd_bracket_count');
+  }
 };
 
 /**
