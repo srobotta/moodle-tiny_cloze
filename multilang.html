@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Multilang Mockup</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+  <meta charset="UTF-8">
+  <title>Language Switch Input</title>
+  <style>
+    .hidden {
+      display: none;
+    }
+
+    .language-selector {
+      position: relative;
+      width: 300px;
+      font-family: sans-serif;
+      margin-bottom: 60px;
+      z-index: auto;
+    }
+
+    .input-wrapper {
+      position: relative;
+      z-index: auto;
+    }
+
+    .input-label::before {
+      content: attr(data-label);
+      position: absolute;
+      left: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #888;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    input.tiny_cloze_answer {
+      padding-left: 40px;
+      box-sizing: border-box;
+      width: 100%;
+      height: 35px;
+      font-size: 14px;
+      position: relative;
+      z-index: 0;
+    }
+
+    .dropdown-list {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      z-index: auto;
+      background: white;
+      border: 1px solid #ccc;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      margin-top: 4px;
+      margin-bottom: 20px;
+    }
+    
+    .dropdown-list.open {
+      display: block;
+      z-index: 1000;
+    }
+
+    .dropdown-list .input-wrapper {
+      padding: 4px;
+    }
+
+    .dropdown-list input {
+      cursor: pointer;
+    }
+
+    .icon_smallicon {
+      width: 16px;
+      height: 16px;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+
+    .visible-input-wrapper {
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+Lorem ipsum nun sea olet.
+
+<div class="row">
+<div class="col-12">
+  Antwort 1
+
+<div class="language-selector">
+  <span title="">
+    <img class="icon_smallicon" src="http://localhost:8000/theme/image.php/boost/core/1751644959/i/language" alt="Lang icon">
+  </span>
+
+  <!-- Dropdown list -->
+  <div class="dropdown-list">
+    <div class="input-wrapper input-label" data-label="&#x1F310;">
+      <input class="tiny_cloze_answer form-control" data-name="all" placeholder="all">
+    </div>
+    <div class="input-wrapper input-label hidden" data-label="DE">
+      <input class="tiny_cloze_answer form-control" data-name="de" placeholder="DE">
+    </div>
+    <div class="input-wrapper input-label hidden" data-label="EN">
+      <input class="tiny_cloze_answer form-control" data-name="en" placeholder="EN">
+    </div>
+  </div>
+</div>
+</div>
+</div>
+
+<div class="row">
+<div class="col-12">
+  Antwort 2
+<div class="language-selector">
+  <span title="">
+    <img class="icon_smallicon" src="http://localhost:8000/theme/image.php/boost/core/1751644959/i/language" alt="Lang icon">
+  </span>
+
+  <!-- Dropdown list -->
+  <div class="dropdown-list">
+    <div class="input-wrapper input-label" data-label="&#x1F310;">
+      <input class="tiny_cloze_answer form-control" data-name="all" placeholder="all">
+    </div>
+    <div class="input-wrapper input-label hidden" data-label="DE">
+      <input class="tiny_cloze_answer form-control" data-name="de" placeholder="DE">
+    </div>
+    <div class="input-wrapper input-label hidden" data-label="EN">
+      <input class="tiny_cloze_answer form-control" data-name="en" placeholder="EN">
+    </div>
+  </div>
+</div>
+</div>
+</div>
+<script>
+  const langSelector = document.querySelectorAll('.language-selector');
+  const dropdownInputs = document.querySelectorAll('.dropdown-list input');
+
+  // Handle selecting a dropdown input
+  dropdownInputs.forEach(input => {
+    input.addEventListener('click', (e) => {
+      // Check if one or all inputs are visible.
+      const dropdownList = e.target.parentNode.parentNode;
+      const inputFields = dropdownList.querySelectorAll('input');
+      //const isOpen = Array.from(inputFields).filter(e => e.checkVisibility()).length;
+      const isOpen = dropdownList.classList.contains('open');
+      inputFields.forEach((i) => {
+        if (i !== e.target) {
+          if (isOpen) {
+            i.parentNode.classList.add('hidden');
+          } else {
+            i.parentNode.classList.remove('hidden');
+          }
+        }
+      });
+      if (isOpen) {
+        dropdownList.classList.remove('open');
+      } else {
+        dropdownList.classList.add('open');      
+      }
+    });
+  });
+
+  // Close dropdown when clicking outside
+  document.addEventListener('click', (e) => {
+    langSelector.forEach(s => {
+      if (!s.contains(e.target)) {
+        const inputFields = s.querySelectorAll('input');
+        let hasOpen = false;
+        inputFields.forEach(i => {
+          if (!i.parentNode.classList.contains('hidden')) {
+            if (hasOpen) {
+              i.parentNode.classList.add('hidden');
+            } else {
+              hasOpen = true;
+            }
+          }
+        });
+        s.querySelector('.dropdown-list').classList.remove('open');
+      }
+    });
+  });
+</script>
+
+</body>
+</html>
