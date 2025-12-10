@@ -3,7 +3,7 @@ Moodle Tiny Cloze question editor
 
 ![Release](https://img.shields.io/badge/Release-1.14-blue.svg)
 [![Moodle Plugin CI](https://github.com/srobotta/moodle-tiny_cloze/actions/workflows/moodle-plugin-ci.yml/badge.svg)](https://github.com/srobotta/moodle-tiny_cloze/actions/workflows/moodle-plugin-ci.yml)
-![Supported](https://img.shields.io/badge/Moodle-4.1+-orange.svg)
+![Supported](https://img.shields.io/badge/Moodle-4.3+-orange.svg)
 [![License GPL-3.0](https://img.shields.io/github/license/srobotta/moodle-tiny_cloze?color=lightgrey)](https://github.com/srobotta/moodle-tiny_cloze/blob/main/LICENSE)
 [![GitHub contributors](https://img.shields.io/github/contributors/srobotta/moodle-tiny_cloze)](https://github.com/srobotta/moodle-tiny_cloze/graphs/contributors)
 
@@ -24,7 +24,7 @@ modifying embedded answer (Cloze) questions. To install, add a new directory
 named `cloze` in `lib/editor/tiny/plugins`, unzip the content of this zip archive
 into the newly created directory and visit notifications to update database.
 
-This plugin requires Moodle 4.1 or later as that ships with a new version of the Tiny
+This plugin requires Moodle 4.3 or later as that ships with a new version of the Tiny
 editor and the Atto editor is due to be phased out in a future version of Moodle.
 
 ## Installation
@@ -127,6 +127,10 @@ If the problem persists then please [open a new issue on Github](https://github.
 or write a new comment on the [Moodle plugins directory](https://moodle.org/plugins/tiny_cloze).
 
 ## History
+
+### Current main
+- Remove deprecated and now removed ModalFactory dependency. Therfore, the
+  minimum required Moodle version is now 4.3
 
 ### v1.14
 - Release for Moodle 5.1
