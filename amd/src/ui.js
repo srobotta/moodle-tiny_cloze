@@ -23,7 +23,6 @@
 
 import ModalEvents from 'core/modal_events';
 import Modal from 'core/modal';
-import ModalFactory from 'core/modal_factory';
 import Mustache from 'core/mustache';
 import {get_strings as getStrings} from 'core/str';
 import {component} from './common';
@@ -259,11 +258,7 @@ const _createModal = async function() {
     removeOnClose: true,
     large: true,
   };
-  if (typeof Modal.create === 'function') {
-    _modal = await Modal.create(cfg);
-  } else {
-    _modal = await ModalFactory.create(cfg);
-  }
+  _modal = await Modal.create(cfg);
 };
 
 /**
