@@ -174,6 +174,13 @@ describe('Test function addMarkers()', function () {
       '<p><span contenteditable="false" class="cloze-question-marker" data-mce-contenteditable="false">{1:MC:A~=B~C}</span></p>'
       + '<p><span contenteditable="false" class="cloze-question-marker" data-mce-contenteditable="false">{1:MC:A~=B~C}</span></p>'
     );
-
+    assert.equal(
+      cloze.addMarkers(
+        '<p>Which fraction equals 0.5? {1:MULTICHOICE_V:=\\(\\frac{1\\}{2\\}\\)~\\(\\frac{2\\}{3\\}\\)}</p>',
+        regex
+      ),
+      '<p>Which fraction equals 0.5? <span contenteditable="false" class="cloze-question-marker" '
+      + 'data-mce-contenteditable="false">{1:MULTICHOICE_V:=\\(\\frac{1\\}{2\\}\\)~\\(\\frac{2\\}{3\\}\\)}</span></p>'
+    );
   });
 });
