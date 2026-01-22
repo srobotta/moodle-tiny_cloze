@@ -25,7 +25,6 @@ import * as assert from 'assert';
 import * as jsdom from 'jsdom';
 import * as cloze from './src/cloze.mjs';
 
-
 describe('Test function hasClass()', function () {
   describe('create <i class="tiny_cloze_add">+</i>', function () {
     const dom = new jsdom.JSDOM(`<!DOCTYPE html><i class="tiny_cloze_add">+</i>`);
@@ -147,5 +146,34 @@ describe('Test function hasOddBracketCount()', function () {
     assert.equal(cloze.hasOddBracketCount('[abc]2)b'), true);
     assert.equal(cloze.hasOddBracketCount('[[[())]]]'), true);
     assert.equal(cloze.hasOddBracketCount('{([)]}'), true);
+  });
+});
+
+describe('Test function addMarkers()', function () {
+  const regex = new RegExp(cloze.regexClozeStr.replace('__REGEX_QTYPES__', cloze.regexBaseQtypes), 'g');
+  it('Test replacing question strings with markers in editor content.', function () {
+    assert.equal(
+      cloze.addMarkers('<p>{1:MULTICHOICE:A{~=B}</p>', regex),
+      '<p><span contenteditable="false" class="cloze-question-marker" data-mce-contenteditable="false">{1:MULTICHOICE:A{~=B}</span></p>'
+    );
+    assert.equal(
+      cloze.addMarkers(
+        '<p>{1:MULTICHOICE:A{~=B}</p>'
+        + '<p>{1:MULTICHOICE:C{~=D}</p>',
+        regex
+      ),
+      '<p><span contenteditable="false" class="cloze-question-marker" data-mce-contenteditable="false">{1:MULTICHOICE:A{~=B}</span></p>'
+      + '<p><span contenteditable="false" class="cloze-question-marker" data-mce-contenteditable="false">{1:MULTICHOICE:C{~=D}</span></p>'
+    );
+    assert.equal(
+      cloze.addMarkers(
+        '<p>{1:MC:A~=B~C}</p>'
+        + '<p>{1:MC:A~=B~C}</p>',
+        regex
+      ),
+      '<p><span contenteditable="false" class="cloze-question-marker" data-mce-contenteditable="false">{1:MC:A~=B~C}</span></p>'
+      + '<p><span contenteditable="false" class="cloze-question-marker" data-mce-contenteditable="false">{1:MC:A~=B~C}</span></p>'
+    );
+
   });
 });

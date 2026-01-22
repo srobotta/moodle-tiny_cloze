@@ -30,10 +30,12 @@ import {hasQtypeMultianswerrgx} from './options';
 import {
   CSS, TEMPLATE,
   markerClass, markerSpan,
+  addMarkers,
   isNull, strdecode, strencode, indexOfNode,
   getUuid, getFractionOptions, getQuestionTypes,
   hasInvalidChars, hasOddBracketCount, isCustomGrade, setStr,
-  selectCustomPercent
+  selectCustomPercent,
+  regexBaseQtypes, regexMultianswerrgxQtypes, regexClozeStr
 } from './cloze';
 
 // Language strings used in the modal dialogue.
@@ -123,16 +125,15 @@ const onInit = function(ed) {
 };
 
 /**
- * Regex to recognize the question string in the text e.g. {1:NUMERICAL:...} or {:MULTICHOICE:...}
+ * Get regex to recognize the question string in the text e.g. {1:NUMERICAL:...} or {:MULTICHOICE:...}
  * @param {tinymce.Editor} editor
  * @return {RegExp}
  * @private
  */
 const _getRegexQtype = (editor) => {
-  // eslint-disable-next-line max-len
-  const baseQtypes = 'MULTICHOICE(_H|_V|_S|_HS|_VS)?|MULTIRESPONSE(_H|_S|_HS)?|NUMERICAL|SHORTANSWER(_C)?|SAC?|NM|MWC?|M[CR](V|H|VS|HS)?';
-  const extQtypes = hasQtypeMultianswerrgx(editor) ? '|REGEXP(_C)?|RXC?' : '';
-  return new RegExp('\\{([0-9]*):(' + baseQtypes + extQtypes + '):(.*?)(?<!\\\\)\\}', 'g');
+  const extQtypes = hasQtypeMultianswerrgx(editor) ? regexMultianswerrgxQtypes : '';
+  const regex = regexClozeStr.replace('__REGEX_QTYPES__', regexBaseQtypes + extQtypes);
+  return new RegExp(regex, 'g');
 };
 
 /**
@@ -326,52 +327,17 @@ const displayDialogueForEdit = async function(target) {
  */
 const _addMarkers = function() {
 
-  let content = _editor.getContent();
-  let newContent = '';
+  const content = _editor.getContent();
 
   // Check if there is already a marker span. In this case we do not have to do anything.
   if (content.indexOf(markerClass) !== -1) {
     return;
   }
-
-  let m;
-  do {
-    m = content.match((_getRegexQtype(_editor)));
-    if (!m) { // No match of a cloze question, then we are done.
-      newContent += content;
-      break;
-    }
-    // Copy the current match to the new string preceded with the <span>.
-    const pos = content.indexOf(m[0]);
-    newContent += content.substring(0, pos) + markerSpan + content.substring(pos, pos + m[0].length);
-    content = content.substring(pos + m[0].length);
-
-    // Count the { in the string, should be just one (the very first one at position 0).
-    let level = (m[0].match(/\{/g) || []).length;
-    if (level === 1) {
-      // If that's the case, we close the span and the cloze question text is the innerHTML of that marker span.
-      newContent += '</span>';
-      continue; // Look for the next matching cloze question.
-    }
-    // If there are more { than } in the string, then we did not find the corresponding } that belongs to the cloze string.
-    while (level > 1) {
-      const a = content.indexOf('{');
-      const b = content.indexOf('}');
-      if (a > -1 && b > -1 && a < b) { // The { is before another } so remember to find as many } until we back at level 1.
-        level++;
-        newContent = content.substring(0, a);
-        content = content.substring(a + 1);
-      } else if (b > -1) { // We found a closing } to a previously {.
-        newContent = content.substring(0, b);
-        content = content.substring(b + 1);
-        level--;
-      } else {
-        level = 1; // Should not happen, just to stop the endless loop.
-      }
-    }
-    newContent += '</span>';
-  } while (m);
-  _editor.setContent(newContent);
+  const newContent = addMarkers(content, _getRegexQtype(_editor));
+  // If the content has changed, set the new content.
+  if (newContent !== null) {
+    _editor.setContent(newContent);
+  }
 };
 
 /**
