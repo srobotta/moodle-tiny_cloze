@@ -466,7 +466,10 @@ export const addMarkers = function(content, regex) {
   const n = m.filter((v, i, a) => a.indexOf(v) === i);
   // Replace all matches with the marker span added.
   for (let i = 0; i < n.length; i++) {
-    content = content.replaceAll(n[i], markerSpan + n[i] + '</span>');
+    // `replaceAll` allows special replacement patterns beginning with `$`.
+    // Escape these in the replacement string if they appear in the content.
+    const escaped = n[i].replaceAll('$', '$$$$');
+    content = content.replaceAll(n[i], markerSpan + escaped + '</span>');
   }
   return content;
 };
