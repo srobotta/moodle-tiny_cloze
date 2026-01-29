@@ -182,5 +182,13 @@ describe('Test function addMarkers()', function () {
       '<p>Which fraction equals 0.5? <span contenteditable="false" class="cloze-question-marker" '
       + 'data-mce-contenteditable="false">{1:MULTICHOICE_V:=\\(\\frac{1\\}{2\\}\\)~\\(\\frac{2\\}{3\\}\\)}</span></p>'
     );
+    assert.equal(
+      cloze.addMarkers(
+        '<p>{1:MULTICHOICE:=$\'A\'~$\'B\'}</p>',
+        regex
+      ),
+      '<p><span contenteditable="false" class="cloze-question-marker" '
+      + 'data-mce-contenteditable="false">{1:MULTICHOICE:=$\'A\'~$\'B\'}</span></p>'
+    );
   });
 });
