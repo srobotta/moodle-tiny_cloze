@@ -778,7 +778,10 @@ const _setSubquestion = function(e) {
     question += _answerdata[i].fraction && !isNaN(_answerdata[i].fraction)
       ? '%' + _answerdata[i].fraction + '%' : _answerdata[i].fraction;
     question += strencode(_answerdata[i].answer);
-    if (_qtype === 'NM' || _qtype === 'NUMERICAL') {
+    if ( // Set tolerance only on correct or semi correct answers.
+      (_qtype === 'NM' || _qtype === 'NUMERICAL') &&
+      (_answerdata[i].fraction !== '0' && _answerdata[i].fraction !== '')
+    ) {
       question += ':' + _answerdata[i].tolerance;
     }
     if (_answerdata[i].feedback) {
@@ -813,6 +816,37 @@ const _setSubquestion = function(e) {
 };
 
 /**
+ * Build the current answer object based on one possible answer field collection.
+ * @param {NodeList} answer
+ * @param {NodeList} feedback
+ * @param {NodeList} fraction
+ * @param {string} toleranceValue
+ * @param {NodeList} customGrade
+ * @return {Object} currentAnswer
+ * @private
+ */
+const _buildCurrentAnswer = function(answer, feedback, fraction, toleranceValue, customGrade) {
+  const currentAnswer = {
+    raw: answer.value.trim(),
+    answer: answer.value.trim(),
+    id: getUuid(),
+    feedback: feedback.value,
+    fraction: fraction.value === selectCustomPercent ? customGrade.value : fraction.value,
+    fractionOptions: getFractionOptions(fraction.value),
+    tolerance: toleranceValue,
+    isCustomGrade: fraction.value === selectCustomPercent
+  };
+  if (_qtype === 'NM' || _qtype === 'NUMERICAL') {
+    // In numeric questions convert answer and tolerance to numeric values (this filters non numeric values).
+    if (currentAnswer.answer !== '' && currentAnswer.answer !== '*') {
+      currentAnswer.answer = Number(currentAnswer.answer);
+    }
+    currentAnswer.tolerance = Number(currentAnswer.tolerance);
+  }
+  return currentAnswer;
+};
+
+/**
  * Read the form data, process it and store the result in the internal _answerdata array.
  * Also, if validation is enabled, the fields are checked for invalid values e.g.
  * - answer field is empty (if a correct answer is contained, empty fields are eliminated).
@@ -838,23 +872,18 @@ const _processFormData = function(validate) {
   for (let i = 0; i < answers.length; i++) {
     answers.item(i).classList.remove('error');
     customGrades.item(i).classList.remove('error');
-    const currentAnswer = {
-      raw: answers.item(i).value.trim(),
-      answer: answers.item(i).value.trim(),
-      id: getUuid(),
-      feedback: feedbacks.item(i).value,
-      fraction: fractions.item(i).value === selectCustomPercent ? customGrades.item(i).value : fractions.item(i).value,
-      fractionOptions: getFractionOptions(fractions.item(i).value),
-      tolerance: tolerances.length > 0 ? tolerances.item(i).value : 0,
-      isCustomGrade: fractions.item(i).value === selectCustomPercent
-    };
+    let toleranceValue = '0';
     if (_qtype === 'NM' || _qtype === 'NUMERICAL') {
       tolerances.item(i).classList.remove('error');
-      // In numeric questions convert answer and tolerance to numeric values (this filters non numeric values).
-      currentAnswer.answer = Number(currentAnswer.answer);
-      currentAnswer.tolerance = Number(currentAnswer.tolerance);
+      toleranceValue = tolerances.item(i).value;
     }
-    _answerdata.push(currentAnswer);
+    _answerdata.push(_buildCurrentAnswer(
+      answers.item(i),
+      feedbacks.item(i),
+      fractions.item(i),
+      toleranceValue,
+      customGrades.item(i)
+    ));
   }
   _marks = _form.querySelector('.' + CSS.MARKS).value;
 
@@ -946,7 +975,7 @@ const _validateAnswers = function() {
  * @param {int} i
  */
 const _validateAnswersNumeric = function(i) {
-  if (isNaN(_answerdata[i].answer) && _answerdata[i].raw !== '') {
+  if (isNaN(_answerdata[i].answer) && _answerdata[i].raw !== '' && _answerdata[i].raw !== '*') {
     _answerdata[i].hasErrors.push('answer_not_numeric');
   }
   if (isNaN(_answerdata[i].tolerance)) {
