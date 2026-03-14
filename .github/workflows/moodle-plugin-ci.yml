@@ -199,7 +199,7 @@ jobs:
           if [[ $MOODLE_BRANCH =~ MOODLE_50[1-5]_STABLE ]]; then
             path+=/public
           fi
-          patch -p1 ${path}/question/type/numerical/questiontype.php ${path}/lib/editor/tiny/plugins/cloze/tests/qtype_numerical.patch
+          patch -p1 ${path}/question/type/numerical/questiontype.php ${path}/lib/editor/tiny/plugins/cloze/tests/mdl-88217.patch
           moodle-plugin-ci behat --profile chrome --auto-rerun 0
         env:
           MOODLE_BRANCH: ${{ matrix.moodle-branch }}
