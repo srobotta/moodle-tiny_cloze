@@ -182,6 +182,7 @@ const _getStr = async() => {
     {key: 'err_not_numeric', component},
     {key: 'err_invalid_chars', component},
     {key: 'err_invalid_brackets', component},
+    {key: 'decsep', component: 'core_langconfig'},
   ];
   let langKeys = [
     'answer',
@@ -224,6 +225,7 @@ const _getStr = async() => {
     'err_not_numeric',
     'err_invalid_chars',
     'err_invalid_brackets',
+    'decsep',
   ];
   if (hasQtypeMultianswerrgx(_editor)) {
     strToFetch.push({key: 'regexp', component: 'qtype_regexp'});
@@ -826,7 +828,7 @@ const _setSubquestion = function(e) {
  * @private
  */
 const _buildCurrentAnswer = function(answer, feedback, fraction, toleranceValue, customGrade) {
-  const currentAnswer = {
+  return {
     raw: answer.value.trim(),
     answer: answer.value.trim(),
     id: getUuid(),
@@ -836,14 +838,6 @@ const _buildCurrentAnswer = function(answer, feedback, fraction, toleranceValue,
     tolerance: toleranceValue,
     isCustomGrade: fraction.value === selectCustomPercent
   };
-  if (_qtype === 'NM' || _qtype === 'NUMERICAL') {
-    // In numeric questions convert answer and tolerance to numeric values (this filters non numeric values).
-    if (currentAnswer.answer !== '' && currentAnswer.answer !== '*') {
-      currentAnswer.answer = Number(currentAnswer.answer);
-    }
-    currentAnswer.tolerance = Number(currentAnswer.tolerance);
-  }
-  return currentAnswer;
 };
 
 /**
@@ -975,12 +969,30 @@ const _validateAnswers = function() {
  * @param {int} i
  */
 const _validateAnswersNumeric = function(i) {
-  if (isNaN(_answerdata[i].answer) && _answerdata[i].raw !== '' && _answerdata[i].raw !== '*') {
-    _answerdata[i].hasErrors.push('answer_not_numeric');
-  }
-  if (isNaN(_answerdata[i].tolerance)) {
+  if (!_isValidNumber(_answerdata[i].tolerance)) {
     _answerdata[i].hasErrors.push('tolerance_not_numeric');
   }
+  if (!_isValidNumber(_answerdata[i].raw) && _answerdata[i].raw !== '' && _answerdata[i].raw !== '*') {
+    _answerdata[i].hasErrors.push('answer_not_numeric');
+  }
+};
+
+/**
+ * Check îf the given value is a number.
+ * @param {string} value
+ * @returns {boolean}
+ */
+const _isValidNumber = function(value) {
+  if (!isNaN(value)) {
+    return true;
+  }
+  if (STR.decsep !== '.' && value.indexOf(STR.decsep) > -1) {
+    const valueWithPoint = value.replace(STR.decsep, '.');
+    if (!isNaN(valueWithPoint)) { // The value is a number.
+      return true;
+    }
+  }
+  return false;
 };
 
 /**
