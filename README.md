@@ -1,7 +1,7 @@
 Moodle Tiny Cloze question editor
 =================================
 
-![Release](https://img.shields.io/badge/Release-1.14-blue.svg)
+![Release](https://img.shields.io/badge/Release-1.15-blue.svg)
 [![Moodle Plugin CI](https://github.com/srobotta/moodle-tiny_cloze/actions/workflows/moodle-plugin-ci.yml/badge.svg)](https://github.com/srobotta/moodle-tiny_cloze/actions/workflows/moodle-plugin-ci.yml)
 ![Supported](https://img.shields.io/badge/Moodle-4.3+-orange.svg)
 [![License GPL-3.0](https://img.shields.io/github/license/srobotta/moodle-tiny_cloze?color=lightgrey)](https://github.com/srobotta/moodle-tiny_cloze/blob/main/LICENSE)
@@ -106,8 +106,9 @@ at https://docs.moodle.org/en/Multi-language_content_filter.
 
 ## Troubleshooting FAQ
 
-When the button ![edit cloze question icon](pix/icon.svg) does not appear in the toolbar and the menu "Insert" does not contain
-the item to edit a cloze question then please check the following:
+When the button ![edit cloze question icon](pix/icon.svg) does not appear in the toolbar
+and the menu "Insert" does not contain the item to edit a cloze question then please check
+the following:
 
 - Are you editing a cloze question type? Only for these questions the button appears.
 - Are you in the field question text? The button does not appear on the feedback field or
@@ -121,14 +122,21 @@ that should bring up the developer tools.
 In that window click the console tab and delete
 possible existing messages. Now reload the page (can be launched from inside the developer
 tools window via Ctrl + r)
-- Check that the Moodle dependencies are met. The plugin needs at least Moodle 4.1.
+- Check that the Moodle dependencies are met. The plugin needs at least Moodle 4.3.
 
 If the problem persists then please [open a new issue on Github](https://github.com/srobotta/moodle-tiny_cloze/issues/new)
 or write a new comment on the [Moodle plugins directory](https://moodle.org/plugins/tiny_cloze).
 
 ## History
 
-### Current main
+### v1.15
+- Fix [#35](https://github.com/srobotta/moodle-tiny_cloze/issues/35) Numerical answers with decimals.
+- Fix [#34](https://github.com/srobotta/moodle-tiny_cloze/issues/34) Asterisk cannot be inserted
+  as answers for numerical type question.
+- Escape '$' in replacement string [PR 33](https://github.com/srobotta/moodle-tiny_cloze/pull/33)
+  thanks to [Simon Schoenenberger](https://github.com/detomon).
+- Fix [#32](https://github.com/srobotta/moodle-tiny_cloze/issues/32) HTML is removed when using
+  curly braces inside answers.
 - Remove deprecated and now removed ModalFactory dependency. Therfore, the
   minimum required Moodle version is now 4.3
 
@@ -152,7 +160,7 @@ or write a new comment on the [Moodle plugins directory](https://moodle.org/plug
 - Refactoring to add JavaScript unit test.
 
 ### v1.11
-- Fix [Issue 25](https://github.com/srobotta/moodle-tiny_cloze/issues/25) on error in essay
+- Fix [#25](https://github.com/srobotta/moodle-tiny_cloze/issues/25) on error in essay
 questions in the questionnaire plugin.
 
 ### v1.10
@@ -166,7 +174,7 @@ questions in the questionnaire plugin.
   plugin [moodle-qtype_multianswerrgx](https://github.com/rezeau/moodle-qtype_multianswerrgx)
   by [Joseph Rézeau](https://github.com/rezeau).
 - Add CI of Moodle 4.5.
-- Fix bug that escaped closing curly brakets where not recognized [issue #21](https://github.com/srobotta/moodle-tiny_cloze/issues/21).
+- Fix bug that escaped closing curly brakets where not recognized [#21](https://github.com/srobotta/moodle-tiny_cloze/issues/21).
 - On double click on a cloze question opens the dialogue automatically.
 - Delete icon disappears when there is one answer option left only.
 - Style adaptations on the dalogue that will be necessary with upcoming Moodle 4.5. 
@@ -190,13 +198,13 @@ a behaviour that the original cloze plugin for Atto contained.
 
 ### v1.5
 - Extend dialogue UI with error messages when input fields contain invalid
-values. This fixes [issue #18](https://github.com/srobotta/moodle-tiny_cloze/issues/18).
+values. This fixes [#18](https://github.com/srobotta/moodle-tiny_cloze/issues/18).
 - Improve handling when adding an answer slot with autofill and focus.
 - Prevent providing non-numerical values for answer and tolerance in numeric questions.
 
 ### v1.4
 - Extend tests to cover functionality of the whole plugin.
-- Custom grade values for answers (this addresses [issue #16](https://github.com/srobotta/moodle-tiny_cloze/issues/16))
+- Custom grade values for answers (this addresses [#16](https://github.com/srobotta/moodle-tiny_cloze/issues/16))
 - Add PHP 8.2 tests for the Moodle 4.3 test runs.
 - Streamline the process when the strings for the dialogue are fetched.
 - Add alt attributes for the icons.
