@@ -1,7 +1,7 @@
 Moodle Tiny Cloze question editor
 =================================
 
-![Release](https://img.shields.io/badge/Release-1.15-blue.svg)
+![Release](https://img.shields.io/badge/Release-1.16-blue.svg)
 [![Moodle Plugin CI](https://github.com/srobotta/moodle-tiny_cloze/actions/workflows/moodle-plugin-ci.yml/badge.svg)](https://github.com/srobotta/moodle-tiny_cloze/actions/workflows/moodle-plugin-ci.yml)
 ![Supported](https://img.shields.io/badge/Moodle-4.3+-orange.svg)
 [![License GPL-3.0](https://img.shields.io/github/license/srobotta/moodle-tiny_cloze?color=lightgrey)](https://github.com/srobotta/moodle-tiny_cloze/blob/main/LICENSE)
@@ -128,6 +128,9 @@ If the problem persists then please [open a new issue on Github](https://github.
 or write a new comment on the [Moodle plugins directory](https://moodle.org/plugins/tiny_cloze).
 
 ## History
+
+### v1.16
+- Add support for Moodle 5.2.
 
 ### v1.15
 - Fix [#35](https://github.com/srobotta/moodle-tiny_cloze/issues/35) Numerical answers with decimals.
