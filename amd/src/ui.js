@@ -780,6 +780,10 @@ const _setSubquestion = function(e) {
     question += _answerdata[i].fraction && !isNaN(_answerdata[i].fraction)
       ? '%' + _answerdata[i].fraction + '%' : _answerdata[i].fraction;
     question += strencode(_answerdata[i].answer);
+    // Bug when question ends with an &:
+    if (question.charAt(question.length - 1) === '&') {
+      question += ' ';
+    }
     if ( // Set tolerance only on correct or semi correct answers.
       (_qtype === 'NM' || _qtype === 'NUMERICAL') &&
       (_answerdata[i].fraction !== '0' && _answerdata[i].fraction !== '')
