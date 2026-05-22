@@ -208,7 +208,8 @@ describe('Test function strencode()', function () {
   it('Test encode strings.', function () {
     assert.equal(cloze.strencode('>&lt;'), '>&lt;');
     assert.equal(cloze.strencode('< | >>'), '< | >>');
-    assert.equal(cloze.strencode('foo#bar'), 'foo\#bar');
-    assert.equal(cloze.strencode('test}'), 'test\}');
+    assert.equal(cloze.strencode('foo#bar'), 'foo\\#bar');
+    assert.equal(cloze.strencode('test}'), 'test\\}');
+    assert.equal(cloze.strencode('~test'), '\\~test');
   });
 });
