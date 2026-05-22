@@ -22,7 +22,11 @@
  */
 
 export const isNull = a => typeof a === 'undefined' || a === null;
-export const strdecode = t => String(t).replace(/\\(#|\}|~)/g, '$1');
+export const strdecode = t => String(t)
+  .replace(/\\(#|\}|~)/g, '$1')
+  .replaceAll('&amp;', '&')
+  .replaceAll('&lt;', '<')
+  .replaceAll('&gt;', '>');
 export const strencode = t => String(t).replace(/(#|\}|~)/g, '\\$1');
 
 // Regular expressions to detect cloze question types in edtor content.

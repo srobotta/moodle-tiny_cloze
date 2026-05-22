@@ -192,3 +192,23 @@ describe('Test function addMarkers()', function () {
     );
   });
 });
+
+describe('Test function strdecode()', function () {
+  it('Test decode strings.', function () {
+    assert.equal(cloze.strdecode('&amp;&amp;foo'), '&&foo');
+    assert.equal(cloze.strdecode('df &#123;&amp;&amp;foo'), 'df &#123;&&foo');
+    assert.equal(cloze.strdecode('>&lt;'), '><');
+    assert.equal(cloze.strdecode('&lt; | &gt;&gt;'), '< | >>');
+    assert.equal(cloze.strdecode('foo\#bar'), 'foo#bar');
+    assert.equal(cloze.strdecode('test\}'), 'test}');
+  });
+});
+
+describe('Test function strencode()', function () {
+  it('Test encode strings.', function () {
+    assert.equal(cloze.strencode('>&lt;'), '&lt;&lt;');
+    assert.equal(cloze.strencode('< | >>'), '&lt; | &gt;&gt;');
+    assert.equal(cloze.strencode('foo#bar'), 'foo\#bar');
+    assert.equal(cloze.strencode('test}'), 'test\}');
+  });
+});
