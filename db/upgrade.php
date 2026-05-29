@@ -23,18 +23,18 @@
  */
 
 /**
- * Execute tiny_cloze upgrade from the given old version
+ * Execute tiny_cloze upgrade from the given old version.
  *
  * @param int $oldversion
  *
  * @return bool
  */
-function xmldb_tiny_cloze_upgrade($oldversion) {
+function xmldb_tiny_cloze_upgrade($oldversion): bool {
 
-    if ($oldversion < 2026041708) {
+    if ($oldversion < 2026052900) {
         tiny_cloze_upgrade_verbose('Upgrading default permissions for capability: ' . \tiny_cloze\capability::CAPABILITY_USE);
         tiny_cloze_upgrade_default_permissions();
-        upgrade_plugin_savepoint(true, 2026041708, 'tiny', 'cloze');
+        upgrade_plugin_savepoint(true, 2026052900, 'tiny', 'cloze');
     }
     return true;
 }
@@ -42,7 +42,7 @@ function xmldb_tiny_cloze_upgrade($oldversion) {
 /**
  * Update permissions.
  */
-function tiny_cloze_upgrade_default_permissions() {
+function tiny_cloze_upgrade_default_permissions(): void {
     $capability = new \tiny_cloze\capability();
     $roles = $capability->get_roles();
     if (empty($roles)) {
@@ -51,7 +51,7 @@ function tiny_cloze_upgrade_default_permissions() {
     }
 
     if ($capability->is_modified_since_install()) {
-        tiny_cloze_upgrade_verbose('Default capabilities have been changed since installation, do no upgrade.');
+        tiny_cloze_upgrade_verbose('Default capabilities have been changed since installation, do not upgrade.');
         return;
     }
 
@@ -66,7 +66,7 @@ function tiny_cloze_upgrade_default_permissions() {
  * Output upgrade messages.
  * @param string $msg
  */
-function tiny_cloze_upgrade_verbose(string $msg) {
+function tiny_cloze_upgrade_verbose(string $msg): void {
     if (php_sapi_name() === 'cli') {
         echo $msg . PHP_EOL;
         return;

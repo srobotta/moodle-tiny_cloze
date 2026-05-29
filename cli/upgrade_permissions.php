@@ -53,7 +53,7 @@ if (empty($roles)) {
 
 if ($capability->is_modified_since_install()) {
     if (empty($options['force'])) {
-        echo "Default capabilities have been changed since installation, do no upgrade.\n";
+        echo "Default capabilities have been changed since installation, do not upgrade.\n";
         echo "Re-run with --force to override.\n";
         exit(1);
     } else {

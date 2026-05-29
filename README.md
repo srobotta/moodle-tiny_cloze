@@ -1,7 +1,7 @@
 Moodle Tiny Cloze question editor
 =================================
 
-![Release](https://img.shields.io/badge/Release-1.16-blue.svg)
+![Release](https://img.shields.io/badge/Release-1.17-blue.svg)
 [![Moodle Plugin CI](https://github.com/srobotta/moodle-tiny_cloze/actions/workflows/moodle-plugin-ci.yml/badge.svg)](https://github.com/srobotta/moodle-tiny_cloze/actions/workflows/moodle-plugin-ci.yml)
 ![Supported](https://img.shields.io/badge/Moodle-4.3+-orange.svg)
 [![License GPL-3.0](https://img.shields.io/github/license/srobotta/moodle-tiny_cloze?color=lightgrey)](https://github.com/srobotta/moodle-tiny_cloze/blob/main/LICENSE)
@@ -128,6 +128,15 @@ If the problem persists then please [open a new issue on Github](https://github.
 or write a new comment on the [Moodle plugins directory](https://moodle.org/plugins/tiny_cloze).
 
 ## History
+
+### v1.17
+- Fix [#36](https://github.com/srobotta/moodle-tiny_cloze/issues/36) By default only editing teachers were
+able to use the editor plugin. In the student quiz plugin, the student role did not see the button in the tinyMCE because of lack of permissions. In an upgrade step these are automatically added if you did not modify these
+for the `tiny/cloze:use` capability in your Moodle instance.
+You can run the upgrade manually by executing `php public/lib/editor/tiny/plugins/cloze/cli/upgrade_permissions.php`
+when the automated upgrade did not work because of modified permissions.
+- Decode `<>&` from its entities when displaying the question in the modal dialogue.
+- Add a workaround to circumvent Bug [MDL-88798](https://moodle.atlassian.net/browse/MDL-88798).
 
 ### v1.16
 - Add support for Moodle 5.2.
