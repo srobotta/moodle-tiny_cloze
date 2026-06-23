@@ -71,7 +71,7 @@ describe('Test function getQuestionTypes() without regex', function () {
   it('Check for # of questions', function () {
     assert.equal(questions.length, 13);
   });
-  if ('Check that sequence is correct', function () {
+  it ('Check that sequence is correct', function () {
     assert.equal(questions[2].type, 'MULTICHOICE_V');
     assert.equal(questions[7].type, 'MULTIRESPONSE_H');
     assert.equal(questions[10].type, 'NUMERICAL');
@@ -84,7 +84,7 @@ describe('Test function getQuestionTypes() with regex', function () {
   it('Check for # of questions', function () {
     assert.equal(questions.length, 15);
   });
-  if ('Check that sequence is correct', function () {
+  it ('Check that sequence is correct', function () {
     assert.equal(questions[2].type, 'MULTICHOICE_V');
     assert.equal(questions[7].type, 'MULTIRESPONSE_H');
     assert.equal(questions[10].type, 'NUMERICAL');
@@ -101,7 +101,7 @@ describe('Test function isCustomGrade()', function () {
     assert.equal(cloze.isCustomGrade('0'), false);
     assert.equal(cloze.isCustomGrade(''), false);
   });
-  if ('Test custom grades 80, 60, 40, 33', function () {
+  it ('Test custom grades 80, 60, 40, 33', function () {
     assert.equal(cloze.isCustomGrade('80'), true);
     assert.equal(cloze.isCustomGrade('60'), true);
     assert.equal(cloze.isCustomGrade('40'), true);

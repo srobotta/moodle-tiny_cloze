@@ -32,10 +32,6 @@ use editor_tiny\plugin_with_configuration;
 use editor_tiny\plugin_with_menuitems;
 use question_bank;
 
-defined('MOODLE_INTERNAL') || die;
-
-require_once(__DIR__ . '/../../../../../behat/classes/util.php');
-
 /**
  * The capabilities of the plugin, in this case there is one toolbar button and one menu item.
  */
@@ -78,7 +74,7 @@ class plugininfo extends plugin implements plugin_with_buttons, plugin_with_conf
         global $CFG;
 
         // When on the test site, check that the simulation config for an existing regex question type is set.
-        if (\behat_util::is_test_site()) {
+        if (defined('BEHAT_SITE_RUNNING') && BEHAT_SITE_RUNNING) {
             return [
                 'testsite' => true,
                 'multianswerrgx' => (bool)get_config('tiny_cloze', 'simulate_multianswerrgx'),
@@ -104,6 +100,5 @@ class plugininfo extends plugin implements plugin_with_buttons, plugin_with_conf
             // The multianswerrgx question type is not available.
             return $config;
         }
-        return $config;
     }
 }

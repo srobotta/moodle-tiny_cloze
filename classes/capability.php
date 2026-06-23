@@ -104,7 +104,7 @@ class capability {
         if ($this->capabilities === null) {
             $this->capabilities = $DB->get_records(
                 'role_capabilities',
-                ['capability' => self::CAPABILITY_USE, 'contextid' => 1]
+                ['capability' => self::CAPABILITY_USE, 'contextid' => \context_system::instance()->id]
             );
         }
         return $this->capabilities;
@@ -116,7 +116,6 @@ class capability {
      * @return \stdClass
      */
     public function update_role_permissions(): \stdClass {
-        global $DB, $USER;
         // The result object that contains information about the modifications done.
         $result = (object)[
             'changed' => 0,
@@ -138,10 +137,7 @@ class capability {
             }
             // And whether the role does not yet have the correct permission.
             if ($rec->permission != CAP_ALLOW) {
-                $rec->permission = CAP_ALLOW;
-                $rec->timemodified = time();
-                $rec->modifierid = $USER->id;
-                $DB->update_record('role_capabilities', $rec);
+                assign_capability(self::CAPABILITY_USE, CAP_ALLOW, $rec->roleid, \context_system::instance()->id, true);
                 $result->log[] = "Updated role '{$roleshortname}' to CAP_ALLOW.";
                 $result->changed++;
             } else {
@@ -151,15 +147,8 @@ class capability {
         // All remaining roles where not handled by the existing permission records,
         // so we need to add them here.
         foreach ($roles as $role) {
-            $new = new \stdClass();
-            $new->contextid = 1;
-            $new->roleid = $role->id;
-            $new->capability = self::CAPABILITY_USE;
-            $new->permission = CAP_ALLOW;
-            $new->timemodified = time();
-            $new->modifierid = $USER->id;
-            $DB->insert_record('role_capabilities', $new);
-            echo "Inserted CAP_ALLOW for role '{$role->shortname}'.\n";
+            assign_capability(self::CAPABILITY_USE, CAP_ALLOW, $role->id, \context_system::instance()->id, true);
+            $result->log[] = "Inserted CAP_ALLOW for role '{$role->shortname}'.";
             $result->changed++;
         }
         return $result;

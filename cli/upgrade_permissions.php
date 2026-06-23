@@ -26,8 +26,8 @@
 
 define('CLI_SCRIPT', true);
 
-// Bring in config and adminlib.
-require_once(dirname(__DIR__, 7) . '/config.php');
+// Bring in config and adminlib (config.php works for pre 5.1 and 5.1 onwards).
+require_once(dirname(__DIR__, 6) . '/config.php');
 require_once($CFG->libdir . '/adminlib.php');
 require_once($CFG->libdir . '/clilib.php');
 
