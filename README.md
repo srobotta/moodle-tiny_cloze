@@ -1,7 +1,7 @@
 Moodle Tiny Cloze question editor
 =================================
 
-![Release](https://img.shields.io/badge/Release-1.17-blue.svg)
+![Release](https://img.shields.io/badge/Release-1.18-blue.svg)
 [![Moodle Plugin CI](https://github.com/srobotta/moodle-tiny_cloze/actions/workflows/moodle-plugin-ci.yml/badge.svg)](https://github.com/srobotta/moodle-tiny_cloze/actions/workflows/moodle-plugin-ci.yml)
 [![MDL Shield](https://img.shields.io/endpoint?url=https%3A%2F%2Fmdlshield.com%2Fapi%2Fbadge%2Ftiny_cloze)](https://mdlshield.com/plugins/tiny_cloze)
 ![Supported](https://img.shields.io/badge/Moodle-4.3+-orange.svg)
@@ -129,6 +129,13 @@ If the problem persists then please [open a new issue on Github](https://github.
 or write a new comment on the [Moodle plugins directory](https://moodle.org/plugins/tiny_cloze).
 
 ## History
+
+### v1.18
+
+- Adapt Moodle CI for Moodle 5.3 and add support for the new Moodle version.
+- Fix [#37](https://github.com/srobotta/moodle-tiny_cloze/issues/37) when no input field can be focused, the dialogue still
+should display the error.
+- Applied some suggested changes after [MDLShield](https://mdlshield.com/reviews/tiny_cloze_2026-06-23) audit.
 
 ### v1.17
 - Fix [#36](https://github.com/srobotta/moodle-tiny_cloze/issues/36) By default only editing teachers were
