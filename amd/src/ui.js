@@ -908,7 +908,10 @@ const _processFormData = function(validate) {
     globalErrors = _translateGlobalErrors(hasCorrectAnswer, errors);
     // If we have errors, we focus the first field that contains an error.
     if (globalErrors.length > 0) {
-      _form.querySelector('input.error').focus();
+      const firstInputWithError = _form.querySelector('input.error');
+      if (firstInputWithError) {
+        firstInputWithError.focus();
+      }
     }
   }
   return globalErrors;
